@@ -5,7 +5,7 @@ import { ExtractedStartupData, UploadedFile } from '../types/user';
 
 export const api = {
   /**
-   * Live AI Advisory Assistant using Groq OSS-120B
+   * Live AI Advisory Assistant powered by Google Gemini Intelligence
    */
   async askAI(question: string, context?: any): Promise<string> {
     return await liveAiService.askAI(question, context || {

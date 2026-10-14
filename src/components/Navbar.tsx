@@ -6,7 +6,8 @@ import {
   Globe, 
   ChevronDown, 
   ShieldCheck, 
-  ArrowRight
+  ArrowRight,
+  LogOut
 } from 'lucide-react';
 import { StartupProfile } from '../data/defaultData';
 
@@ -293,32 +294,6 @@ export const Navbar: React.FC<NavbarProps> = ({
             )}
           </div>
 
-          {/* Live Cloud Status */}
-          <div 
-            title="Full-Stack Backend Live: Render & Cloud Run API"
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              padding: '0.42rem 0.85rem',
-              borderRadius: 'var(--radius-full)',
-              backgroundColor: '#F0FDF4',
-              border: '1px solid #BBF7D0',
-              fontSize: '0.78rem',
-              fontWeight: 700,
-              color: '#15803D',
-            }}
-          >
-            <span style={{
-              width: '8px',
-              height: '8px',
-              borderRadius: '50%',
-              backgroundColor: '#22C55E',
-              boxShadow: '0 0 8px rgba(34, 197, 94, 0.8)',
-            }} />
-            <span>Cloud API: Live</span>
-          </div>
-
           {/* Daily Streak Fire Badge */}
           <button
             onClick={openStreakModal}
@@ -368,7 +343,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           {/* Main Action CTA */}
           {currentView === 'landing' ? (
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              {!isLoggedIn && (
+              {!isLoggedIn ? (
                 <button
                   onClick={onSignIn}
                   style={{
@@ -384,6 +359,28 @@ export const Navbar: React.FC<NavbarProps> = ({
                 >
                   Sign In
                 </button>
+              ) : (
+                onSignOut && (
+                  <button
+                    onClick={onSignOut}
+                    style={{
+                      padding: '0.5rem 1rem',
+                      borderRadius: 'var(--radius-full)',
+                      border: '1.5px solid #FEE2E2',
+                      backgroundColor: '#FEF2F2',
+                      color: '#DC2626',
+                      fontWeight: 700,
+                      fontSize: '0.84rem',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.35rem',
+                    }}
+                  >
+                    <LogOut size={14} />
+                    <span>Log Out</span>
+                  </button>
+                )
               )}
               <button
                 onClick={() => {
@@ -472,6 +469,39 @@ export const Navbar: React.FC<NavbarProps> = ({
                     </div>
                   )}
                 </div>
+              )}
+
+              {isLoggedIn && onSignOut && (
+                <button
+                  type="button"
+                  onClick={onSignOut}
+                  title="Sign out of your session"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.35rem',
+                    padding: '0.48rem 0.85rem',
+                    borderRadius: 'var(--radius-full)',
+                    border: '1.5px solid #FEE2E2',
+                    backgroundColor: '#FEF2F2',
+                    color: '#DC2626',
+                    fontSize: '0.82rem',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    transition: 'all 0.15s ease',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = '#FEE2E2';
+                    e.currentTarget.style.borderColor = '#FCA5A5';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = '#FEF2F2';
+                    e.currentTarget.style.borderColor = '#FEE2E2';
+                  }}
+                >
+                  <LogOut size={13} />
+                  <span>Log Out</span>
+                </button>
               )}
               <button
                 onClick={() => {

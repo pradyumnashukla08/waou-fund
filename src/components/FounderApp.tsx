@@ -12,7 +12,8 @@ import {
   Scale, 
   Users, 
   User, 
-  Sparkles
+  Sparkles,
+  LogOut
 } from 'lucide-react';
 import { StartupProfile } from '../data/defaultData';
 import { EvaluationResult } from '../types';
@@ -41,6 +42,7 @@ interface FounderAppProps {
   toggleDailyTask: () => void;
   activeTab: string;
   setActiveTab: (tab: string) => void;
+  onSignOut?: () => void;
 }
 
 export const FounderApp: React.FC<FounderAppProps> = ({
@@ -54,6 +56,7 @@ export const FounderApp: React.FC<FounderAppProps> = ({
   toggleDailyTask,
   activeTab,
   setActiveTab,
+  onSignOut,
 }) => {
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, badge: 'HOT' },
@@ -186,24 +189,49 @@ export const FounderApp: React.FC<FounderAppProps> = ({
           })}
         </nav>
 
-        {/* Cloud Architecture Info Pill */}
+        {/* Sidebar Footer with Logout */}
         <div style={{
           marginTop: 'auto',
-          padding: '0.85rem',
-          borderRadius: 'var(--radius-md)',
-          backgroundColor: '#F8FAFC',
-          border: '1px solid #E2E8F0',
-          fontSize: '0.74rem',
+          paddingTop: '1rem',
+          borderTop: '1px solid #E2E8F0',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '0.6rem',
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px' }}>
-            <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#22C55E' }} />
-            <span style={{ fontWeight: 800, color: '#0F172A' }}>Cloud Architecture Live</span>
-          </div>
-          <div style={{ color: '#64748B', display: 'flex', flexDirection: 'column', gap: '2px', fontSize: '0.72rem' }}>
-            <div>• Backend: <span style={{ color: '#15803D', fontWeight: 600 }}>Render / Cloud Run (Online)</span></div>
-            <div>• Storage: <span style={{ color: '#2563EB', fontWeight: 600 }}>Firebase Secure Vault</span></div>
-            <div>• AI Core: <span style={{ color: '#7C3AED', fontWeight: 600 }}>Groq Llama-3 + Gemini</span></div>
-          </div>
+          {onSignOut && (
+            <button
+              onClick={onSignOut}
+              className="btn-outline"
+              title="Sign out of your session"
+              style={{
+                width: '100%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '0.55rem',
+                padding: '0.7rem 1rem',
+                fontSize: '0.86rem',
+                fontWeight: 700,
+                color: '#DC2626',
+                backgroundColor: '#FEF2F2',
+                borderColor: '#FEE2E2',
+                borderRadius: 'var(--radius-md)',
+                cursor: 'pointer',
+                transition: 'all 0.15s ease',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = '#FEE2E2';
+                e.currentTarget.style.borderColor = '#FCA5A5';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = '#FEF2F2';
+                e.currentTarget.style.borderColor = '#FEE2E2';
+              }}
+            >
+              <LogOut size={16} />
+              <span>Log Out</span>
+            </button>
+          )}
         </div>
       </aside>
 

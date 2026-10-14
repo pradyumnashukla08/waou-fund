@@ -27,8 +27,8 @@ export const CLOUD_CONFIG = {
 
   // AI Pipeline
   AI_ENGINES: [
-    { name: 'Gemini 2.5 Flash / Pro', role: 'Institutional Deck & Diligence Analysis' },
-    { name: 'Groq Llama-3 70B', role: 'Real-time AI Investor Grill (Sub-second latency)' },
+    { name: 'Gemini 3.5 Flash / Pro', role: 'Institutional Deck & Diligence Analysis' },
+    { name: 'Gemini 3.8 Flash', role: 'Real-time AI Investor Grill & Advisory' },
     { name: 'Venture Deterministic Engine', role: 'Financial Command & Unit Economics Audit' },
   ],
 };

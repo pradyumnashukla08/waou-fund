@@ -1,61 +1,78 @@
 // Live AI Service for WaouFund Full-Stack Platform
-// Powered by Groq Llama/OSS-120B & Venture Wolf Cloud Engine
+// Powered by Google Gemini Intelligence Core (gemini-3.5-flash / gemini-3.8-flash)
 
-import { CLOUD_CONFIG } from '../config/cloud';
 import { EvaluationResult, ClarityVerdict } from '../types';
 import { StartupProfile } from '../data/defaultData';
 import { ExtractedStartupData, UploadedFile } from '../types/user';
 
-const getGroqKey = (): string => {
-  if (typeof import.meta !== 'undefined' && import.meta.env?.VITE_GROQ_API_KEY) {
-    return import.meta.env.VITE_GROQ_API_KEY;
+const getGeminiKey = (): string => {
+  if (typeof import.meta !== 'undefined' && import.meta.env?.VITE_GEMINI_API_KEY) {
+    return import.meta.env.VITE_GEMINI_API_KEY;
   }
   try {
-    return localStorage.getItem('@waoufund_groq_key') || '';
+    return localStorage.getItem('@waoufund_gemini_key') || '';
   } catch {
     return '';
   }
 };
 
-const GROQ_ENDPOINT = 'https://api.groq.com/openai/v1/chat/completions';
-const PRIMARY_MODEL = 'openai/gpt-oss-120b';
-const FALLBACK_MODEL = 'qwen/qwen3.8-27b';
+const GEMINI_PRIMARY_MODEL = 'gemini-3.5-flash';
+const GEMINI_FALLBACK_MODEL = 'gemini-3.8-flash';
 
-/** Generic call to Groq chat completions */
-async function callGroq(
-  messages: { role: 'system' | 'user' | 'assistant'; content: string }[],
+/** Generic call to Google Gemini generateContent API */
+async function callGemini(
+  systemInstruction: string,
+  userPrompt: string,
   jsonMode: boolean = false
 ): Promise<string> {
+  const apiKey = getGeminiKey();
+  if (!apiKey) {
+    throw new Error('Gemini API key is not configured');
+  }
+
   const tryModel = async (model: string) => {
-    const apiKey = getGroqKey();
-    const res = await fetch(GROQ_ENDPOINT, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({
-        model,
-        messages,
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+    const body: Record<string, any> = {
+      contents: [{
+        role: 'user',
+        parts: [{ text: userPrompt }],
+      }],
+      generationConfig: {
         temperature: 0.2,
-        ...(jsonMode && { response_format: { type: 'json_object' } }),
-      }),
-      signal: AbortSignal.timeout(12000),
+      },
+    };
+
+    if (systemInstruction) {
+      body.systemInstruction = {
+        parts: [{ text: systemInstruction }],
+      };
+    }
+
+    if (jsonMode) {
+      body.generationConfig.responseMimeType = 'application/json';
+    }
+
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+      signal: AbortSignal.timeout(15000),
     });
 
     if (!res.ok) {
-      throw new Error(`Groq HTTP ${res.status}: ${res.statusText}`);
+      const errText = await res.text();
+      throw new Error(`Gemini HTTP ${res.status}: ${errText}`);
     }
 
     const data = await res.json();
-    return data.choices?.[0]?.message?.content || '';
+    return data.candidates?.[0]?.content?.parts?.[0]?.text || '';
   };
 
   try {
-    return await tryModel(PRIMARY_MODEL);
+    return await tryModel(GEMINI_PRIMARY_MODEL);
   } catch (err) {
-    console.warn(`Groq primary model failed (${PRIMARY_MODEL}), trying fallback (${FALLBACK_MODEL}):`, err);
-    return await tryModel(FALLBACK_MODEL);
+    console.warn(`Gemini primary (${GEMINI_PRIMARY_MODEL}) failed, trying fallback (${GEMINI_FALLBACK_MODEL}):`, err);
+    return await tryModel(GEMINI_FALLBACK_MODEL);
   }
 }
 
@@ -83,15 +100,12 @@ Context on this founder's startup:
 Keep responses concise (2-4 punchy paragraphs max), data-driven, and focused on institutional diligence standards.`;
 
     try {
-      const response = await callGroq([
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: question },
-      ]);
+      const response = await callGemini(systemPrompt, question, false);
       if (response && response.trim().length > 0) {
         return response.trim();
       }
     } catch (err) {
-      console.error('Groq live askAI failed:', err);
+      console.error('Gemini live askAI failed:', err);
     }
 
     // High quality contextual fallback
@@ -112,15 +126,12 @@ Startup context:
 ${JSON.stringify(context, null, 2)}`;
 
     try {
-      const response = await callGroq([
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: userPrompt },
-      ]);
+      const response = await callGemini(systemPrompt, userPrompt, false);
       if (response && response.trim().length > 0) {
         return response.trim().replace(/^"|"$/g, '');
       }
     } catch (err) {
-      console.error('Live AI generateField failed:', err);
+      console.error('Gemini generateField failed:', err);
     }
 
     if (fieldLabel.includes('PITCH')) {
@@ -180,21 +191,14 @@ Extract and synthesize the startup profile as a JSON object with this exact stru
 }`;
 
     try {
-      const response = await callGroq(
-        [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: userPrompt },
-        ],
-        true
-      );
-
+      const response = await callGemini(systemPrompt, userPrompt, true);
       const sanitized = response.replace(/```json\n?|\n?```/g, '').trim();
       const parsed = JSON.parse(sanitized);
       if (parsed.companyName) {
         return parsed;
       }
     } catch (err) {
-      console.error('Document AI intelligence extraction failed:', err);
+      console.error('Gemini document intelligence extraction failed:', err);
     }
 
     // Dynamic smart fallback based on primary file name
@@ -278,21 +282,14 @@ Evaluate the founder's conviction, defensibility, and financial accuracy. Output
 }`;
 
     try {
-      const response = await callGroq(
-        [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: userPrompt },
-        ],
-        true
-      );
-
+      const response = await callGemini(systemPrompt, userPrompt, true);
       const sanitized = response.replace(/```json\n?|\n?```/g, '').trim();
       const parsed = JSON.parse(sanitized);
       if (parsed.clarity_score && parsed.vector_scores) {
         return parsed;
       }
     } catch (err) {
-      console.error('Live AI evaluateInvestorAnswer failed:', err);
+      console.error('Gemini evaluateInvestorAnswer failed:', err);
     }
 
     // Contextual fallback

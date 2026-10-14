@@ -365,6 +365,7 @@ export default function App() {
                 setActiveAppTab(tab);
                 window.scrollTo({ top: 0, behavior: 'smooth' });
               }}
+              onSignOut={handleSignOut}
             />
           )}
         </>

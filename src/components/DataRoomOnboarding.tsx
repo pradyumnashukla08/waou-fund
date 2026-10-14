@@ -41,7 +41,7 @@ function formatFileSize(bytes: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
-/** Real AI document analysis using live Groq pipeline & backend */
+/** Real AI document analysis using live Gemini pipeline & backend */
 async function analyzeDocumentLocally(files: UploadedFile[]): Promise<ExtractedStartupData> {
   try {
     const aiResult = await liveAiService.extractDocumentsIntelligence(files);
