@@ -238,6 +238,7 @@ export const FounderApp: React.FC<FounderAppProps> = ({
 
         {activeTab === 'diagnostic' && (
           <DiagnosticModule 
+            startup={startup}
             evaluation={evaluation} 
             onUpdateEvaluation={onUpdateEvaluation} 
             setActiveTab={setActiveTab}

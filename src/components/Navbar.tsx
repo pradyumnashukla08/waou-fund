@@ -22,10 +22,11 @@ interface NavbarProps {
   isDailyTaskDone: boolean;
   activeAppTab: string;
   setActiveAppTab: (tab: string) => void;
-  // Auth props
   onSignIn?: () => void;
+  onSignOut?: () => void;
   isLoggedIn?: boolean;
   userName?: string;
+  userEmail?: string;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -40,10 +41,13 @@ export const Navbar: React.FC<NavbarProps> = ({
   isDailyTaskDone,
   setActiveAppTab,
   onSignIn,
+  onSignOut,
   isLoggedIn,
   userName,
+  userEmail,
 }) => {
   const [dropdownOpen, setDropdownOpen] = React.useState(false);
+  const [userMenuOpen, setUserMenuOpen] = React.useState(false);
 
   return (
     <header style={{
@@ -247,9 +251,9 @@ export const Navbar: React.FC<NavbarProps> = ({
                   letterSpacing: '0.06em', 
                   textTransform: 'uppercase' 
                 }}>
-                  Switch Startup
+                  Ventures & Reference Benchmarks
                 </div>
-                {allStartups.map((s) => (
+                {allStartups.map((s, idx) => (
                   <div
                     key={s.id}
                     onClick={() => {
@@ -266,13 +270,23 @@ export const Navbar: React.FC<NavbarProps> = ({
                       backgroundColor: selectedStartup.id === s.id ? 'var(--accent-bg-blue)' : 'transparent',
                       color: 'var(--text-primary)',
                       transition: 'background 0.15s ease',
+                      borderLeft: idx === 0 ? '3px solid #2563EB' : '3px solid transparent',
                     }}
                   >
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span style={{ fontWeight: 700, fontSize: '0.88rem' }}>{s.name}</span>
+                      <span style={{ fontWeight: 700, fontSize: '0.88rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                        {s.name}
+                        {idx === 0 && (
+                          <span style={{ fontSize: '0.62rem', backgroundColor: '#EFF6FF', color: '#2563EB', padding: '1px 5px', borderRadius: '4px', fontWeight: 800 }}>
+                            YOURS
+                          </span>
+                        )}
+                      </span>
                       <span style={{ fontSize: '0.72rem', color: '#10B981', fontWeight: 700 }}>{s.fundabilityScore}/100</span>
                     </div>
-                    <span style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>{s.category} • {s.stage}</span>
+                    <span style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>
+                      {idx === 0 ? 'Active Production Dossier' : `Sample Benchmark • ${s.stage}`}
+                    </span>
                   </div>
                 ))}
               </div>
@@ -392,21 +406,71 @@ export const Navbar: React.FC<NavbarProps> = ({
           ) : (
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
               {isLoggedIn && userName && (
-                <div style={{
-                  width: '34px',
-                  height: '34px',
-                  borderRadius: '50%',
-                  background: 'linear-gradient(135deg, #2563EB 0%, #7C3AED 100%)',
-                  color: '#FFFFFF',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: '0.78rem',
-                  fontWeight: 800,
-                  flexShrink: 0,
-                  title: userName,
-                }}>
-                  {userName.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase()}
+                <div style={{ position: 'relative' }}>
+                  <button
+                    type="button"
+                    onClick={() => setUserMenuOpen(!userMenuOpen)}
+                    style={{
+                      width: '36px',
+                      height: '36px',
+                      borderRadius: '50%',
+                      background: 'linear-gradient(135deg, #2563EB 0%, #7C3AED 100%)',
+                      color: '#FFFFFF',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '0.8rem',
+                      fontWeight: 800,
+                      flexShrink: 0,
+                      border: '2px solid #FFFFFF',
+                      boxShadow: '0 2px 8px rgba(37, 99, 235, 0.25)',
+                      cursor: 'pointer',
+                    }}
+                    title={userName}
+                  >
+                    {userName.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase()}
+                  </button>
+
+                  {userMenuOpen && (
+                    <div style={{
+                      position: 'absolute',
+                      top: 'calc(100% + 8px)',
+                      right: 0,
+                      width: '220px',
+                      backgroundColor: '#FFFFFF',
+                      borderRadius: '12px',
+                      border: '1px solid var(--border-subtle)',
+                      boxShadow: 'var(--shadow-xl)',
+                      padding: '0.75rem',
+                      zIndex: 70,
+                    }}>
+                      <div style={{ paddingBottom: '0.5rem', borderBottom: '1px solid #F1F5F9', marginBottom: '0.5rem' }}>
+                        <div style={{ fontSize: '0.88rem', fontWeight: 800, color: '#0F172A' }}>{userName}</div>
+                        {userEmail && <div style={{ fontSize: '0.75rem', color: '#64748B' }}>{userEmail}</div>}
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setUserMenuOpen(false);
+                          onSignOut?.();
+                        }}
+                        style={{
+                          width: '100%',
+                          textAlign: 'left',
+                          padding: '0.5rem 0.6rem',
+                          borderRadius: '6px',
+                          border: 'none',
+                          backgroundColor: 'transparent',
+                          color: '#EF4444',
+                          fontSize: '0.82rem',
+                          fontWeight: 700,
+                          cursor: 'pointer',
+                        }}
+                      >
+                        Sign Out / Switch User
+                      </button>
+                    </div>
+                  )}
                 </div>
               )}
               <button

@@ -18,17 +18,111 @@ import { DataRoomOnboarding } from './components/DataRoomOnboarding';
 // ─── App view states ────────────────────────────────────────────────
 type AppView = 'landing' | 'auth' | 'dataroom' | 'app';
 
-export default function App() {
-  const [currentView, setCurrentView] = useState<AppView>('landing');
-  const [activeAppTab, setActiveAppTab] = useState<string>('dashboard');
-  const [allStartups, setAllStartups] = useState<StartupProfile[]>(MOCK_STARTUPS);
-  const [selectedStartup, setSelectedStartup] = useState<StartupProfile>(MOCK_STARTUPS[0]);
-  const [evaluation, setEvaluation] = useState<EvaluationResult>(DEFAULT_EVALUATION);
+// ─── Real User Startup & Persistence Helpers ────────────────────────
+const getInitialUser = () => {
+  try {
+    const saved = localStorage.getItem('@waoufund_active_user');
+    if (saved) return JSON.parse(saved);
+  } catch {}
+  return null;
+};
 
-  // Auth / Onboarding state
-  const [userName, setUserName] = useState('');
-  const [userEmail, setUserEmail] = useState('');
-  const [userRole, setUserRole] = useState<UserRole>('founder');
+const getInitialStartup = (user: any): StartupProfile => {
+  try {
+    const saved = localStorage.getItem('@waoufund_active_startup');
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (parsed && parsed.name) return parsed;
+    }
+  } catch {}
+
+  const founderName = user?.name || 'Founder';
+  const founderEmail = user?.email || 'founder@startup.com';
+  const company = user?.name ? `${user.name}'s Venture` : 'My Venture';
+
+  return {
+    id: 'user_active_startup',
+    name: company,
+    tagline: 'Autonomous AI enterprise infrastructure accelerating fundraising and diligence workflows.',
+    category: 'B2B SaaS / Enterprise AI',
+    stage: 'Seed',
+    founder: founderName,
+    location: 'Bengaluru, India',
+    website: 'https://myventure.ai',
+    targetAsk: '₹3.5 Cr ($450K)',
+    valuation: '₹24.0 Cr ($3.0M)',
+    equityOffered: '14.6%',
+    mrr: '₹24,00,000',
+    burn: '₹7,50,000',
+    growth: '+22% MoM',
+    fundabilityScore: 82,
+    fullName: founderName,
+    role: 'CEO & Co-Founder',
+    profileImage: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&fit=crop&q=80',
+    linkedinUrl: '',
+    email: founderEmail,
+    pedigree: 'First-Time Founder',
+    team: [],
+    companyName: company,
+    websiteUrl: 'https://myventure.ai',
+    companyType: 'Private Limited',
+    isRegistered: true,
+    registrationNo: '29ABCDE1234F1Z5',
+    sector: 'SaaS',
+    pitch: 'Autonomous AI enterprise infrastructure accelerating fundraising and diligence workflows.',
+    currency: '₹ (INR)',
+    tam: '38000000000',
+    sam: '7800000000',
+    som: '1100000000',
+    competitor1: 'https://pitchbook.com',
+    competitor2: 'https://carta.com',
+    competitor3: '',
+    distributionMoat: 'Proprietary institutional intelligence graph and direct API integration with data rooms.',
+    targetRaise: '35000000',
+    valuationCap: '240000000',
+    capitalCommitted: '7500000',
+    currentMrr: '2400000',
+    userTraction: '14 Active Enterprise Pilots',
+    momGrowth: '22',
+    grossMargin: '84',
+    cac: '75000',
+    waitlistCount: '340',
+    betaConversion: '24',
+    productStatus: 'Functional MVP',
+    problemValidation: 'Founders spend 400+ hours manually preparing models and navigating investor diligence.',
+    teamCapability: 'Technical and business operators with prior scaling experience in venture-backed teams.',
+    runway: '14',
+    verifiedArr: '28800000',
+    churnRate: '1.4',
+    nrr: '121',
+    ltvcacRatio: '4:1',
+    cacPayback: '6',
+    burnRate: '750000',
+    execSales: false,
+    execEng: true,
+    execMarketing: false,
+    annualRevenue: '28800000',
+    expansionVectors: ['New Product Lines'],
+    cSuiteComplete: false,
+    marketShare: '8',
+  };
+};
+
+export default function App() {
+  const initialUser = getInitialUser();
+  const [userName, setUserName] = useState<string>(initialUser?.name || '');
+  const [userEmail, setUserEmail] = useState<string>(initialUser?.email || '');
+  const [userRole, setUserRole] = useState<UserRole>(initialUser?.role || 'founder');
+
+  const [currentView, setCurrentView] = useState<AppView>(initialUser ? 'app' : 'landing');
+  const [activeAppTab, setActiveAppTab] = useState<string>('dashboard');
+
+  const [selectedStartup, setSelectedStartup] = useState<StartupProfile>(() => getInitialStartup(initialUser));
+  const [allStartups, setAllStartups] = useState<StartupProfile[]>(() => {
+    const active = getInitialStartup(initialUser);
+    return [active, ...MOCK_STARTUPS.filter(s => s.id !== active.id)];
+  });
+  const [evaluation, setEvaluation] = useState<EvaluationResult>(DEFAULT_EVALUATION);
 
   // Gamification & Streak state
   const [streakCount, setStreakCount] = useState<number>(5);
@@ -51,54 +145,89 @@ export default function App() {
 
   const handleUpdateStartup = (updated: StartupProfile) => {
     setSelectedStartup(updated);
-    setAllStartups(allStartups.map((s) => (s.id === updated.id ? updated : s)));
+    setAllStartups(prev => prev.map((s) => (s.id === updated.id ? updated : s)));
+    try {
+      localStorage.setItem('@waoufund_active_startup', JSON.stringify(updated));
+    } catch {}
   };
 
   const handleUpdateEvaluation = (res: EvaluationResult) => {
     setEvaluation(res);
   };
 
-  // ─── Auth completion: user logged in and selected role ────────────
+  // ─── Auth completion: real user logged in and selected role ───────
   const handleAuthComplete = (email: string, name: string, role: UserRole) => {
     setUserEmail(email);
     setUserName(name);
     setUserRole(role);
+
+    try {
+      localStorage.setItem('@waoufund_active_user', JSON.stringify({ email, name, role }));
+    } catch {}
+
+    // Synchronize startup with the real founder's name and email
+    setSelectedStartup(prev => {
+      const updated: StartupProfile = {
+        ...prev,
+        founder: name,
+        fullName: name,
+        email: email,
+        name: prev.name.includes('AvasPlot') ? `${name}'s Venture` : prev.name,
+        companyName: prev.companyName?.includes('AvasPlot') ? `${name}'s Venture` : prev.companyName,
+      };
+      setAllStartups(all => [updated, ...MOCK_STARTUPS]);
+      try {
+        localStorage.setItem('@waoufund_active_startup', JSON.stringify(updated));
+      } catch {}
+      return updated;
+    });
+
     if (role === 'founder') {
       setCurrentView('dataroom');
     } else {
-      // Angel & VC go directly to founder app for now
       setCurrentView('app');
       setActiveAppTab('dashboard');
     }
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // ─── Data room analysis completed: auto-fill startup profile ─────
+  // ─── Data room analysis completed: auto-fill real startup profile ──
   const handleDataRoomComplete = (extractedData: ExtractedStartupData) => {
-    // Merge extracted data into the selected startup profile
     const merged: StartupProfile = {
       ...selectedStartup,
       name: extractedData.companyName || selectedStartup.name,
+      companyName: extractedData.companyName || selectedStartup.companyName,
       tagline: extractedData.tagline || selectedStartup.tagline,
+      pitch: extractedData.tagline || selectedStartup.pitch,
       stage: (extractedData.stage as StartupProfile['stage']) || selectedStartup.stage,
       category: extractedData.sector || selectedStartup.category,
+      sector: extractedData.sector || selectedStartup.sector,
       targetAsk: extractedData.askAmount || selectedStartup.targetAsk,
       mrr: extractedData.mrr || selectedStartup.mrr,
+      tam: extractedData.tam || selectedStartup.tam,
+      sam: extractedData.sam || selectedStartup.sam,
+      som: extractedData.som || selectedStartup.som,
       fundabilityScore: extractedData.fundingReadiness || selectedStartup.fundabilityScore,
     };
-    setSelectedStartup(merged);
-    setAllStartups(prev => prev.map(s => s.id === merged.id ? merged : s));
 
-    // Merge fundability breakdown into evaluation
+    setSelectedStartup(merged);
+    setAllStartups(prev => [merged, ...MOCK_STARTUPS]);
+    try {
+      localStorage.setItem('@waoufund_active_startup', JSON.stringify(merged));
+    } catch {}
+
     if (extractedData.fundingReadinessBreakdown) {
       const bd = extractedData.fundingReadinessBreakdown;
       setEvaluation(prev => ({
         ...prev,
         overall_score: extractedData.fundingReadiness || prev.overall_score,
-        team_score: bd.teamScore,
-        market_score: bd.marketScore,
-        execution_score: bd.tractionScore,
-        product_score: bd.productScore,
+        team_score: bd.teamScore * 10,
+        market_score: bd.marketScore * 10,
+        execution_score: bd.tractionScore * 10,
+        product_score: bd.productScore * 10,
+        traction_score: bd.financialScore * 10,
+        red_flags: extractedData.redFlags || prev.red_flags,
+        stage_advice: extractedData.investorRecommendation || prev.stage_advice,
       }));
     }
 
@@ -116,6 +245,19 @@ export default function App() {
   const handleSkipDataRoom = () => {
     setCurrentView('app');
     setActiveAppTab('dashboard');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // ─── Sign Out / Reset session ────────────────────────────────────
+  const handleSignOut = () => {
+    try {
+      localStorage.removeItem('@waoufund_active_user');
+      localStorage.removeItem('@waoufund_active_startup');
+    } catch {}
+    setUserName('');
+    setUserEmail('');
+    setUserRole('founder');
+    setCurrentView('landing');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -189,8 +331,10 @@ export default function App() {
             activeAppTab={activeAppTab}
             setActiveAppTab={setActiveAppTab}
             onSignIn={() => setCurrentView('auth')}
+            onSignOut={handleSignOut}
             isLoggedIn={!!userName}
             userName={userName}
+            userEmail={userEmail}
           />
 
           {/* ── Main View Switcher: Landing vs Founder Studio OS ─── */}

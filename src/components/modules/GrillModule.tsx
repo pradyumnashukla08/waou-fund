@@ -97,7 +97,8 @@ export const GrillModule: React.FC<GrillModuleProps> = ({ startup, setActiveTab 
       // Completed all rounds -> Generate Verdict
       setIsLoading(true);
       const res = await api.evaluateInvestorAnswer(
-        updatedHistory.map((item) => ({ question: item.question, answer: item.answer || '' }))
+        updatedHistory.map((item) => ({ question: item.question, answer: item.answer || '' })),
+        startup
       );
       setVerdict(res);
       setIsLoading(false);

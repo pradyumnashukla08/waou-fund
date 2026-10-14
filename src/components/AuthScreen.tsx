@@ -192,15 +192,21 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onComplete }) => {
                 <div>
                   <label style={{ fontSize: '0.82rem', fontWeight: 700, color: '#374151', display: 'block', marginBottom: '6px' }}>Email Address</label>
                   <div style={{ position: 'relative' }}>
-                    <Mail size={16} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: '#94A3B8' }} />
+                    <Mail size={16} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: '#94A3B8', pointerEvents: 'none', zIndex: 2 }} />
                     <input
+                      id="auth-email-input"
+                      name="email"
                       type="email"
+                      autoComplete="email"
                       value={email}
                       onChange={e => { setEmail(e.target.value); setErrors(p => ({ ...p, email: '' })); }}
                       placeholder="you@startup.com"
                       style={{
+                        display: 'block',
                         width: '100%',
-                        padding: '0.75rem 0.75rem 0.75rem 2.5rem',
+                        height: '46px',
+                        minHeight: '46px',
+                        padding: '0.75rem 0.75rem 0.75rem 2.6rem',
                         borderRadius: '10px',
                         border: `1.5px solid ${errors.email ? '#EF4444' : '#E2E8F0'}`,
                         fontSize: '0.94rem',
@@ -208,6 +214,8 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onComplete }) => {
                         outline: 'none',
                         boxSizing: 'border-box',
                         backgroundColor: '#F8FAFC',
+                        appearance: 'none',
+                        WebkitAppearance: 'none',
                       }}
                     />
                   </div>

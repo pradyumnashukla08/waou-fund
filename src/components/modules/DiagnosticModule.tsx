@@ -9,26 +9,31 @@ import {
   RefreshCw, 
   Info,
   ShieldCheck,
-  Award,
   Layers
 } from 'lucide-react';
 import { EvaluationResult } from '../../types';
+import { StartupProfile } from '../../data/defaultData';
 import { api } from '../../services/api';
 
 interface DiagnosticModuleProps {
+  startup?: StartupProfile;
   evaluation: EvaluationResult;
   onUpdateEvaluation: (res: EvaluationResult) => void;
   setActiveTab: (tab: string) => void;
 }
 
 export const DiagnosticModule: React.FC<DiagnosticModuleProps> = ({
+  startup,
   evaluation,
   onUpdateEvaluation,
   setActiveTab,
 }) => {
   const [isScanning, setIsScanning] = useState(false);
   const [scanStep, setScanStep] = useState(0);
-  const [activeFileName, setActiveFileName] = useState('AvasPlot_Seed_Pitch_Deck_V3.pdf');
+  const defaultDeckName = startup?.pitchDeckUrl 
+    ? (startup.pitchDeckUrl.split('/').pop() || `${startup.name.replace(/\s+/g, '_')}_Pitch_Deck.pdf`)
+    : `${startup?.name ? startup.name.replace(/\s+/g, '_') : 'My_Startup'}_Pitch_Deck.pdf`;
+  const [activeFileName, setActiveFileName] = useState(defaultDeckName);
   const [selectedFinding, setSelectedFinding] = useState<number | null>(null);
 
   const scanSteps = [
@@ -39,7 +44,7 @@ export const DiagnosticModule: React.FC<DiagnosticModuleProps> = ({
     'Synthesizing Diagnostic Verdict...',
   ];
 
-  const handleSimulateScan = async (fileName = 'Custom_Founder_Deck.pdf', fileSize = '8.4 MB') => {
+  const handleSimulateScan = async (fileName = defaultDeckName, fileSize = '8.4 MB') => {
     setIsScanning(true);
     setActiveFileName(fileName);
     setScanStep(0);
@@ -52,6 +57,14 @@ export const DiagnosticModule: React.FC<DiagnosticModuleProps> = ({
     const updated = await api.evaluateDeck(fileName, fileSize);
     onUpdateEvaluation(updated);
     setIsScanning(false);
+  };
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const sizeMb = (file.size / (1024 * 1024)).toFixed(1) + ' MB';
+      handleSimulateScan(file.name, sizeMb);
+    }
   };
 
   const getGrade = (score: number) => {
@@ -155,13 +168,36 @@ export const DiagnosticModule: React.FC<DiagnosticModuleProps> = ({
             </div>
 
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem', justifyContent: 'center' }}>
-              <button
-                onClick={() => handleSimulateScan('AvasPlot_Seed_Pitch_Deck_V3.pdf', '12.4 MB')}
+              <label 
                 className="btn-cyan"
-                style={{ padding: '0.65rem 1.25rem', fontSize: '0.86rem' }}
+                style={{ padding: '0.65rem 1.25rem', fontSize: '0.86rem', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}
+              >
+                <UploadCloud size={15} />
+                <span>Upload New Deck File</span>
+                <input 
+                  type="file" 
+                  accept=".pdf,.pptx,.ppt" 
+                  onChange={handleFileUpload} 
+                  style={{ display: 'none' }} 
+                />
+              </label>
+
+              <button
+                onClick={() => handleSimulateScan(activeFileName, '12.4 MB')}
+                className="btn-outline"
+                style={{
+                  padding: '0.65rem 1.25rem',
+                  fontSize: '0.86rem',
+                  backgroundColor: 'var(--bg-secondary)',
+                  color: 'var(--text-primary)',
+                  borderColor: 'rgba(226, 232, 240, 0.8)',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                }}
               >
                 <RefreshCw size={14} />
-                <span>Re-Analyze Current Deck</span>
+                <span>Re-Analyze {startup?.name ? `${startup.name} Deck` : 'Current Deck'}</span>
               </button>
 
               <button
@@ -172,10 +208,10 @@ export const DiagnosticModule: React.FC<DiagnosticModuleProps> = ({
                   fontSize: '0.86rem',
                   backgroundColor: 'var(--bg-secondary)',
                   color: 'var(--text-primary)',
-                  borderColor: 'rgba(255, 255, 255, 0.15)',
+                  borderColor: 'rgba(226, 232, 240, 0.8)',
                 }}
               >
-                <span>Load FinFlow Series-A Deck</span>
+                <span>Benchmark: FinFlow Series-A</span>
               </button>
 
               <button
@@ -186,10 +222,10 @@ export const DiagnosticModule: React.FC<DiagnosticModuleProps> = ({
                   fontSize: '0.86rem',
                   backgroundColor: 'var(--bg-secondary)',
                   color: 'var(--text-primary)',
-                  borderColor: 'rgba(255, 255, 255, 0.15)',
+                  borderColor: 'rgba(226, 232, 240, 0.8)',
                 }}
               >
-                <span>Load HealthSync Pre-Seed Deck</span>
+                <span>Benchmark: HealthSync Pre-Seed</span>
               </button>
             </div>
           </div>

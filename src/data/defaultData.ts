@@ -1,5 +1,11 @@
 import { EvaluationResult, Mentor, FundingStage, AIInvestorRound } from '../types';
 
+export interface TeamMember {
+  name: string;
+  role: string;
+  linkedin: string;
+}
+
 export interface StartupProfile {
   id: string;
   name: string;
@@ -16,6 +22,73 @@ export interface StartupProfile {
   burn: string;
   growth: string;
   fundabilityScore: number;
+
+  // 1. Founder Identity
+  fullName?: string;
+  role?: string;
+  profileImage?: string;
+  linkedinUrl?: string;
+  email?: string;
+  pedigree?: string;
+  team?: TeamMember[];
+
+  // 2. Startup Core & Compliance
+  companyName?: string;
+  websiteUrl?: string;
+  pitchDeckUrl?: string;
+  companyType?: string;
+  isRegistered?: boolean;
+  registrationNo?: string;
+  sector?: string;
+  pitch?: string;
+  currency?: string;
+
+  // 3. Market & Competitors
+  tam?: string;
+  sam?: string;
+  som?: string;
+  competitor1?: string;
+  competitor2?: string;
+  competitor3?: string;
+  distributionMoat?: string;
+
+  // 4. The Fundraising Ask
+  targetRaise?: string;
+  valuationCap?: string;
+  capitalCommitted?: string;
+
+  // 5. Dynamic Traction Metrics
+  // Pre-Seed
+  waitlistCount?: string;
+  betaConversion?: string;
+  productStatus?: string;
+  problemValidation?: string;
+  teamCapability?: string;
+  runway?: string;
+
+  // Seed
+  currentMrr?: string;
+  userTraction?: string;
+  momGrowth?: string;
+  grossMargin?: string;
+  cac?: string;
+
+  // Series-A
+  verifiedArr?: string;
+  churnRate?: string;
+  nrr?: string;
+  ltvcacRatio?: string;
+  cacPayback?: string;
+  burnRate?: string;
+  execSales?: boolean;
+  execEng?: boolean;
+  execMarketing?: boolean;
+
+  // Series-B
+  annualRevenue?: string;
+  expansionVectors?: string[];
+  cSuiteComplete?: boolean;
+  marketShare?: string;
 }
 
 export const MOCK_STARTUPS: StartupProfile[] = [
@@ -35,6 +108,58 @@ export const MOCK_STARTUPS: StartupProfile[] = [
     burn: '₹12,00,000',
     growth: '+18% MoM',
     fundabilityScore: 88,
+    fullName: 'Rahul Sharma',
+    role: 'CEO & Co-Founder',
+    profileImage: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&fit=crop&q=80',
+    linkedinUrl: 'https://linkedin.com/in/rahulsharma-avasplot',
+    email: 'rahul@avasplot.ai',
+    pedigree: 'Second-Time Founder (Ex-Flipkart Data Science)',
+    team: [
+      { name: 'Kavita Sundaram', role: 'CTO (Ex-Google Brain, IIT Madras)', linkedin: 'https://linkedin.com/in/kavita-sundaram' },
+      { name: 'Aditya Sen', role: 'Head of Growth (Ex-Razorpay)', linkedin: 'https://linkedin.com/in/aditya-sen' }
+    ],
+    companyName: 'AvasPlot Technologies Inc.',
+    websiteUrl: 'https://avasplot.ai',
+    companyType: 'Private Limited',
+    isRegistered: true,
+    registrationNo: '29ABCDE1234F1Z5',
+    sector: 'SaaS',
+    pitch: 'AI spatial intelligence platform enabling institutional REITs to evaluate commercial asset yields with 98% accuracy in 12 minutes.',
+    currency: '₹ (INR)',
+    tam: '42000000000',
+    sam: '8500000000',
+    som: '1200000000',
+    competitor1: 'https://costar.com',
+    competitor2: 'https://cherre.com',
+    competitor3: 'https://reonomy.com',
+    distributionMoat: 'Proprietary spatial graph of 1.4M commercial parcels and direct API integration with Indian municipal land registries.',
+    targetRaise: '40000000',
+    valuationCap: '280000000',
+    capitalCommitted: '18000000',
+    currentMrr: '5000000',
+    userTraction: '18 Enterprise Clients',
+    momGrowth: '18',
+    grossMargin: '82',
+    cac: '85000',
+    waitlistCount: '450',
+    betaConversion: '28',
+    productStatus: 'Functional MVP',
+    problemValidation: 'Commercial real estate underwriting takes 6 weeks of manual surveyor appraisals resulting in 18% pricing variance.',
+    teamCapability: 'Founders have 14+ years combined in enterprise GIS, spatial computer vision, and institutional REIT debt underwriting.',
+    runway: '14',
+    verifiedArr: '60000000',
+    churnRate: '1.2',
+    nrr: '124',
+    ltvcacRatio: '>4:1',
+    cacPayback: '5',
+    burnRate: '1200000',
+    execSales: true,
+    execEng: true,
+    execMarketing: false,
+    annualRevenue: '60000000',
+    expansionVectors: ['International Expansion', 'New Product Lines'],
+    cSuiteComplete: true,
+    marketShare: '12',
   },
   {
     id: 'finflow',

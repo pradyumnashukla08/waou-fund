@@ -5,6 +5,7 @@ import {
 } from 'lucide-react';
 import { UserRole, UploadedFile, ExtractedStartupData } from '../types/user';
 import { CLOUD_CONFIG } from '../config/cloud';
+import { liveAiService } from '../services/liveAiService';
 
 interface DataRoomOnboardingProps {
   userName: string;
@@ -40,35 +41,18 @@ function formatFileSize(bytes: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
-/** Simulate AI document analysis using extracted text patterns */
+/** Real AI document analysis using live Groq pipeline & backend */
 async function analyzeDocumentLocally(files: UploadedFile[]): Promise<ExtractedStartupData> {
-  // Real flow: send to backend /api/evaluate with document URLs
-  // Since this is a browser demo, we'll run smart field extraction + simulation
-  await new Promise(r => setTimeout(r, 2800)); // Simulate processing time
-
-  // Try real API first
   try {
-    const response = await fetch(`${CLOUD_CONFIG.PRIMARY_API_URL}/evaluate`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Bypass-Tunnel-Reminder': 'true',
-      },
-      body: JSON.stringify({
-        description: `Startup documents uploaded: ${files.map(f => f.name).join(', ')}`,
-        stage: 'Seed',
-        companyName: files[0]?.name?.replace(/\.(pdf|pptx?|xlsx?|docx?)$/i, '') || 'Your Startup',
-      }),
-      signal: AbortSignal.timeout(8000),
-    });
-
-    if (response.ok) {
-      const data = await response.json();
-      if (data.success && data.data) return data.data;
+    const aiResult = await liveAiService.extractDocumentsIntelligence(files);
+    if (aiResult && aiResult.companyName) {
+      return aiResult;
     }
-  } catch {
-    // Fallback to intelligent local simulation below
+  } catch (err) {
+    console.error('liveAiService extraction failed, using fallback:', err);
   }
+
+  // Fallback to intelligent local parsing below
 
   // Intelligent local simulation based on file names & types
   const fileNames = files.map(f => f.name.toLowerCase()).join(' ');
