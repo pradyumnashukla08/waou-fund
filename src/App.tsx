@@ -8,16 +8,27 @@ import {
 } from 'lucide-react';
 import { MOCK_STARTUPS, DEFAULT_EVALUATION, StartupProfile } from './data/defaultData';
 import { EvaluationResult } from './types';
+import { UserRole, ExtractedStartupData } from './types/user';
 import { Navbar } from './components/Navbar';
 import { LandingPage } from './components/LandingPage';
 import { FounderApp } from './components/FounderApp';
+import { AuthScreen } from './components/AuthScreen';
+import { DataRoomOnboarding } from './components/DataRoomOnboarding';
+
+// ─── App view states ────────────────────────────────────────────────
+type AppView = 'landing' | 'auth' | 'dataroom' | 'app';
 
 export default function App() {
-  const [currentView, setCurrentView] = useState<'landing' | 'app'>('landing');
+  const [currentView, setCurrentView] = useState<AppView>('landing');
   const [activeAppTab, setActiveAppTab] = useState<string>('dashboard');
   const [allStartups, setAllStartups] = useState<StartupProfile[]>(MOCK_STARTUPS);
   const [selectedStartup, setSelectedStartup] = useState<StartupProfile>(MOCK_STARTUPS[0]);
   const [evaluation, setEvaluation] = useState<EvaluationResult>(DEFAULT_EVALUATION);
+
+  // Auth / Onboarding state
+  const [userName, setUserName] = useState('');
+  const [userEmail, setUserEmail] = useState('');
+  const [userRole, setUserRole] = useState<UserRole>('founder');
 
   // Gamification & Streak state
   const [streakCount, setStreakCount] = useState<number>(5);
@@ -47,88 +58,175 @@ export default function App() {
     setEvaluation(res);
   };
 
+  // ─── Auth completion: user logged in and selected role ────────────
+  const handleAuthComplete = (email: string, name: string, role: UserRole) => {
+    setUserEmail(email);
+    setUserName(name);
+    setUserRole(role);
+    if (role === 'founder') {
+      setCurrentView('dataroom');
+    } else {
+      // Angel & VC go directly to founder app for now
+      setCurrentView('app');
+      setActiveAppTab('dashboard');
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // ─── Data room analysis completed: auto-fill startup profile ─────
+  const handleDataRoomComplete = (extractedData: ExtractedStartupData) => {
+    // Merge extracted data into the selected startup profile
+    const merged: StartupProfile = {
+      ...selectedStartup,
+      name: extractedData.companyName || selectedStartup.name,
+      tagline: extractedData.tagline || selectedStartup.tagline,
+      stage: (extractedData.stage as StartupProfile['stage']) || selectedStartup.stage,
+      category: extractedData.sector || selectedStartup.category,
+      targetAsk: extractedData.askAmount || selectedStartup.targetAsk,
+      mrr: extractedData.mrr || selectedStartup.mrr,
+      fundabilityScore: extractedData.fundingReadiness || selectedStartup.fundabilityScore,
+    };
+    setSelectedStartup(merged);
+    setAllStartups(prev => prev.map(s => s.id === merged.id ? merged : s));
+
+    // Merge fundability breakdown into evaluation
+    if (extractedData.fundingReadinessBreakdown) {
+      const bd = extractedData.fundingReadinessBreakdown;
+      setEvaluation(prev => ({
+        ...prev,
+        overall_score: extractedData.fundingReadiness || prev.overall_score,
+        team_score: bd.teamScore,
+        market_score: bd.marketScore,
+        execution_score: bd.tractionScore,
+        product_score: bd.productScore,
+      }));
+    }
+
+    confetti({
+      particleCount: 100,
+      spread: 70,
+      origin: { y: 0.6 },
+    });
+
+    setCurrentView('app');
+    setActiveAppTab('dashboard');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleSkipDataRoom = () => {
+    setCurrentView('app');
+    setActiveAppTab('dashboard');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   return (
     <div className="waoufund-app" style={{ minHeight: '100vh' }}>
-      {/* ── Top Sticky Header Navigation ─────────────────────────────── */}
-      <Navbar 
-        currentView={currentView}
-        setCurrentView={setCurrentView}
-        selectedStartup={selectedStartup}
-        setSelectedStartup={(s) => {
-          setSelectedStartup(s);
-          if (s.id === 'finflow') {
-            setEvaluation({
-              ...DEFAULT_EVALUATION,
-              overall_score: 94,
-              team_score: 95,
-              market_score: 96,
-              financial_metrics: {
-                ...DEFAULT_EVALUATION.financial_metrics,
-                arr: 250000000,
-                mrr: 25000000,
-                cash_balance: 45000000,
-              },
-            });
-          } else if (s.id === 'healthsync') {
-            setEvaluation({
-              ...DEFAULT_EVALUATION,
-              overall_score: 74,
-              team_score: 80,
-              market_score: 76,
-              financial_metrics: {
-                ...DEFAULT_EVALUATION.financial_metrics,
-                arr: 10000000,
-                mrr: 850000,
-                cash_balance: 3500000,
-              },
-            });
-          } else {
-            setEvaluation(DEFAULT_EVALUATION);
-          }
-        }}
-        allStartups={allStartups}
-        streakCount={streakCount}
-        openStreakModal={() => setShowStreakModal(true)}
-        openDailyTaskModal={() => setShowDailyTaskModal(true)}
-        isDailyTaskDone={isDailyTaskDone}
-        activeAppTab={activeAppTab}
-        setActiveAppTab={setActiveAppTab}
-      />
 
-      {/* ── Main View Switcher: Landing vs Founder Studio OS ────────── */}
-      {currentView === 'landing' ? (
-        <LandingPage 
-          onGetStarted={() => {
-            setCurrentView('app');
-            setActiveAppTab('dashboard');
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-          }}
-          onOpenDiagnostic={() => {
-            setCurrentView('app');
-            setActiveAppTab('diagnostic');
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-          }}
-          selectedStartup={selectedStartup}
-        />
-      ) : (
-        <FounderApp 
-          startup={selectedStartup}
-          onUpdateStartup={handleUpdateStartup}
-          evaluation={evaluation}
-          onUpdateEvaluation={handleUpdateEvaluation}
-          streakCount={streakCount}
-          openStreakModal={() => setShowStreakModal(true)}
-          isDailyTaskDone={isDailyTaskDone}
-          toggleDailyTask={toggleDailyTask}
-          activeTab={activeAppTab}
-          setActiveTab={(tab) => {
-            setActiveAppTab(tab);
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-          }}
+      {/* ── Full-page Auth & Onboarding views (no Navbar) ─────────── */}
+      {currentView === 'auth' && (
+        <AuthScreen
+          onComplete={handleAuthComplete}
         />
       )}
 
-      {/* ── STREAK MODAL (Light Theme) ─────────────────────────────── */}
+      {currentView === 'dataroom' && (
+        <DataRoomOnboarding
+          userName={userName}
+          role={userRole}
+          onComplete={handleDataRoomComplete}
+          onSkip={handleSkipDataRoom}
+        />
+      )}
+
+      {/* ── Main views with Navbar ─────────────────────────────────── */}
+      {(currentView === 'landing' || currentView === 'app') && (
+        <>
+          {/* ── Top Sticky Header Navigation ───────────────────────── */}
+          <Navbar 
+            currentView={currentView === 'landing' ? 'landing' : 'app'}
+            setCurrentView={(v) => {
+              if (v === 'landing') setCurrentView('landing');
+              else setCurrentView('app');
+            }}
+            selectedStartup={selectedStartup}
+            setSelectedStartup={(s) => {
+              setSelectedStartup(s);
+              if (s.id === 'finflow') {
+                setEvaluation({
+                  ...DEFAULT_EVALUATION,
+                  overall_score: 94,
+                  team_score: 95,
+                  market_score: 96,
+                  financial_metrics: {
+                    ...DEFAULT_EVALUATION.financial_metrics,
+                    arr: 250000000,
+                    mrr: 25000000,
+                    cash_balance: 45000000,
+                  },
+                });
+              } else if (s.id === 'healthsync') {
+                setEvaluation({
+                  ...DEFAULT_EVALUATION,
+                  overall_score: 74,
+                  team_score: 80,
+                  market_score: 76,
+                  financial_metrics: {
+                    ...DEFAULT_EVALUATION.financial_metrics,
+                    arr: 10000000,
+                    mrr: 850000,
+                    cash_balance: 3500000,
+                  },
+                });
+              } else {
+                setEvaluation(DEFAULT_EVALUATION);
+              }
+            }}
+            allStartups={allStartups}
+            streakCount={streakCount}
+            openStreakModal={() => setShowStreakModal(true)}
+            openDailyTaskModal={() => setShowDailyTaskModal(true)}
+            isDailyTaskDone={isDailyTaskDone}
+            activeAppTab={activeAppTab}
+            setActiveAppTab={setActiveAppTab}
+            onSignIn={() => setCurrentView('auth')}
+            isLoggedIn={!!userName}
+            userName={userName}
+          />
+
+          {/* ── Main View Switcher: Landing vs Founder Studio OS ─── */}
+          {currentView === 'landing' ? (
+            <LandingPage 
+              onGetStarted={() => {
+                setCurrentView('auth');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              onOpenDiagnostic={() => {
+                setCurrentView('auth');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              selectedStartup={selectedStartup}
+            />
+          ) : (
+            <FounderApp 
+              startup={selectedStartup}
+              onUpdateStartup={handleUpdateStartup}
+              evaluation={evaluation}
+              onUpdateEvaluation={handleUpdateEvaluation}
+              streakCount={streakCount}
+              openStreakModal={() => setShowStreakModal(true)}
+              isDailyTaskDone={isDailyTaskDone}
+              toggleDailyTask={toggleDailyTask}
+              activeTab={activeAppTab}
+              setActiveTab={(tab) => {
+                setActiveAppTab(tab);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+            />
+          )}
+        </>
+      )}
+
+      {/* ── STREAK MODAL ──────────────────────────────────────────── */}
       {showStreakModal && (
         <div style={{
           position: 'fixed',
@@ -222,7 +320,7 @@ export default function App() {
         </div>
       )}
 
-      {/* ── DAILY TASK MODAL (Light Theme) ─────────────────────────── */}
+      {/* ── DAILY TASK MODAL ──────────────────────────────────────── */}
       {showDailyTaskModal && (
         <div style={{
           position: 'fixed',

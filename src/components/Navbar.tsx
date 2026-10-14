@@ -22,6 +22,10 @@ interface NavbarProps {
   isDailyTaskDone: boolean;
   activeAppTab: string;
   setActiveAppTab: (tab: string) => void;
+  // Auth props
+  onSignIn?: () => void;
+  isLoggedIn?: boolean;
+  userName?: string;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -35,6 +39,9 @@ export const Navbar: React.FC<NavbarProps> = ({
   openDailyTaskModal,
   isDailyTaskDone,
   setActiveAppTab,
+  onSignIn,
+  isLoggedIn,
+  userName,
 }) => {
   const [dropdownOpen, setDropdownOpen] = React.useState(false);
 
@@ -346,40 +353,85 @@ export const Navbar: React.FC<NavbarProps> = ({
 
           {/* Main Action CTA */}
           {currentView === 'landing' ? (
-            <button
-              onClick={() => setCurrentView('app')}
-              className="btn-primary"
-              style={{
-                padding: '0.55rem 1.25rem',
-                fontSize: '0.88rem',
-              }}
-            >
-              <span>Launch Studio</span>
-              <ArrowRight size={15} />
-            </button>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              {!isLoggedIn && (
+                <button
+                  onClick={onSignIn}
+                  style={{
+                    padding: '0.5rem 1.1rem',
+                    borderRadius: 'var(--radius-full)',
+                    border: '1.5px solid #E2E8F0',
+                    backgroundColor: '#FFFFFF',
+                    color: '#334155',
+                    fontWeight: 700,
+                    fontSize: '0.86rem',
+                    cursor: 'pointer',
+                  }}
+                >
+                  Sign In
+                </button>
+              )}
+              <button
+                onClick={() => {
+                  if (isLoggedIn) {
+                    setCurrentView('app');
+                  } else {
+                    onSignIn?.();
+                  }
+                }}
+                className="btn-primary"
+                style={{
+                  padding: '0.55rem 1.25rem',
+                  fontSize: '0.88rem',
+                }}
+              >
+                <span>{isLoggedIn ? 'Launch Studio' : 'Get Started Free'}</span>
+                <ArrowRight size={15} />
+              </button>
+            </div>
           ) : (
-            <button
-              onClick={() => {
-                setActiveAppTab('diagnostic');
-              }}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.45rem',
-                padding: '0.55rem 1.15rem',
-                borderRadius: 'var(--radius-full)',
-                background: 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)',
-                color: '#FFFFFF',
-                fontWeight: 700,
-                fontSize: '0.84rem',
-                border: 'none',
-                cursor: 'pointer',
-                boxShadow: '0 4px 14px rgba(245, 158, 11, 0.3)',
-              }}
-            >
-              <Sparkles size={14} />
-              <span>Diagnose Deck</span>
-            </button>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+              {isLoggedIn && userName && (
+                <div style={{
+                  width: '34px',
+                  height: '34px',
+                  borderRadius: '50%',
+                  background: 'linear-gradient(135deg, #2563EB 0%, #7C3AED 100%)',
+                  color: '#FFFFFF',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '0.78rem',
+                  fontWeight: 800,
+                  flexShrink: 0,
+                  title: userName,
+                }}>
+                  {userName.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase()}
+                </div>
+              )}
+              <button
+                onClick={() => {
+                  setActiveAppTab('diagnostic');
+                }}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.45rem',
+                  padding: '0.55rem 1.15rem',
+                  borderRadius: 'var(--radius-full)',
+                  background: 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)',
+                  color: '#FFFFFF',
+                  fontWeight: 700,
+                  fontSize: '0.84rem',
+                  border: 'none',
+                  cursor: 'pointer',
+                  boxShadow: '0 4px 14px rgba(245, 158, 11, 0.3)',
+                }}
+              >
+                <Sparkles size={14} />
+                <span>Diagnose Deck</span>
+              </button>
+            </div>
           )}
         </div>
       </div>
