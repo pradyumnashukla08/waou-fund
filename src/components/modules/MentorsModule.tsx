@@ -229,11 +229,11 @@ export const MentorsModule: React.FC = () => {
                         onChange={(e) => setBookingDate(e.target.value)}
                         style={{
                           width: '100%',
-                          backgroundColor: 'rgba(2, 4, 10, 0.7)',
-                          border: '1px solid rgba(20, 184, 166, 0.3)',
+                          backgroundColor: 'var(--bg-secondary)',
+                          border: '1px solid var(--border-subtle)',
                           borderRadius: '10px',
                           padding: '0.7rem',
-                          color: '#FFFFFF',
+                          color: 'var(--text-primary)',
                           fontSize: '0.9rem',
                         }}
                       />
@@ -248,11 +248,11 @@ export const MentorsModule: React.FC = () => {
                         onChange={(e) => setBookingTime(e.target.value)}
                         style={{
                           width: '100%',
-                          backgroundColor: '#FFFFFF',
-                          border: '1px solid rgba(20, 184, 166, 0.3)',
+                          backgroundColor: 'var(--bg-secondary)',
+                          border: '1px solid var(--border-subtle)',
                           borderRadius: '10px',
                           padding: '0.7rem',
-                          color: '#FFFFFF',
+                          color: 'var(--text-primary)',
                           fontSize: '0.9rem',
                         }}
                       >
@@ -275,11 +275,11 @@ export const MentorsModule: React.FC = () => {
                       rows={3}
                       style={{
                         width: '100%',
-                        backgroundColor: 'rgba(2, 4, 10, 0.7)',
-                        border: '1px solid rgba(20, 184, 166, 0.3)',
+                        backgroundColor: 'var(--bg-secondary)',
+                        border: '1px solid var(--border-subtle)',
                         borderRadius: '10px',
                         padding: '0.75rem',
-                        color: '#FFFFFF',
+                        color: 'var(--text-primary)',
                         fontSize: '0.9rem',
                       }}
                     />

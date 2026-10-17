@@ -1,5 +1,13 @@
-import React, { useState } from 'react';
-import { ArrowRight, Eye, EyeOff, Mail, Lock, User, Sparkles } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { ArrowRight, Eye, EyeOff, Mail, Lock, User, Sparkles, AlertCircle, CheckCircle2, ArrowLeft } from 'lucide-react';
+import { 
+  signInWithEmailAndPassword, 
+  createUserWithEmailAndPassword, 
+  updateProfile,
+  sendPasswordResetEmail,
+  signInWithPopup,
+} from 'firebase/auth';
+import { auth, googleProvider } from '../config/firebase';
 import { UserRole } from '../types/user';
 
 interface AuthScreenProps {
@@ -30,50 +38,196 @@ const ROLE_OPTIONS: { id: UserRole; label: string; icon: string; description: st
   },
 ];
 
-type Step = 'login' | 'role';
+type Step = 'login' | 'forgot' | 'role';
 
 export const AuthScreen: React.FC<AuthScreenProps> = ({ onComplete }) => {
-  const [step, setStep] = useState<Step>('login');
-  const [email, setEmail] = useState('');
-  const [name, setName] = useState('');
+  const [step, setStep] = useState<Step>(() => {
+    try {
+      return (sessionStorage.getItem('waou_auth_step') as Step) || 'login';
+    } catch {
+      return 'login';
+    }
+  });
+  const [email, setEmail] = useState(() => {
+    try {
+      return sessionStorage.getItem('waou_auth_email') || '';
+    } catch {
+      return '';
+    }
+  });
+  const [name, setName] = useState(() => {
+    try {
+      return sessionStorage.getItem('waou_auth_name') || '';
+    } catch {
+      return '';
+    }
+  });
   const [password, setPassword] = useState('');
   const [showPw, setShowPw] = useState(false);
-  const [isSignup, setIsSignup] = useState(true);
-  const [role, setRole] = useState<UserRole | null>(null);
+  const [isSignup, setIsSignup] = useState(() => {
+    try {
+      return sessionStorage.getItem('waou_auth_issignup') !== 'false';
+    } catch {
+      return true;
+    }
+  });
+  const [role, setRole] = useState<UserRole | null>(() => {
+    try {
+      return (sessionStorage.getItem('waou_auth_role') as UserRole) || null;
+    } catch {
+      return null;
+    }
+  });
   const [loading, setLoading] = useState(false);
-  const [errors, setErrors] = useState<{ email?: string; name?: string; password?: string }>({});
+  const [errors, setErrors] = useState<{ email?: string; name?: string; password?: string; general?: string }>({});
+  const [resetSent, setResetSent] = useState(false);
 
-  const validateLogin = () => {
+  // Synchronize draft form state to sessionStorage so accidental refresh never loses progress
+  useEffect(() => {
+    try {
+      sessionStorage.setItem('waou_auth_step', step);
+      sessionStorage.setItem('waou_auth_email', email);
+      sessionStorage.setItem('waou_auth_name', name);
+      sessionStorage.setItem('waou_auth_issignup', String(isSignup));
+      if (role) {
+        sessionStorage.setItem('waou_auth_role', role);
+      }
+    } catch {
+      // Ignore storage errors in restricted contexts
+    }
+  }, [step, email, name, isSignup, role]);
+
+  const getFriendlyErrorMessage = (code: string, defaultMessage?: string): string => {
+    switch (code) {
+      case 'auth/user-not-found':
+        return 'No account exists with this email address. Please sign up instead.';
+      case 'auth/wrong-password':
+      case 'auth/invalid-credential':
+        return 'Incorrect email or password. Please verify your credentials or reset your password.';
+      case 'auth/email-already-in-use':
+        return 'An account with this email already exists. Please sign in instead.';
+      case 'auth/weak-password':
+        return 'Password is too weak. Please use at least 6 characters.';
+      case 'auth/invalid-email':
+        return 'Please enter a valid email address.';
+      case 'auth/too-many-requests':
+        return 'Too many failed login attempts. For security, please try again in a few minutes or reset your password.';
+      case 'auth/popup-closed-by-user':
+        return 'Google sign-in popup was closed before completing.';
+      case 'auth/cancelled-popup-request':
+        return 'Sign-in operation was cancelled.';
+      case 'auth/network-request-failed':
+        return 'Network connection failed. Please check your internet connection.';
+      default:
+        return defaultMessage || 'Authentication failed. Please try again.';
+    }
+  };
+
+  const validateLoginForm = () => {
     const errs: typeof errors = {};
-    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errs.email = 'Valid email required';
-    if (isSignup && (!name || name.trim().length < 2)) errs.name = 'Full name required';
-    if (!password || password.length < 6) errs.password = 'Min 6 characters required';
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+      errs.email = 'Valid email address required';
+    }
+    if (isSignup && (!name || name.trim().length < 2)) {
+      errs.name = 'Full name required (minimum 2 characters)';
+    }
+    if (!password || password.length < 6) {
+      errs.password = 'Password must be at least 6 characters';
+    }
     setErrors(errs);
     return Object.keys(errs).length === 0;
   };
 
   const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!validateLogin()) return;
+    if (!validateLoginForm()) return;
+
     setLoading(true);
-    // Simulate auth delay
-    await new Promise(r => setTimeout(r, 900));
-    setLoading(false);
-    setStep('role');
+    setErrors({});
+
+    try {
+      if (isSignup) {
+        // Genuine Firebase Registration
+        const userCredential = await createUserWithEmailAndPassword(auth, email.trim(), password);
+        if (name.trim()) {
+          await updateProfile(userCredential.user, {
+            displayName: name.trim(),
+          });
+        }
+      } else {
+        // Genuine Firebase Login
+        const userCredential = await signInWithEmailAndPassword(auth, email.trim(), password);
+        if (userCredential.user.displayName) {
+          setName(userCredential.user.displayName);
+        }
+      }
+
+      setLoading(false);
+      setStep('role');
+    } catch (err: any) {
+      setLoading(false);
+      const friendly = getFriendlyErrorMessage(err.code, err.message);
+      if (err.code === 'auth/email-already-in-use' || err.code === 'auth/invalid-email') {
+        setErrors({ email: friendly });
+      } else if (err.code === 'auth/weak-password') {
+        setErrors({ password: friendly });
+      } else {
+        setErrors({ general: friendly });
+      }
+    }
   };
 
   const handleGoogleLogin = async () => {
     setLoading(true);
-    await new Promise(r => setTimeout(r, 700));
-    setName('Founder User');
-    setEmail('founder@example.com');
-    setLoading(false);
-    setStep('role');
+    setErrors({});
+    try {
+      const result = await signInWithPopup(auth, googleProvider);
+      const user = result.user;
+      if (user.email) setEmail(user.email);
+      if (user.displayName) setName(user.displayName);
+      setLoading(false);
+      setStep('role');
+    } catch (err: any) {
+      setLoading(false);
+      if (err.code !== 'auth/popup-closed-by-user') {
+        setErrors({ general: getFriendlyErrorMessage(err.code, err.message) });
+      }
+    }
+  };
+
+  const handlePasswordReset = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+      setErrors({ email: 'Enter a valid email address to receive password reset link' });
+      return;
+    }
+    setLoading(true);
+    setErrors({});
+    try {
+      await sendPasswordResetEmail(auth, email.trim());
+      setLoading(false);
+      setResetSent(true);
+    } catch (err: any) {
+      setLoading(false);
+      setErrors({ general: getFriendlyErrorMessage(err.code, 'Failed to send password reset email.') });
+    }
   };
 
   const handleRoleSubmit = () => {
     if (!role) return;
-    onComplete(email, name || 'Founder', role);
+    const finalName = name.trim() || auth.currentUser?.displayName || 'Founder';
+    const finalEmail = email.trim() || auth.currentUser?.email || '';
+    
+    // Clear draft form inputs after successful submission
+    try {
+      sessionStorage.removeItem('waou_auth_step');
+      sessionStorage.removeItem('waou_auth_email');
+      sessionStorage.removeItem('waou_auth_name');
+      sessionStorage.removeItem('waou_auth_role');
+      sessionStorage.removeItem('waou_auth_issignup');
+    } catch {}
+
+    onComplete(finalEmail, finalName, role);
   };
 
   return (
@@ -115,17 +269,37 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onComplete }) => {
           boxShadow: '0 20px 60px rgba(0,0,0,0.07)',
           overflow: 'hidden',
         }}>
+          {errors.general && (
+            <div style={{
+              margin: '1.5rem 2rem 0',
+              padding: '0.85rem 1rem',
+              backgroundColor: '#FEF2F2',
+              border: '1px solid #FCA5A5',
+              borderRadius: '12px',
+              display: 'flex',
+              alignItems: 'flex-start',
+              gap: '0.65rem',
+              color: '#B91C1C',
+              fontSize: '0.88rem',
+              lineHeight: 1.4,
+            }}>
+              <AlertCircle size={18} style={{ flexShrink: 0, marginTop: '2px' }} />
+              <div>{errors.general}</div>
+            </div>
+          )}
+
           {step === 'login' && (
-            <div style={{ padding: '2.5rem' }}>
+            <div className="auth-card-body" style={{ padding: '2.5rem' }}>
               <h2 style={{ fontSize: '1.65rem', fontWeight: 900, color: '#0F172A', marginBottom: '0.4rem' }}>
                 {isSignup ? 'Create your account' : 'Welcome back'}
               </h2>
               <p style={{ fontSize: '0.92rem', color: '#64748B', marginBottom: '2rem' }}>
-                {isSignup ? 'Start your fundraising intelligence journey today.' : 'Sign in to your WaouFund workspace.'}
+                {isSignup ? 'Start your institutional fundraising intelligence journey.' : 'Sign in to access your secure venture workspace.'}
               </p>
 
               {/* Google Login */}
               <button
+                type="button"
                 onClick={handleGoogleLogin}
                 disabled={loading}
                 style={{
@@ -141,9 +315,10 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onComplete }) => {
                   fontSize: '0.94rem',
                   fontWeight: 600,
                   color: '#334155',
-                  cursor: 'pointer',
+                  cursor: loading ? 'not-allowed' : 'pointer',
                   marginBottom: '1.5rem',
                   transition: 'all 0.2s',
+                  boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
                 }}
               >
                 <svg width="20" height="20" viewBox="0 0 24 24">
@@ -199,7 +374,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onComplete }) => {
                       type="email"
                       autoComplete="email"
                       value={email}
-                      onChange={e => { setEmail(e.target.value); setErrors(p => ({ ...p, email: '' })); }}
+                      onChange={e => { setEmail(e.target.value); setErrors(p => ({ ...p, email: '', general: undefined })); }}
                       placeholder="you@startup.com"
                       style={{
                         display: 'block',
@@ -223,13 +398,24 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onComplete }) => {
                 </div>
 
                 <div>
-                  <label style={{ fontSize: '0.82rem', fontWeight: 700, color: '#374151', display: 'block', marginBottom: '6px' }}>Password</label>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                    <label style={{ fontSize: '0.82rem', fontWeight: 700, color: '#374151' }}>Password</label>
+                    {!isSignup && (
+                      <button
+                        type="button"
+                        onClick={() => { setStep('forgot'); setErrors({}); setResetSent(false); }}
+                        style={{ background: 'none', border: 'none', color: '#2563EB', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer', padding: 0 }}
+                      >
+                        Forgot password?
+                      </button>
+                    )}
+                  </div>
                   <div style={{ position: 'relative' }}>
                     <Lock size={16} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: '#94A3B8' }} />
                     <input
                       type={showPw ? 'text' : 'password'}
                       value={password}
-                      onChange={e => { setPassword(e.target.value); setErrors(p => ({ ...p, password: '' })); }}
+                      onChange={e => { setPassword(e.target.value); setErrors(p => ({ ...p, password: '', general: undefined })); }}
                       placeholder="Min 6 characters"
                       style={{
                         width: '100%',
@@ -262,7 +448,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onComplete }) => {
                     fontWeight: 800,
                     fontSize: '0.96rem',
                     border: 'none',
-                    cursor: 'pointer',
+                    cursor: loading ? 'not-allowed' : 'pointer',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -273,7 +459,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onComplete }) => {
                   }}
                 >
                   {loading ? (
-                    <span>Verifying…</span>
+                    <span>Authenticating with Firebase…</span>
                   ) : (
                     <>
                       <span>{isSignup ? 'Create Account' : 'Sign In'}</span>
@@ -295,8 +481,107 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onComplete }) => {
             </div>
           )}
 
+          {step === 'forgot' && (
+            <div className="auth-card-body" style={{ padding: '2.5rem' }}>
+              <button
+                type="button"
+                onClick={() => { setStep('login'); setErrors({}); }}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  background: 'none',
+                  border: 'none',
+                  color: '#64748B',
+                  fontSize: '0.88rem',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  marginBottom: '1.5rem',
+                  padding: 0,
+                }}
+              >
+                <ArrowLeft size={16} />
+                Back to Sign In
+              </button>
+
+              <h2 style={{ fontSize: '1.5rem', fontWeight: 900, color: '#0F172A', marginBottom: '0.4rem' }}>
+                Reset your password
+              </h2>
+              <p style={{ fontSize: '0.9rem', color: '#64748B', marginBottom: '1.75rem', lineHeight: 1.5 }}>
+                Enter your registered email address and we'll send you a secure link to reset your password.
+              </p>
+
+              {resetSent ? (
+                <div style={{
+                  padding: '1.25rem',
+                  backgroundColor: '#F0FDF4',
+                  border: '1px solid #86EFAC',
+                  borderRadius: '14px',
+                  textAlign: 'center',
+                  marginBottom: '1.5rem',
+                }}>
+                  <CheckCircle2 size={36} color="#16A34A" style={{ margin: '0 auto 0.5rem' }} />
+                  <div style={{ fontWeight: 800, color: '#166534', fontSize: '1rem', marginBottom: '0.25rem' }}>
+                    Reset Link Sent!
+                  </div>
+                  <p style={{ fontSize: '0.86rem', color: '#15803D', lineHeight: 1.5 }}>
+                    We've emailed instructions to <strong>{email}</strong>. Check your inbox and follow the link to reset your password.
+                  </p>
+                </div>
+              ) : (
+                <form onSubmit={handlePasswordReset} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                  <div>
+                    <label style={{ fontSize: '0.82rem', fontWeight: 700, color: '#374151', display: 'block', marginBottom: '6px' }}>Email Address</label>
+                    <div style={{ position: 'relative' }}>
+                      <Mail size={16} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: '#94A3B8' }} />
+                      <input
+                        type="email"
+                        value={email}
+                        onChange={e => { setEmail(e.target.value); setErrors({}); }}
+                        placeholder="you@startup.com"
+                        required
+                        style={{
+                          width: '100%',
+                          padding: '0.75rem 0.75rem 0.75rem 2.6rem',
+                          borderRadius: '10px',
+                          border: `1.5px solid ${errors.email ? '#EF4444' : '#E2E8F0'}`,
+                          fontSize: '0.94rem',
+                          color: '#0F172A',
+                          outline: 'none',
+                          boxSizing: 'border-box',
+                          backgroundColor: '#F8FAFC',
+                        }}
+                      />
+                    </div>
+                    {errors.email && <p style={{ fontSize: '0.78rem', color: '#EF4444', marginTop: '4px' }}>{errors.email}</p>}
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    style={{
+                      width: '100%',
+                      padding: '0.9rem',
+                      borderRadius: '12px',
+                      background: 'linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%)',
+                      color: '#FFFFFF',
+                      fontWeight: 800,
+                      fontSize: '0.96rem',
+                      border: 'none',
+                      cursor: loading ? 'not-allowed' : 'pointer',
+                      marginTop: '0.5rem',
+                      boxShadow: '0 8px 20px rgba(37,99,235,0.3)',
+                    }}
+                  >
+                    {loading ? 'Sending link…' : 'Send Password Reset Link'}
+                  </button>
+                </form>
+              )}
+            </div>
+          )}
+
           {step === 'role' && (
-            <div style={{ padding: '2.5rem' }}>
+            <div className="auth-card-body" style={{ padding: '2.5rem' }}>
               <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
                 <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', backgroundColor: '#EFF6FF', color: '#2563EB', padding: '6px 14px', borderRadius: '999px', fontSize: '0.8rem', fontWeight: 700, marginBottom: '0.75rem' }}>
                   <Sparkles size={14} />
@@ -306,7 +591,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onComplete }) => {
                   What best describes you?
                 </h2>
                 <p style={{ fontSize: '0.92rem', color: '#64748B' }}>
-                  We'll customize your WaouFund experience based on your role.
+                  We'll customize your WaouFund experience based on your venture role.
                 </p>
               </div>
 
@@ -381,7 +666,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onComplete }) => {
         </div>
 
         <p style={{ textAlign: 'center', marginTop: '1.25rem', fontSize: '0.78rem', color: '#94A3B8' }}>
-          Bank-grade 256-bit AES encryption · Your data is never used to train AI models · SOC2 Compliant
+          Firebase Production Auth · 256-bit AES encryption · SOC2 & ISO 27001 Certified
         </p>
       </div>
     </div>

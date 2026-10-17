@@ -7,7 +7,10 @@ import {
   ChevronDown, 
   ShieldCheck, 
   ArrowRight,
-  LogOut
+  LogOut,
+  Menu,
+  X,
+  User
 } from 'lucide-react';
 import { StartupProfile } from '../data/defaultData';
 
@@ -49,6 +52,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 }) => {
   const [dropdownOpen, setDropdownOpen] = React.useState(false);
   const [userMenuOpen, setUserMenuOpen] = React.useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
 
   return (
     <header style={{
@@ -113,7 +117,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               }}>
                 Waou<span style={{ color: '#2563EB' }}>Fund</span>
               </span>
-              <span style={{ 
+              <span className="hide-on-mobile" style={{ 
                 fontSize: '0.68rem', 
                 fontWeight: 700, 
                 letterSpacing: '0.08em', 
@@ -126,7 +130,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           </div>
 
           {/* Mode Switcher Tabs */}
-          <div style={{
+          <div className="hide-on-mobile" style={{
             display: 'inline-flex',
             backgroundColor: 'var(--bg-secondary)',
             padding: '4px',
@@ -191,7 +195,7 @@ export const Navbar: React.FC<NavbarProps> = ({
         {/* Right Nav Actions */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
           {/* Active Startup Picker (Dropdown) */}
-          <div style={{ position: 'relative' }}>
+          <div className="hide-on-mobile" style={{ position: 'relative' }}>
             <button
               onClick={() => setDropdownOpen(!dropdownOpen)}
               style={{
@@ -321,6 +325,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           {/* Daily Directive Task Pill */}
           <button
             onClick={openDailyTaskModal}
+            className="hide-on-mobile"
             title="Today's AI Directive"
             style={{
               display: 'flex',
@@ -342,7 +347,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
           {/* Main Action CTA */}
           {currentView === 'landing' ? (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <div className="hide-on-mobile" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               {!isLoggedIn ? (
                 <button
                   onClick={onSignIn}
@@ -401,7 +406,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               </button>
             </div>
           ) : (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+            <div className="hide-on-mobile" style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
               {isLoggedIn && userName && (
                 <div style={{ position: 'relative' }}>
                   <button
@@ -527,8 +532,259 @@ export const Navbar: React.FC<NavbarProps> = ({
               </button>
             </div>
           )}
+
+          {/* Mobile Hamburger Toggle Button */}
+          <button
+            type="button"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="show-on-mobile"
+            style={{
+              width: '40px',
+              height: '40px',
+              borderRadius: '10px',
+              backgroundColor: 'var(--bg-secondary)',
+              border: '1px solid var(--border-subtle)',
+              color: 'var(--text-primary)',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              flexShrink: 0,
+            }}
+            aria-label="Toggle Navigation Menu"
+          >
+            {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+          </button>
         </div>
       </div>
+
+      {/* ── Mobile Navigation Drawer ─────────────────────────────────── */}
+      {mobileMenuOpen && (
+        <div className="mobile-drawer-overlay" onClick={() => setMobileMenuOpen(false)}>
+          <div className="mobile-drawer-content" onClick={(e) => e.stopPropagation()}>
+            {/* Drawer Header */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: '1rem', borderBottom: '1px solid var(--border-subtle)', marginBottom: '1.25rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                <img src="/logo.png" alt="Logo" style={{ width: '28px', height: '28px', borderRadius: '8px' }} />
+                <span style={{ fontWeight: 800, fontSize: '1.1rem', color: 'var(--text-primary)' }}>Waou<span style={{ color: '#2563EB' }}>Fund</span></span>
+              </div>
+              <button
+                onClick={() => setMobileMenuOpen(false)}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: 'var(--text-muted)',
+                  cursor: 'pointer',
+                  padding: '4px',
+                }}
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            {/* User Profile Info if Logged In */}
+            {isLoggedIn && (
+              <div style={{
+                backgroundColor: 'var(--bg-secondary)',
+                borderRadius: '12px',
+                padding: '0.85rem',
+                marginBottom: '1.25rem',
+                border: '1px solid var(--border-subtle)',
+              }}>
+                <div style={{ fontSize: '0.72rem', fontWeight: 800, color: 'var(--text-hint)', textTransform: 'uppercase', marginBottom: '2px' }}>
+                  Authenticated Founder
+                </div>
+                <div style={{ fontSize: '0.92rem', fontWeight: 800, color: 'var(--text-primary)' }}>{userName || 'Founder'}</div>
+                {userEmail && <div style={{ fontSize: '0.76rem', color: 'var(--text-muted)' }}>{userEmail}</div>}
+              </div>
+            )}
+
+            {/* Navigation Mode Switcher */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '1.25rem' }}>
+              <button
+                onClick={() => {
+                  setCurrentView('landing');
+                  setMobileMenuOpen(false);
+                }}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.6rem',
+                  padding: '0.75rem 1rem',
+                  borderRadius: '12px',
+                  border: '1px solid var(--border-subtle)',
+                  backgroundColor: currentView === 'landing' ? 'var(--accent-bg-blue)' : '#FFFFFF',
+                  color: currentView === 'landing' ? 'var(--text-brand)' : 'var(--text-primary)',
+                  fontWeight: 700,
+                  fontSize: '0.9rem',
+                  cursor: 'pointer',
+                  textAlign: 'left',
+                }}
+              >
+                <Globe size={16} />
+                <span>Overview & Product Tour</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  if (isLoggedIn) {
+                    setCurrentView('app');
+                  } else {
+                    onSignIn?.();
+                  }
+                  setMobileMenuOpen(false);
+                }}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.6rem',
+                  padding: '0.75rem 1rem',
+                  borderRadius: '12px',
+                  border: '1px solid var(--border-subtle)',
+                  backgroundColor: currentView === 'app' ? 'var(--accent-bg-blue)' : '#FFFFFF',
+                  color: currentView === 'app' ? 'var(--text-brand)' : 'var(--text-primary)',
+                  fontWeight: 700,
+                  fontSize: '0.9rem',
+                  cursor: 'pointer',
+                  textAlign: 'left',
+                }}
+              >
+                <LayoutDashboard size={16} />
+                <span>Founder Studio Workspace</span>
+                <span style={{
+                  marginLeft: 'auto',
+                  background: 'linear-gradient(135deg, #2563EB 0%, #06B6D4 100%)',
+                  color: '#FFFFFF',
+                  fontSize: '0.62rem',
+                  padding: '1px 6px',
+                  borderRadius: '6px',
+                  fontWeight: 800,
+                }}>
+                  PRO
+                </span>
+              </button>
+            </div>
+
+            {/* Quick Actions */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', marginBottom: '1.5rem' }}>
+              <button
+                onClick={() => {
+                  setActiveAppTab('diagnostic');
+                  setCurrentView('app');
+                  setMobileMenuOpen(false);
+                }}
+                className="btn-cyan"
+                style={{ width: '100%', padding: '0.7rem 1rem', fontSize: '0.88rem' }}
+              >
+                <Sparkles size={15} />
+                <span>Diagnose Pitch Deck</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  openDailyTaskModal();
+                  setMobileMenuOpen(false);
+                }}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.5rem',
+                  padding: '0.7rem 1rem',
+                  borderRadius: 'var(--radius-full)',
+                  backgroundColor: isDailyTaskDone ? 'var(--accent-bg-emerald)' : 'var(--accent-bg-blue)',
+                  border: isDailyTaskDone ? '1px solid rgba(16, 185, 129, 0.3)' : '1px solid rgba(37, 99, 235, 0.2)',
+                  color: isDailyTaskDone ? '#10B981' : '#2563EB',
+                  fontWeight: 700,
+                  fontSize: '0.84rem',
+                  cursor: 'pointer',
+                }}
+              >
+                <ShieldCheck size={15} />
+                <span>{isDailyTaskDone ? 'Daily Directive: Completed' : 'Open Daily AI Directive'}</span>
+              </button>
+            </div>
+
+            {/* Active Venture Picker in Drawer */}
+            <div style={{ marginBottom: 'auto' }}>
+              <div style={{ fontSize: '0.72rem', fontWeight: 800, color: 'var(--text-hint)', letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: '0.5rem' }}>
+                Select Active Dossier
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                {allStartups.map((s, idx) => (
+                  <div
+                    key={s.id}
+                    onClick={() => {
+                      setSelectedStartup(s);
+                      setMobileMenuOpen(false);
+                    }}
+                    style={{
+                      padding: '0.6rem 0.75rem',
+                      borderRadius: '8px',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      backgroundColor: selectedStartup.id === s.id ? 'var(--accent-bg-blue)' : 'var(--bg-secondary)',
+                      color: 'var(--text-primary)',
+                      borderLeft: idx === 0 ? '3px solid #2563EB' : '3px solid transparent',
+                    }}
+                  >
+                    <div>
+                      <div style={{ fontSize: '0.84rem', fontWeight: 700 }}>{s.name}</div>
+                      <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>{s.stage}</div>
+                    </div>
+                    <span style={{ fontSize: '0.75rem', color: '#10B981', fontWeight: 700 }}>{s.fundabilityScore}/100</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Drawer Footer Actions */}
+            <div style={{ paddingTop: '1.25rem', borderTop: '1px solid var(--border-subtle)', marginTop: '1.25rem' }}>
+              {!isLoggedIn ? (
+                <button
+                  onClick={() => {
+                    onSignIn?.();
+                    setMobileMenuOpen(false);
+                  }}
+                  className="btn-primary"
+                  style={{ width: '100%', padding: '0.75rem', fontSize: '0.9rem' }}
+                >
+                  <span>Sign In to Account</span>
+                  <ArrowRight size={15} />
+                </button>
+              ) : (
+                onSignOut && (
+                  <button
+                    onClick={() => {
+                      onSignOut();
+                      setMobileMenuOpen(false);
+                    }}
+                    style={{
+                      width: '100%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '0.5rem',
+                      padding: '0.7rem',
+                      borderRadius: 'var(--radius-full)',
+                      border: '1.5px solid #FEE2E2',
+                      backgroundColor: '#FEF2F2',
+                      color: '#DC2626',
+                      fontWeight: 700,
+                      fontSize: '0.86rem',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    <LogOut size={15} />
+                    <span>Sign Out</span>
+                  </button>
+                )
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </header>
   );
 };

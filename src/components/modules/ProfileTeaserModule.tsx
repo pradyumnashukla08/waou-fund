@@ -45,14 +45,33 @@ export const validateUrl = (url: string) => {
   return pattern.test(url.trim());
 };
 
+export const getSafeExternalUrl = (url?: string): string => {
+  if (!url) return '#';
+  const trimmed = url.trim();
+  if (/^(javascript|data|vbscript):/i.test(trimmed)) {
+    return '#';
+  }
+  if (!/^https?:\/\//i.test(trimmed)) {
+    return `https://${trimmed}`;
+  }
+  return trimmed;
+};
+
 export const ProfileTeaserModule: React.FC<ProfileTeaserModuleProps> = ({
   startup,
   onUpdateStartup,
   evaluation,
 }) => {
-  const [formData, setFormData] = useState<StartupProfile>({
-    ...startup,
-    fullName: startup.fullName || startup.founder || 'Rahul Sharma',
+  const [formData, setFormData] = useState<StartupProfile>(() => {
+    try {
+      const draft = sessionStorage.getItem(`waou_profile_draft_${startup.id}`);
+      if (draft) {
+        return JSON.parse(draft);
+      }
+    } catch {}
+    return {
+      ...startup,
+      fullName: startup.fullName || startup.founder || 'Rahul Sharma',
     role: startup.role || 'CEO & Co-Founder',
     profileImage: startup.profileImage || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&fit=crop&q=80',
     linkedinUrl: startup.linkedinUrl || 'https://linkedin.com/in/rahulsharma-founder',
@@ -108,6 +127,7 @@ export const ProfileTeaserModule: React.FC<ProfileTeaserModuleProps> = ({
     expansionVectors: startup.expansionVectors || ['International Expansion', 'New Product Lines'],
     cSuiteComplete: startup.cSuiteComplete !== undefined ? startup.cSuiteComplete : true,
     marketShare: startup.marketShare || '12',
+    };
   });
 
   const [savedSuccess, setSavedSuccess] = useState(false);
@@ -122,6 +142,15 @@ export const ProfileTeaserModule: React.FC<ProfileTeaserModuleProps> = ({
       setFormData({ ...startup });
     }
   }, [startup]);
+
+  // Auto-save form draft on every input change so accidental page refresh never loses typed data
+  useEffect(() => {
+    try {
+      sessionStorage.setItem(`waou_profile_draft_${startup.id}`, JSON.stringify(formData));
+    } catch {
+      // Ignore storage errors in restricted contexts
+    }
+  }, [formData, startup.id]);
 
   const currencySymbol = (formData.currency || '₹ (INR)').split(' ')[0];
 
@@ -174,8 +203,9 @@ export const ProfileTeaserModule: React.FC<ProfileTeaserModuleProps> = ({
           handleChange(field as keyof StartupProfile, generated);
         }
       }
-    } catch (err) {
-      console.error('AI Assist error:', err);
+    } catch (err: any) {
+      console.warn('AI Assist error:', err);
+      alert(`AI Sparkle Assist: ${err.message || 'AI service could not generate this field. Please fill it manually.'}`);
     } finally {
       setAiGeneratingField(null);
     }
@@ -2260,7 +2290,7 @@ export const ProfileTeaserModule: React.FC<ProfileTeaserModuleProps> = ({
                   <strong style={{ fontSize: '0.92rem', color: '#0F172A', display: 'block' }}>{formData.fullName || formData.founder}</strong>
                   <span style={{ fontSize: '0.78rem', color: '#64748B' }}>{formData.role || 'CEO'}</span>
                   {formData.linkedinUrl && (
-                    <a href={formData.linkedinUrl} target="_blank" rel="noreferrer" style={{ fontSize: '0.75rem', color: '#2563EB', display: 'block', marginTop: '4px' }}>
+                    <a href={getSafeExternalUrl(formData.linkedinUrl)} target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.75rem', color: '#2563EB', display: 'block', marginTop: '4px' }}>
                       LinkedIn Profile ↗
                     </a>
                   )}
@@ -2270,7 +2300,7 @@ export const ProfileTeaserModule: React.FC<ProfileTeaserModuleProps> = ({
                     <strong style={{ fontSize: '0.92rem', color: '#0F172A', display: 'block' }}>{m.name || 'Core Member'}</strong>
                     <span style={{ fontSize: '0.78rem', color: '#64748B' }}>{m.role || 'Engineering / Ops'}</span>
                     {m.linkedin && (
-                      <a href={m.linkedin} target="_blank" rel="noreferrer" style={{ fontSize: '0.75rem', color: '#2563EB', display: 'block', marginTop: '4px' }}>
+                      <a href={getSafeExternalUrl(m.linkedin)} target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.75rem', color: '#2563EB', display: 'block', marginTop: '4px' }}>
                         LinkedIn Profile ↗
                       </a>
                     )}

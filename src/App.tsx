@@ -1,11 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import confetti from 'canvas-confetti';
 import { 
   Flame, 
   ShieldCheck, 
   ArrowRight,
-  Check,
 } from 'lucide-react';
+import { onAuthStateChanged, signOut } from 'firebase/auth';
+import { auth } from './config/firebase';
+import { apiClient } from './services/apiClient';
 import { MOCK_STARTUPS, DEFAULT_EVALUATION, StartupProfile } from './data/defaultData';
 import { EvaluationResult } from './types';
 import { UserRole, ExtractedStartupData } from './types/user';
@@ -14,28 +16,13 @@ import { LandingPage } from './components/LandingPage';
 import { FounderApp } from './components/FounderApp';
 import { AuthScreen } from './components/AuthScreen';
 import { DataRoomOnboarding } from './components/DataRoomOnboarding';
+import { updatePageSeo } from './utils/seo';
 
 // ─── App view states ────────────────────────────────────────────────
 type AppView = 'landing' | 'auth' | 'dataroom' | 'app';
 
-// ─── Real User Startup & Persistence Helpers ────────────────────────
-const getInitialUser = () => {
-  try {
-    const saved = localStorage.getItem('@waoufund_active_user');
-    if (saved) return JSON.parse(saved);
-  } catch {}
-  return null;
-};
-
-const getInitialStartup = (user: any): StartupProfile => {
-  try {
-    const saved = localStorage.getItem('@waoufund_active_startup');
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      if (parsed && parsed.name) return parsed;
-    }
-  } catch {}
-
+// ─── Helper to build a clean starter profile for a founder ──────────
+const getInitialStartup = (user?: { name?: string; email?: string } | null): StartupProfile => {
   const founderName = user?.name || 'Founder';
   const founderEmail = user?.email || 'founder@startup.com';
   const company = user?.name ? `${user.name}'s Venture` : 'My Venture';
@@ -109,17 +96,80 @@ const getInitialStartup = (user: any): StartupProfile => {
 };
 
 export default function App() {
-  const initialUser = getInitialUser();
-  const [userName, setUserName] = useState<string>(initialUser?.name || '');
-  const [userEmail, setUserEmail] = useState<string>(initialUser?.email || '');
-  const [userRole, setUserRole] = useState<UserRole>(initialUser?.role || 'founder');
+  const [userName, setUserName] = useState<string>('');
+  const [userEmail, setUserEmail] = useState<string>('');
+  const [userRole, setUserRole] = useState<UserRole>('founder');
 
-  const [currentView, setCurrentView] = useState<AppView>(initialUser ? 'app' : 'landing');
-  const [activeAppTab, setActiveAppTab] = useState<string>('dashboard');
+  const [currentView, setCurrentView] = useState<AppView>(() => {
+    try {
+      if (typeof window !== 'undefined') {
+        const params = new URLSearchParams(window.location.search);
+        const viewParam = params.get('view');
+        const tabParam = params.get('tab');
+        if (viewParam === 'auth') return 'auth';
+        if (viewParam === 'dataroom') return 'dataroom';
+        if (viewParam === 'diagnostic' || tabParam) return 'app';
+      }
+      const saved = sessionStorage.getItem('waou_current_view') as AppView;
+      return (saved === 'app' || saved === 'dataroom' || saved === 'auth') ? saved : 'landing';
+    } catch {
+      return 'landing';
+    }
+  });
 
-  const [selectedStartup, setSelectedStartup] = useState<StartupProfile>(() => getInitialStartup(initialUser));
+  const [activeAppTab, setActiveAppTab] = useState<string>(() => {
+    try {
+      if (typeof window !== 'undefined') {
+        const params = new URLSearchParams(window.location.search);
+        const tabParam = params.get('tab');
+        const viewParam = params.get('view');
+        if (tabParam) return tabParam;
+        if (viewParam === 'diagnostic') return 'diagnostic';
+      }
+      return sessionStorage.getItem('waou_active_tab') || 'dashboard';
+    } catch {
+      return 'dashboard';
+    }
+  });
+
+  // Keep non-sensitive UI routing states synchronized with session storage
+  useEffect(() => {
+    try {
+      sessionStorage.setItem('waou_current_view', currentView);
+    } catch {
+      // Ignore storage errors in restricted contexts
+    }
+  }, [currentView]);
+
+  useEffect(() => {
+    try {
+      sessionStorage.setItem('waou_active_tab', activeAppTab);
+    } catch {
+      // Ignore storage errors in restricted contexts
+    }
+  }, [activeAppTab]);
+
+  // Synchronize dynamic SEO metadata, Open Graph, and canonical URLs on every route transition
+  useEffect(() => {
+    updatePageSeo(currentView, activeAppTab);
+  }, [currentView, activeAppTab]);
+
+  const [selectedStartup, setSelectedStartup] = useState<StartupProfile>(() => {
+    try {
+      const draft = sessionStorage.getItem('waou_selected_startup_draft');
+      if (draft) return JSON.parse(draft);
+    } catch {}
+    return getInitialStartup(null);
+  });
+
+  useEffect(() => {
+    try {
+      sessionStorage.setItem('waou_selected_startup_draft', JSON.stringify(selectedStartup));
+    } catch {}
+  }, [selectedStartup]);
+
   const [allStartups, setAllStartups] = useState<StartupProfile[]>(() => {
-    const active = getInitialStartup(initialUser);
+    const active = getInitialStartup(null);
     return [active, ...MOCK_STARTUPS.filter(s => s.id !== active.id)];
   });
   const [evaluation, setEvaluation] = useState<EvaluationResult>(DEFAULT_EVALUATION);
@@ -129,6 +179,44 @@ export default function App() {
   const [isDailyTaskDone, setIsDailyTaskDone] = useState<boolean>(false);
   const [showStreakModal, setShowStreakModal] = useState<boolean>(false);
   const [showDailyTaskModal, setShowDailyTaskModal] = useState<boolean>(false);
+
+  // ─── Firebase Auth Session Observer ──────────────────────────────────
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      if (firebaseUser) {
+        const name = firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'Founder';
+        const email = firebaseUser.email || '';
+        setUserName(name);
+        setUserEmail(email);
+
+        // Fetch user's server-authoritative startup profile
+        try {
+          const res = await apiClient.get<{ success: boolean; profile: StartupProfile | null }>('/startup/profile');
+          if (res && res.success && res.profile) {
+            setSelectedStartup(res.profile);
+            setAllStartups([res.profile, ...MOCK_STARTUPS.filter(s => s.id !== res.profile!.id)]);
+          } else {
+            // First time login: seed default profile for this user
+            const fresh = getInitialStartup({ name, email });
+            setSelectedStartup(fresh);
+            setAllStartups([fresh, ...MOCK_STARTUPS.filter(s => s.id !== fresh.id)]);
+            apiClient.put('/startup/profile', fresh).catch(err => {
+              console.warn('[App] Initial profile sync warning:', err);
+            });
+          }
+        } catch (err) {
+          console.warn('[App] Could not load profile from backend, using session state:', err);
+        }
+      } else {
+        setUserName('');
+        setUserEmail('');
+        // If unauthenticated, redirect away from protected views back to landing
+        setCurrentView(prev => (prev === 'app' || prev === 'dataroom' ? 'landing' : prev));
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   const toggleDailyTask = () => {
     if (!isDailyTaskDone) {
@@ -146,24 +234,24 @@ export default function App() {
   const handleUpdateStartup = (updated: StartupProfile) => {
     setSelectedStartup(updated);
     setAllStartups(prev => prev.map((s) => (s.id === updated.id ? updated : s)));
-    try {
-      localStorage.setItem('@waoufund_active_startup', JSON.stringify(updated));
-    } catch {}
+
+    // Persist to server if authenticated
+    if (auth.currentUser) {
+      apiClient.put('/startup/profile', updated).catch(err => {
+        console.warn('[App] Failed to persist startup update to backend:', err);
+      });
+    }
   };
 
   const handleUpdateEvaluation = (res: EvaluationResult) => {
     setEvaluation(res);
   };
 
-  // ─── Auth completion: real user logged in and selected role ───────
+  // ─── Auth completion: genuine user authenticated with role ─────────
   const handleAuthComplete = (email: string, name: string, role: UserRole) => {
     setUserEmail(email);
     setUserName(name);
     setUserRole(role);
-
-    try {
-      localStorage.setItem('@waoufund_active_user', JSON.stringify({ email, name, role }));
-    } catch {}
 
     // Synchronize startup with the real founder's name and email
     setSelectedStartup(prev => {
@@ -175,10 +263,15 @@ export default function App() {
         name: prev.name.includes('AvasPlot') ? `${name}'s Venture` : prev.name,
         companyName: prev.companyName?.includes('AvasPlot') ? `${name}'s Venture` : prev.companyName,
       };
-      setAllStartups(all => [updated, ...MOCK_STARTUPS]);
-      try {
-        localStorage.setItem('@waoufund_active_startup', JSON.stringify(updated));
-      } catch {}
+      setAllStartups([updated, ...MOCK_STARTUPS]);
+
+      // Save to server
+      if (auth.currentUser) {
+        apiClient.put('/startup/profile', updated).catch(err => {
+          console.warn('[App] Profile persist on auth complete error:', err);
+        });
+      }
+
       return updated;
     });
 
@@ -211,10 +304,14 @@ export default function App() {
     };
 
     setSelectedStartup(merged);
-    setAllStartups(prev => [merged, ...MOCK_STARTUPS]);
-    try {
-      localStorage.setItem('@waoufund_active_startup', JSON.stringify(merged));
-    } catch {}
+    setAllStartups([merged, ...MOCK_STARTUPS]);
+
+    // Persist to server
+    if (auth.currentUser) {
+      apiClient.put('/startup/profile', merged).catch(err => {
+        console.warn('[App] Profile persist on dataroom complete error:', err);
+      });
+    }
 
     if (extractedData.fundingReadinessBreakdown) {
       const bd = extractedData.fundingReadinessBreakdown;
@@ -248,12 +345,19 @@ export default function App() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // ─── Sign Out / Reset session ────────────────────────────────────
-  const handleSignOut = () => {
+  // ─── Sign Out / Reset session via Firebase Auth ──────────────────
+  const handleSignOut = async () => {
     try {
-      localStorage.removeItem('@waoufund_active_user');
-      localStorage.removeItem('@waoufund_active_startup');
-    } catch {}
+      await signOut(auth);
+    } catch (err) {
+      console.warn('[App] SignOut error:', err);
+    }
+    try {
+      sessionStorage.removeItem('waou_current_view');
+      sessionStorage.removeItem('waou_active_tab');
+    } catch {
+      // Ignore storage errors in restricted contexts
+    }
     setUserName('');
     setUserEmail('');
     setUserRole('founder');
@@ -341,11 +445,20 @@ export default function App() {
           {currentView === 'landing' ? (
             <LandingPage 
               onGetStarted={() => {
-                setCurrentView('auth');
+                if (userName) {
+                  setCurrentView('app');
+                } else {
+                  setCurrentView('auth');
+                }
                 window.scrollTo({ top: 0, behavior: 'smooth' });
               }}
               onOpenDiagnostic={() => {
-                setCurrentView('auth');
+                if (userName) {
+                  setCurrentView('app');
+                  setActiveAppTab('diagnostic');
+                } else {
+                  setCurrentView('auth');
+                }
                 window.scrollTo({ top: 0, behavior: 'smooth' });
               }}
               selectedStartup={selectedStartup}

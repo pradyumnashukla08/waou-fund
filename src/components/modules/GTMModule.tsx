@@ -24,9 +24,21 @@ export const GTMModule: React.FC<GTMModuleProps> = ({ startup, evaluation }) => 
 
   const [experiments, setExperiments] = useState<GTMExperiment[]>(gtm.experiments);
   const [selectedExp, setSelectedExp] = useState<GTMExperiment | null>(null);
-  const [proofText, setProofText] = useState('');
+  const [proofText, setProofText] = useState(() => {
+    try {
+      return sessionStorage.getItem('waou_gtm_proof') || '';
+    } catch {
+      return '';
+    }
+  });
   const [isVerifying, setIsVerifying] = useState(false);
   const [verifyMessage, setVerifyMessage] = useState<string | null>(null);
+
+  React.useEffect(() => {
+    try {
+      sessionStorage.setItem('waou_gtm_proof', proofText);
+    } catch {}
+  }, [proofText]);
 
   const handleVerify = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -289,8 +301,8 @@ export const GTMModule: React.FC<GTMModuleProps> = ({ startup, evaluation }) => 
                 required
                 style={{
                   width: '100%',
-                  backgroundColor: 'rgba(2, 4, 10, 0.7)',
-                  border: '1px solid rgba(37, 99, 235, 0.15)',
+                  backgroundColor: 'var(--bg-secondary)',
+                  border: '1px solid var(--border-subtle)',
                   borderRadius: '12px',
                   padding: '1rem',
                   color: 'var(--text-primary)',

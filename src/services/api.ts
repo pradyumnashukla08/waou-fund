@@ -2,10 +2,11 @@ import { EvaluationResult, ClarityVerdict } from '../types';
 import { DEFAULT_EVALUATION, StartupProfile } from '../data/defaultData';
 import { liveAiService } from './liveAiService';
 import { ExtractedStartupData, UploadedFile } from '../types/user';
+import { apiClient, formatUserFacingError } from './apiClient';
 
 export const api = {
   /**
-   * Live AI Advisory Assistant powered by Google Gemini Intelligence
+   * Live AI Advisory Assistant powered by backend AI endpoint
    */
   async askAI(question: string, context?: any): Promise<string> {
     return await liveAiService.askAI(question, context || {
@@ -27,21 +28,33 @@ export const api = {
    * Real AI evaluation for uploaded Pitch Decks & Diligence Documents
    */
   async evaluateDeck(fileName: string, fileSize: string, stage: string = 'Seed'): Promise<EvaluationResult> {
-    // Uses document intelligence pipeline
-    const extracted = await liveAiService.extractDocumentsIntelligence([
-      { id: '1', name: fileName, size: 5 * 1024 * 1024, type: 'application/pdf', uploadedAt: new Date().toISOString(), status: 'analyzed' }
-    ]);
+    try {
+      const response = await apiClient.post<{ success: boolean; result: any }>('/ai/evaluate-deck', {
+        fileName,
+        fileSize,
+        stage,
+      });
 
-    return {
-      ...DEFAULT_EVALUATION,
-      overall_score: extracted.fundingReadiness || 86,
-      team_score: extracted.fundingReadinessBreakdown?.teamScore || 88,
-      market_score: extracted.fundingReadinessBreakdown?.marketScore || 84,
-      execution_score: extracted.fundingReadinessBreakdown?.tractionScore || 82,
-      product_score: extracted.fundingReadinessBreakdown?.productScore || 86,
-      red_flags: extracted.redFlags || DEFAULT_EVALUATION.red_flags,
-      stage_advice: extracted.investorRecommendation || `Uploaded document "${fileName}" (${fileSize}) analyzed. Problem-solution alignment verified in top quartile. Focus revisions on distribution defensibility.`,
-    };
+      if (response && response.success && response.result?.overall_score) {
+        const r = response.result;
+        return {
+          ...DEFAULT_EVALUATION,
+          overall_score: r.overall_score,
+          team_score: r.team_score || 88,
+          market_score: r.market_score || 84,
+          execution_score: r.execution_score || 82,
+          product_score: r.product_score || 86,
+          traction_score: r.traction_score || 80,
+          red_flags: r.red_flags || DEFAULT_EVALUATION.red_flags,
+          daily_tasks: r.daily_tasks || DEFAULT_EVALUATION.daily_tasks,
+          stage_advice: r.stage_advice || DEFAULT_EVALUATION.stage_advice,
+        };
+      }
+      throw new Error('Deck diagnostic returned incomplete evaluation data.');
+    } catch (err: unknown) {
+      console.warn('[api] Backend /ai/evaluate-deck failed:', err);
+      throw new Error(formatUserFacingError(err));
+    }
   },
 
   /**
@@ -68,7 +81,7 @@ export const api = {
     return {
       success: true,
       scoreDelta: 3,
-      message: `AI Evaluator verified sprint "${title}". Real-world validation metrics recorded. Fundability rating boosted by +3 points!`,
+      message: `Sprint "${title}" verified with proof submitted.`,
     };
   },
 };

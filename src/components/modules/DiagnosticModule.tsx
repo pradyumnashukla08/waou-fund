@@ -9,11 +9,14 @@ import {
   RefreshCw, 
   Info,
   ShieldCheck,
-  Layers
+  Layers,
+  AlertCircle
 } from 'lucide-react';
 import { EvaluationResult } from '../../types';
 import { StartupProfile } from '../../data/defaultData';
 import { api } from '../../services/api';
+import { getAIPromptForStage } from '../../services/aiPromptMatrix';
+import { generateActionSteps } from '../../utils/remediationMapper';
 
 interface DiagnosticModuleProps {
   startup?: StartupProfile;
@@ -33,8 +36,21 @@ export const DiagnosticModule: React.FC<DiagnosticModuleProps> = ({
   const defaultDeckName = startup?.pitchDeckUrl 
     ? (startup.pitchDeckUrl.split('/').pop() || `${startup.name.replace(/\s+/g, '_')}_Pitch_Deck.pdf`)
     : `${startup?.name ? startup.name.replace(/\s+/g, '_') : 'My_Startup'}_Pitch_Deck.pdf`;
-  const [activeFileName, setActiveFileName] = useState(defaultDeckName);
+  const [activeFileName, setActiveFileName] = useState(() => {
+    try {
+      return sessionStorage.getItem('waou_diag_file') || defaultDeckName;
+    } catch {
+      return defaultDeckName;
+    }
+  });
   const [selectedFinding, setSelectedFinding] = useState<number | null>(null);
+  const [scanError, setScanError] = useState<string | null>(null);
+
+  React.useEffect(() => {
+    try {
+      sessionStorage.setItem('waou_diag_file', activeFileName);
+    } catch {}
+  }, [activeFileName]);
 
   const scanSteps = [
     'Vectorizing Slide Geometry & Text Nodes...',
@@ -46,6 +62,7 @@ export const DiagnosticModule: React.FC<DiagnosticModuleProps> = ({
 
   const handleSimulateScan = async (fileName = defaultDeckName, fileSize = '8.4 MB') => {
     setIsScanning(true);
+    setScanError(null);
     setActiveFileName(fileName);
     setScanStep(0);
 
@@ -54,9 +71,15 @@ export const DiagnosticModule: React.FC<DiagnosticModuleProps> = ({
       await new Promise((r) => setTimeout(r, 600));
     }
 
-    const updated = await api.evaluateDeck(fileName, fileSize);
-    onUpdateEvaluation(updated);
-    setIsScanning(false);
+    try {
+      const updated = await api.evaluateDeck(fileName, fileSize, startup?.stage || 'Seed');
+      onUpdateEvaluation(updated);
+    } catch (err: any) {
+      console.warn('Diagnostic evaluation error:', err);
+      setScanError(err.message || 'Deck diagnostic service is currently unavailable. Please retry.');
+    } finally {
+      setIsScanning(false);
+    }
   };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -75,13 +98,16 @@ export const DiagnosticModule: React.FC<DiagnosticModuleProps> = ({
     return 'C';
   };
 
-  const findings = evaluation.red_flags.map((flag, idx) => ({
+  const aiPrompt = getAIPromptForStage(startup?.stage || 'Seed');
+  const actionSteps = generateActionSteps(evaluation.red_flags);
+  const findings = actionSteps.map((step, idx) => ({
     id: idx + 1,
-    title: idx === 0 ? 'CRITICAL NARRATIVE VULNERABILITY' : 'BENCHMARK GAP IDENTIFIED',
+    title: step.title.toUpperCase(),
     severity: idx === 0 ? 'CRITICAL' : 'WARNING',
     color: idx === 0 ? '#EF4444' : '#F59E0B',
-    desc: flag,
-    fix: 'Address this finding directly in your pitch narrative and appendix slide model.',
+    desc: step.task,
+    fix: step.fix,
+    category: step.type,
   }));
 
   return (
@@ -114,6 +140,65 @@ export const DiagnosticModule: React.FC<DiagnosticModuleProps> = ({
           Our AI engine parses your deck against 10,000+ funded seed presentations, identifying narrative bloat, missing financial bridges, and unit economic vulnerabilities.
         </p>
       </div>
+
+      {/* ── ACTIVE AI EVALUATOR CARD ────────────────────────────── */}
+      <div style={{
+        backgroundColor: 'var(--bg-card)',
+        borderRadius: '16px',
+        padding: '1.25rem 1.5rem',
+        border: '1px solid rgba(56, 189, 248, 0.25)',
+        background: 'linear-gradient(135deg, rgba(56, 189, 248, 0.05) 0%, rgba(30, 41, 59, 0.25) 100%)',
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <span style={{ display: 'inline-block', width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#38BDF8', boxShadow: '0 0 8px #38BDF8' }} />
+            <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#38BDF8', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+              ACTIVE AI EVALUATOR ({(startup?.stage || 'SEED').toUpperCase()})
+            </span>
+          </div>
+          <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 600 }}>
+            Model: Gemini Flash • Zero Synthetic Fallbacks
+          </span>
+        </div>
+        <div style={{ fontSize: '0.86rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.3rem' }}>
+          Persona: {aiPrompt.persona}
+        </div>
+        <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '0.25rem', lineHeight: 1.5 }}>
+          <strong style={{ color: 'var(--text-primary)' }}>Focus Rules:</strong> {aiPrompt.rules}
+        </div>
+        <div style={{ fontSize: '0.8rem', color: '#F87171', lineHeight: 1.5 }}>
+          <strong style={{ color: '#EF4444' }}>Red Flag Sensitivity:</strong> {aiPrompt.redFlags}
+        </div>
+      </div>
+
+      {scanError && (
+        <div style={{
+          backgroundColor: '#FEF2F2',
+          border: '1px solid #FCA5A5',
+          borderRadius: '16px',
+          padding: '1.25rem 1.5rem',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: '1rem',
+          color: '#991B1B',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <AlertCircle size={22} color="#DC2626" style={{ flexShrink: 0 }} />
+            <div>
+              <div style={{ fontWeight: 800, fontSize: '0.94rem' }}>Deck Diagnostic Notice</div>
+              <div style={{ fontSize: '0.85rem', color: '#B91C1C' }}>{scanError}</div>
+            </div>
+          </div>
+          <button
+            onClick={() => handleSimulateScan(activeFileName, '12.4 MB')}
+            className="btn-cyan"
+            style={{ padding: '0.5rem 1rem', fontSize: '0.82rem', whiteSpace: 'nowrap' }}
+          >
+            Retry Scan
+          </button>
+        </div>
+      )}
 
       {/* ── File Upload / Scan Trigger Bar ────────────────────────────── */}
       <div className="card-elevated" style={{
@@ -242,7 +327,7 @@ export const DiagnosticModule: React.FC<DiagnosticModuleProps> = ({
         alignItems: 'center',
       }}>
         {/* Left: Overall Readiness & Grade */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1.75rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', flexWrap: 'wrap' }}>
           <div style={{
             width: '88px',
             height: '88px',
@@ -266,7 +351,7 @@ export const DiagnosticModule: React.FC<DiagnosticModuleProps> = ({
             <div style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-brand)', letterSpacing: '0.06em' }}>
               OVERALL AI READINESS SCORE
             </div>
-            <div style={{ fontSize: '2rem', fontWeight: 900, color: '#FFFFFF', fontFamily: 'var(--font-mono)' }}>
+            <div style={{ fontSize: '2rem', fontWeight: 900, color: 'var(--text-primary)', fontFamily: 'var(--font-mono)' }}>
               {evaluation.overall_score} <span style={{ fontSize: '1rem', color: 'var(--text-muted)' }}>/ 100</span>
             </div>
             <div style={{ fontSize: '0.82rem', color: '#10B981', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px' }}>
@@ -279,7 +364,7 @@ export const DiagnosticModule: React.FC<DiagnosticModuleProps> = ({
         {/* Right: Vectorized Dimensions */}
         <div style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(3, 1fr)',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(90px, 1fr))',
           gap: '1rem',
         }}>
           <div style={{ backgroundColor: 'var(--bg-secondary)', padding: '0.85rem', borderRadius: '12px', border: '1px solid rgba(255, 255, 255, 0.05)' }}>

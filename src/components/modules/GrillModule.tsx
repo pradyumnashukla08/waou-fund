@@ -13,7 +13,8 @@ import {
   CheckCircle2, 
   HelpCircle,
   Award,
-  Volume2
+  Volume2,
+  AlertCircle
 } from 'lucide-react';
 import { StartupProfile, AI_INVESTOR_ROUNDS } from '../../data/defaultData';
 import { ClarityVerdict, QAPair } from '../../types';
@@ -25,15 +26,74 @@ interface GrillModuleProps {
 }
 
 export const GrillModule: React.FC<GrillModuleProps> = ({ startup, setActiveTab }) => {
-  const [phase, setPhase] = useState<'lobby' | 'drilling' | 'verdict'>('lobby');
-  const [currentRoundIdx, setCurrentRoundIdx] = useState(0);
-  const [currentQuestionIdx, setCurrentQuestionIdx] = useState(0);
-  const [currentAnswer, setCurrentAnswer] = useState('');
-  const [qaHistory, setQaHistory] = useState<QAPair[]>([]);
+  const [phase, setPhase] = useState<'lobby' | 'drilling' | 'verdict'>(() => {
+    try {
+      return (sessionStorage.getItem('waou_grill_phase') as any) || 'lobby';
+    } catch {
+      return 'lobby';
+    }
+  });
+  const [currentRoundIdx, setCurrentRoundIdx] = useState<number>(() => {
+    try {
+      const saved = sessionStorage.getItem('waou_grill_round');
+      return saved ? parseInt(saved, 10) : 0;
+    } catch {
+      return 0;
+    }
+  });
+  const [currentQuestionIdx, setCurrentQuestionIdx] = useState<number>(() => {
+    try {
+      const saved = sessionStorage.getItem('waou_grill_question');
+      return saved ? parseInt(saved, 10) : 0;
+    } catch {
+      return 0;
+    }
+  });
+  const [currentAnswer, setCurrentAnswer] = useState<string>(() => {
+    try {
+      return sessionStorage.getItem('waou_grill_answer') || '';
+    } catch {
+      return '';
+    }
+  });
+  const [qaHistory, setQaHistory] = useState<QAPair[]>(() => {
+    try {
+      const saved = sessionStorage.getItem('waou_grill_history');
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
   const [isRecording, setIsRecording] = useState(false);
   const [recordingSeconds, setRecordingSeconds] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
-  const [verdict, setVerdict] = useState<ClarityVerdict | null>(null);
+  const [verdict, setVerdict] = useState<ClarityVerdict | null>(() => {
+    try {
+      const saved = sessionStorage.getItem('waou_grill_verdict');
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
+    }
+  });
+  const [evalError, setEvalError] = useState<string | null>(null);
+
+  // Synchronize grill state to sessionStorage so accidental refresh never restarts interrogation
+  useEffect(() => {
+    try {
+      sessionStorage.setItem('waou_grill_phase', phase);
+      sessionStorage.setItem('waou_grill_round', String(currentRoundIdx));
+      sessionStorage.setItem('waou_grill_question', String(currentQuestionIdx));
+      sessionStorage.setItem('waou_grill_answer', currentAnswer);
+      sessionStorage.setItem('waou_grill_history', JSON.stringify(qaHistory));
+      if (verdict) {
+        sessionStorage.setItem('waou_grill_verdict', JSON.stringify(verdict));
+      } else {
+        sessionStorage.removeItem('waou_grill_verdict');
+      }
+    } catch {
+      // Ignore storage errors in restricted contexts
+    }
+  }, [phase, currentRoundIdx, currentQuestionIdx, currentAnswer, qaHistory, verdict]);
 
   const rounds = AI_INVESTOR_ROUNDS;
   const currentRound = rounds[currentRoundIdx];
@@ -59,6 +119,14 @@ export const GrillModule: React.FC<GrillModuleProps> = ({ startup, setActiveTab 
     setQaHistory([]);
     setCurrentAnswer('');
     setVerdict(null);
+    try {
+      sessionStorage.removeItem('waou_grill_phase');
+      sessionStorage.removeItem('waou_grill_round');
+      sessionStorage.removeItem('waou_grill_question');
+      sessionStorage.removeItem('waou_grill_answer');
+      sessionStorage.removeItem('waou_grill_history');
+      sessionStorage.removeItem('waou_grill_verdict');
+    } catch {}
   };
 
   const handleToggleRecord = () => {
@@ -96,13 +164,20 @@ export const GrillModule: React.FC<GrillModuleProps> = ({ startup, setActiveTab 
     } else {
       // Completed all rounds -> Generate Verdict
       setIsLoading(true);
-      const res = await api.evaluateInvestorAnswer(
-        updatedHistory.map((item) => ({ question: item.question, answer: item.answer || '' })),
-        startup
-      );
-      setVerdict(res);
-      setIsLoading(false);
-      setPhase('verdict');
+      setEvalError(null);
+      try {
+        const res = await api.evaluateInvestorAnswer(
+          updatedHistory.map((item) => ({ question: item.question, answer: item.answer || '' })),
+          startup
+        );
+        setVerdict(res);
+        setPhase('verdict');
+      } catch (err: any) {
+        console.warn('Investor grill evaluation error:', err);
+        setEvalError(err.message || 'Investor grill evaluation is currently offline.');
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
@@ -122,12 +197,18 @@ export const GrillModule: React.FC<GrillModuleProps> = ({ startup, setActiveTab 
       setCurrentQuestionIdx(0);
     } else {
       setIsLoading(true);
+      setEvalError(null);
       api.evaluateInvestorAnswer(
-        updatedHistory.map((item) => ({ question: item.question, answer: item.answer || '' }))
+        updatedHistory.map((item) => ({ question: item.question, answer: item.answer || '' })),
+        startup
       ).then((res) => {
         setVerdict(res);
-        setIsLoading(false);
         setPhase('verdict');
+      }).catch((err: any) => {
+        console.warn('Investor grill evaluation error:', err);
+        setEvalError(err.message || 'Investor grill evaluation is currently offline.');
+      }).finally(() => {
+        setIsLoading(false);
       });
     }
   };
@@ -162,6 +243,52 @@ export const GrillModule: React.FC<GrillModuleProps> = ({ startup, setActiveTab 
           Test your verbal pitch conviction, financial defenses, and stage readiness with ruthless VC questioning before you step into real partner meetings.
         </p>
       </div>
+
+      {evalError && (
+        <div style={{
+          backgroundColor: '#FEF2F2',
+          border: '1px solid #FCA5A5',
+          borderRadius: '16px',
+          padding: '1.25rem 1.5rem',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: '1rem',
+          color: '#991B1B',
+          maxWidth: '850px',
+          margin: '0 auto',
+          width: '100%',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <AlertCircle size={22} color="#DC2626" style={{ flexShrink: 0 }} />
+            <div>
+              <div style={{ fontWeight: 800, fontSize: '0.94rem' }}>AI Partner Evaluator Notice</div>
+              <div style={{ fontSize: '0.85rem', color: '#B91C1C' }}>{evalError}</div>
+            </div>
+          </div>
+          <button
+            onClick={() => {
+              setEvalError(null);
+              setIsLoading(true);
+              api.evaluateInvestorAnswer(
+                qaHistory.map((item) => ({ question: item.question, answer: item.answer || '' })),
+                startup
+              ).then((res) => {
+                setVerdict(res);
+                setPhase('verdict');
+              }).catch((err: any) => {
+                setEvalError(err.message || 'Retry failed. AI service is currently unreachable.');
+              }).finally(() => {
+                setIsLoading(false);
+              });
+            }}
+            className="btn-cyan"
+            style={{ padding: '0.5rem 1rem', fontSize: '0.82rem', whiteSpace: 'nowrap' }}
+          >
+            Retry Analysis
+          </button>
+        </div>
+      )}
 
       {/* ── PHASE 1: LOBBY ─────────────────────────────────────────────── */}
       {phase === 'lobby' && (
@@ -358,8 +485,8 @@ export const GrillModule: React.FC<GrillModuleProps> = ({ startup, setActiveTab 
                 rows={4}
                 style={{
                   width: '100%',
-                  backgroundColor: 'rgba(2, 4, 10, 0.7)',
-                  border: '1px solid rgba(37, 99, 235, 0.15)',
+                  backgroundColor: 'var(--bg-secondary)',
+                  border: '1px solid var(--border-subtle)',
                   borderRadius: '12px',
                   padding: '1rem',
                   color: 'var(--text-primary)',

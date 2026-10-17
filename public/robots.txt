@@ -1,0 +1,10 @@
+# WaouFund Production Robots Policy
+User-agent: *
+Allow: /
+Allow: /sitemap.xml
+Disallow: /api/
+Disallow: /admin/
+Disallow: /private/
+
+# Sitemaps
+Sitemap: https://waoufund.com/sitemap.xml

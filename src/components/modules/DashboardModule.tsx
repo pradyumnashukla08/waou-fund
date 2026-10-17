@@ -164,7 +164,7 @@ export const DashboardModule: React.FC<DashboardModuleProps> = ({
           zIndex: 1,
         }}>
           {/* Circular SVG Gauge */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', flexWrap: 'wrap' }}>
             <div style={{ position: 'relative', width: '150px', height: '150px', flexShrink: 0 }}>
               <svg width="150" height="150" viewBox="0 0 160 160">
                 <circle cx="80" cy="80" r="64" stroke="var(--border-subtle)" strokeWidth="14" fill="transparent" />

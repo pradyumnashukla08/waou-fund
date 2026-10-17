@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {
   Upload, FileText, CheckCircle2, AlertCircle, ArrowRight,
   Sparkles, Loader2, X, Eye, FileSpreadsheet, Presentation
@@ -14,7 +14,7 @@ interface DataRoomOnboardingProps {
   onSkip: () => void;
 }
 
-type AnalysisPhase = 'upload' | 'analyzing' | 'results';
+type AnalysisPhase = 'upload' | 'analyzing' | 'results' | 'error';
 
 const ACCEPTED_TYPES = [
   'application/pdf',
@@ -41,93 +41,57 @@ function formatFileSize(bytes: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
-/** Real AI document analysis using live Gemini pipeline & backend */
-async function analyzeDocumentLocally(files: UploadedFile[]): Promise<ExtractedStartupData> {
-  try {
-    const aiResult = await liveAiService.extractDocumentsIntelligence(files);
-    if (aiResult && aiResult.companyName) {
-      return aiResult;
-    }
-  } catch (err) {
-    console.error('liveAiService extraction failed, using fallback:', err);
-  }
-
-  // Fallback to intelligent local parsing below
-
-  // Intelligent local simulation based on file names & types
-  const fileNames = files.map(f => f.name.toLowerCase()).join(' ');
-  const hasPitchDeck = fileNames.includes('pitch') || fileNames.includes('deck') || fileNames.includes('.pptx') || fileNames.includes('.ppt');
-  const hasFinancials = fileNames.includes('financ') || fileNames.includes('model') || fileNames.includes('.xlsx') || fileNames.includes('forecast');
-  const hasBizPlan = fileNames.includes('business') || fileNames.includes('plan') || fileNames.includes('.pdf');
-
-  const baseScore = 52;
-  const pitchBonus = hasPitchDeck ? 18 : 0;
-  const finBonus = hasFinancials ? 16 : 0;
-  const planBonus = hasBizPlan ? 8 : 0;
-  const totalScore = Math.min(94, baseScore + pitchBonus + finBonus + planBonus);
-
-  const companyName = files[0]?.name
-    .replace(/\.(pdf|pptx?|xlsx?|docx?)$/i, '')
-    .replace(/[-_]/g, ' ')
-    .replace(/\b\w/g, l => l.toUpperCase())
-    .split(' ').slice(0, 3).join(' ') || 'Your Startup';
-
-  return {
-    companyName,
-    tagline: hasPitchDeck ? 'Extracted from pitch deck — update with your one-liner' : 'Update your company tagline',
-    stage: hasFinancials ? 'Seed' : 'Pre-Seed',
-    sector: 'Technology / SaaS',
-    askAmount: hasFinancials ? '₹2–5 Cr' : 'Not detected',
-    mrr: hasFinancials ? '₹8.5L' : 'Not detected',
-    arr: hasFinancials ? '₹1.02 Cr' : 'Not detected',
-    teamSize: 5,
-    foundedYear: '2024',
-    location: 'India',
-    businessModel: hasBizPlan ? 'SaaS subscription with usage-based tiers' : 'Not detected',
-    revenueModel: hasFinancials ? 'Monthly & Annual Subscriptions (ARR Model)' : 'Not detected',
-    targetMarket: 'B2B startups & growth-stage companies',
-    tam: '₹45,000 Cr',
-    sam: '₹8,200 Cr',
-    som: '₹480 Cr (3-year target)',
-    keyMetrics: [
-      hasPitchDeck ? '✓ Pitch deck detected & parsed' : '⚠ No pitch deck uploaded',
-      hasFinancials ? '✓ Financial model detected & parsed' : '⚠ No financial model uploaded',
-      hasBizPlan ? '✓ Business plan detected & parsed' : '⚠ No business plan uploaded',
-    ],
-    redFlags: [
-      ...(hasFinancials ? [] : ['Financial model not uploaded — investors need 3-year P&L']),
-      ...(hasPitchDeck ? [] : ['Pitch deck not uploaded — required for deck diagnostic']),
-      'Unit economics (CAC, LTV, payback) not yet verified',
-    ].filter(Boolean),
-    strengths: [
-      ...(files.length >= 2 ? ['Multiple supporting documents uploaded — strong diligence preparation'] : []),
-      ...(hasPitchDeck ? ['Pitch deck available for AI Investor Grill simulation'] : []),
-      ...(hasFinancials ? ['Financial model available for 5-year scenario analysis'] : []),
-    ],
-    fundingReadiness: totalScore,
-    fundingReadinessBreakdown: {
-      teamScore: 70 + (files.length * 5),
-      marketScore: 65 + (hasBizPlan ? 20 : 0),
-      tractionScore: 55 + (hasFinancials ? 25 : 0),
-      financialScore: hasFinancials ? 78 : 42,
-      productScore: 68 + (hasPitchDeck ? 15 : 0),
-    },
-    summary: `AI document analysis complete. ${files.length} document(s) processed. ${hasPitchDeck ? 'Pitch deck parsed. ' : ''}${hasFinancials ? 'Financial model analyzed. ' : ''}Your preliminary fundability score is ${totalScore}/100. Complete your profile to get a full institutional-grade assessment.`,
-    investorRecommendation: totalScore >= 75
-      ? 'Profile shows strong institutional readiness signals. Proceed to AI Investor Grill simulation.'
-      : totalScore >= 60
-      ? 'Profile shows moderate readiness. Strengthen financial model and traction metrics before approaching Series-A funds.'
-      : 'Profile needs development. Focus on pre-seed angel networks and refine your unit economics.',
-  };
-}
-
 export const DataRoomOnboarding: React.FC<DataRoomOnboardingProps> = ({ userName, role, onComplete, onSkip }) => {
-  const [phase, setPhase] = useState<AnalysisPhase>('upload');
-  const [files, setFiles] = useState<UploadedFile[]>([]);
+  const [phase, setPhase] = useState<AnalysisPhase>(() => {
+    try {
+      return (sessionStorage.getItem('waou_onboard_phase') as AnalysisPhase) || 'upload';
+    } catch {
+      return 'upload';
+    }
+  });
+  const [files, setFiles] = useState<UploadedFile[]>(() => {
+    try {
+      const saved = sessionStorage.getItem('waou_onboard_files');
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
   const [dragOver, setDragOver] = useState(false);
-  const [analysisResult, setAnalysisResult] = useState<ExtractedStartupData | null>(null);
+  const [analysisResult, setAnalysisResult] = useState<ExtractedStartupData | null>(() => {
+    try {
+      const saved = sessionStorage.getItem('waou_onboard_result');
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
+    }
+  });
   const [analysisProgress, setAnalysisProgress] = useState(0);
   const [analysisStep, setAnalysisStep] = useState('');
+  const [analysisError, setAnalysisError] = useState<string | null>(null);
+
+  // Synchronize onboarding draft so accidental page refresh never drops uploaded files or analysis
+  useEffect(() => {
+    try {
+      sessionStorage.setItem('waou_onboard_phase', phase);
+      sessionStorage.setItem('waou_onboard_files', JSON.stringify(files));
+      if (analysisResult) {
+        sessionStorage.setItem('waou_onboard_result', JSON.stringify(analysisResult));
+      } else {
+        sessionStorage.removeItem('waou_onboard_result');
+      }
+    } catch {
+      // Ignore storage errors in restricted contexts
+    }
+  }, [phase, files, analysisResult]);
+
+  const clearOnboardingDraft = () => {
+    try {
+      sessionStorage.removeItem('waou_onboard_phase');
+      sessionStorage.removeItem('waou_onboard_files');
+      sessionStorage.removeItem('waou_onboard_result');
+    } catch {}
+  };
 
   const addFiles = useCallback((newFiles: FileList) => {
     const added: UploadedFile[] = Array.from(newFiles).map(f => ({
@@ -152,7 +116,7 @@ export const DataRoomOnboarding: React.FC<DataRoomOnboardingProps> = ({ userName
   const runAnalysis = async () => {
     if (files.length === 0) return;
     setPhase('analyzing');
-    setAnalysisProgress(0);
+    setAnalysisError(null);
 
     const steps = [
       'Scanning document structure…',
@@ -165,12 +129,18 @@ export const DataRoomOnboarding: React.FC<DataRoomOnboardingProps> = ({ userName
     for (let i = 0; i < steps.length; i++) {
       setAnalysisStep(steps[i]);
       setAnalysisProgress(Math.round(((i + 1) / steps.length) * 100));
-      await new Promise(r => setTimeout(r, 500 + Math.random() * 400));
+      await new Promise(r => setTimeout(r, 400 + Math.random() * 200));
     }
 
-    const result = await analyzeDocumentLocally(files);
-    setAnalysisResult(result);
-    setPhase('results');
+    try {
+      const result = await liveAiService.extractDocumentsIntelligence(files);
+      setAnalysisResult(result);
+      setPhase('results');
+    } catch (err: any) {
+      console.warn('Document extraction error:', err);
+      setAnalysisError(err.message || 'AI document extraction service is currently unavailable.');
+      setPhase('error');
+    }
   };
 
   const readyScore = analysisResult?.fundingReadiness ?? 0;
@@ -178,14 +148,17 @@ export const DataRoomOnboarding: React.FC<DataRoomOnboardingProps> = ({ userName
   const scoreLabel = readyScore >= 75 ? 'Institutional Ready' : readyScore >= 55 ? 'Needs Strengthening' : 'Early Stage';
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      background: 'linear-gradient(135deg, #F8FAFC 0%, #EFF6FF 50%, #F0FDF4 100%)',
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      padding: '3rem 1.5rem',
-    }}>
+    <div 
+      className="dataroom-page-container"
+      style={{
+        minHeight: '100vh',
+        background: 'linear-gradient(135deg, #F8FAFC 0%, #EFF6FF 50%, #F0FDF4 100%)',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        padding: '3rem 1.5rem',
+      }}
+    >
       {/* Header */}
       <div style={{ textAlign: 'center', marginBottom: '2.5rem', maxWidth: '680px' }}>
         <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', backgroundColor: '#EFF6FF', color: '#2563EB', padding: '6px 14px', borderRadius: '999px', fontSize: '0.8rem', fontWeight: 700, marginBottom: '1rem' }}>
@@ -211,6 +184,7 @@ export const DataRoomOnboarding: React.FC<DataRoomOnboardingProps> = ({ userName
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
             {/* Drop Zone */}
             <div
+              className="dataroom-dropzone"
               onDrop={handleDrop}
               onDragOver={e => { e.preventDefault(); setDragOver(true); }}
               onDragLeave={() => setDragOver(false)}
@@ -310,7 +284,7 @@ export const DataRoomOnboarding: React.FC<DataRoomOnboardingProps> = ({ userName
             )}
 
             {/* Action Buttons */}
-            <div style={{ display: 'flex', gap: '0.75rem' }}>
+            <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
               <button
                 onClick={runAnalysis}
                 disabled={files.length === 0}
@@ -335,7 +309,10 @@ export const DataRoomOnboarding: React.FC<DataRoomOnboardingProps> = ({ userName
                 <span>Analyze Documents with AI</span>
               </button>
               <button
-                onClick={onSkip}
+                onClick={() => {
+                  clearOnboardingDraft();
+                  onSkip();
+                }}
                 style={{
                   padding: '0.9rem 1.5rem',
                   borderRadius: '12px',
@@ -549,7 +526,10 @@ export const DataRoomOnboarding: React.FC<DataRoomOnboardingProps> = ({ userName
 
             {/* CTA */}
             <button
-              onClick={() => onComplete(analysisResult)}
+              onClick={() => {
+                clearOnboardingDraft();
+                if (analysisResult) onComplete(analysisResult);
+              }}
               style={{
                 width: '100%',
                 padding: '1rem',
@@ -570,6 +550,97 @@ export const DataRoomOnboarding: React.FC<DataRoomOnboardingProps> = ({ userName
               <span>Open My Founder Studio</span>
               <ArrowRight size={18} />
             </button>
+          </div>
+        )}
+
+        {/* ── ERROR STATE: SERVICE UNAVAILABLE ─────────────────────── */}
+        {phase === 'error' && (
+          <div style={{
+            backgroundColor: '#FFFFFF',
+            borderRadius: '24px',
+            border: '1px solid #FCA5A5',
+            padding: '2.5rem',
+            boxShadow: '0 20px 60px rgba(0,0,0,0.07)',
+            textAlign: 'center',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '1.25rem',
+          }}>
+            <div style={{
+              width: '64px',
+              height: '64px',
+              borderRadius: '20px',
+              backgroundColor: '#FEF2F2',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: '#DC2626',
+            }}>
+              <AlertCircle size={32} />
+            </div>
+
+            <div>
+              <h3 style={{ fontSize: '1.3rem', fontWeight: 900, color: '#0F172A', marginBottom: '0.4rem' }}>
+                AI Document Intelligence Notice
+              </h3>
+              <p style={{ fontSize: '0.92rem', color: '#64748B', maxWidth: '500px', lineHeight: 1.5, margin: '0 auto' }}>
+                {analysisError}
+              </p>
+            </div>
+
+            <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', justifyContent: 'center', marginTop: '0.5rem' }}>
+              <button
+                onClick={runAnalysis}
+                style={{
+                  padding: '0.75rem 1.5rem',
+                  borderRadius: '12px',
+                  background: 'linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%)',
+                  color: '#FFFFFF',
+                  fontWeight: 700,
+                  fontSize: '0.92rem',
+                  border: 'none',
+                  cursor: 'pointer',
+                }}
+              >
+                Retry Analysis
+              </button>
+
+              <button
+                onClick={() => setPhase('upload')}
+                style={{
+                  padding: '0.75rem 1.5rem',
+                  borderRadius: '12px',
+                  backgroundColor: '#F8FAFC',
+                  color: '#334155',
+                  fontWeight: 700,
+                  fontSize: '0.92rem',
+                  border: '1px solid #E2E8F0',
+                  cursor: 'pointer',
+                }}
+              >
+                Change Files
+              </button>
+
+              <button
+                onClick={() => {
+                  clearOnboardingDraft();
+                  onSkip();
+                }}
+                style={{
+                  padding: '0.75rem 1.5rem',
+                  borderRadius: '12px',
+                  backgroundColor: 'transparent',
+                  color: '#64748B',
+                  fontWeight: 600,
+                  fontSize: '0.92rem',
+                  border: 'none',
+                  cursor: 'pointer',
+                }}
+              >
+                Continue to Manual Profile
+              </button>
+            </div>
           </div>
         )}
       </div>

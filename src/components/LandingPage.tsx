@@ -122,9 +122,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               </div>
 
               <h1 style={{
-                fontSize: 'clamp(2.75rem, 5.5vw, 4.5rem)',
+                fontSize: 'clamp(2.1rem, 5.5vw, 4.2rem)',
                 fontWeight: 900,
-                lineHeight: 1.08,
+                lineHeight: 1.12,
                 color: '#0F172A',
                 letterSpacing: '-0.035em',
               }}>
@@ -240,19 +240,22 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
             {/* Right Column: Hero Interactive Diagnostic Card */}
             <div style={{ display: 'flex', justifyContent: 'center' }}>
-              <div style={{
-                width: '100%',
-                maxWidth: '520px',
-                backgroundColor: '#FFFFFF',
-                borderRadius: '24px',
-                padding: '2rem',
-                boxShadow: '0 25px 60px -15px rgba(37, 99, 235, 0.15), 0 0 1px 1px rgba(0, 0, 0, 0.05)',
-                border: '1px solid #E2E8F0',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '1.5rem',
-                position: 'relative',
-              }}>
+              <div 
+                className="hero-preview-card"
+                style={{
+                  width: '100%',
+                  maxWidth: '520px',
+                  backgroundColor: '#FFFFFF',
+                  borderRadius: '24px',
+                  padding: '2rem',
+                  boxShadow: '0 25px 60px -15px rgba(37, 99, 235, 0.15), 0 0 1px 1px rgba(0, 0, 0, 0.05)',
+                  border: '1px solid #E2E8F0',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '1.5rem',
+                  position: 'relative',
+                }}
+              >
                 {/* Floating Handwritten Callout */}
                 <div style={{
                   position: 'absolute',
@@ -304,12 +307,14 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   borderRadius: '16px',
                   padding: '1.5rem',
                   display: 'flex',
+                  flexWrap: 'wrap',
+                  gap: '1rem',
                   alignItems: 'center',
                   justifyContent: 'space-between',
                   border: '1px solid #E2E8F0',
                 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
-                    <div style={{ position: 'relative', width: '84px', height: '84px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem', flexWrap: 'wrap' }}>
+                    <div style={{ position: 'relative', width: '84px', height: '84px', flexShrink: 0 }}>
                       <svg width="84" height="84" viewBox="0 0 84 84">
                         <circle cx="42" cy="42" r="36" stroke="#E2E8F0" strokeWidth="8" fill="transparent" />
                         <circle 
@@ -373,7 +378,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 </div>
 
                 {/* Sub-Metrics Grid */}
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.75rem' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(85px, 1fr))', gap: '0.75rem' }}>
                   <div style={{ backgroundColor: '#F8FAFC', padding: '0.85rem', borderRadius: '12px', border: '1px solid #E2E8F0' }}>
                     <div style={{ fontSize: '0.7rem', color: '#64748B', fontWeight: 700 }}>INVESTOR READINESS</div>
                     <div style={{ fontSize: '1.15rem', fontWeight: 900, color: '#2563EB' }}>92%</div>

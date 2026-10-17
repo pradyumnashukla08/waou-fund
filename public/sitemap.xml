@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
+        http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
+  <!-- Primary Landing Page -->
+  <url>
+    <loc>https://waoufund.com/</loc>
+    <lastmod>2026-10-17T00:00:00+00:00</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.00</priority>
+  </url>
+
+  <!-- Pitch Deck Diagnostic Engine -->
+  <url>
+    <loc>https://waoufund.com/?view=diagnostic</loc>
+    <lastmod>2026-10-17T00:00:00+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.90</priority>
+  </url>
+
+  <!-- AI Investor Grill Simulation -->
+  <url>
+    <loc>https://waoufund.com/?view=grill</loc>
+    <lastmod>2026-10-17T00:00:00+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.90</priority>
+  </url>
+
+  <!-- Financial Command & AI CFO Model -->
+  <url>
+    <loc>https://waoufund.com/?view=finance</loc>
+    <lastmod>2026-10-17T00:00:00+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+
+  <!-- Virtual Data Room & Diligence Engine -->
+  <url>
+    <loc>https://waoufund.com/?view=dataroom</loc>
+    <lastmod>2026-10-17T00:00:00+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+
+  <!-- Market TAM & Traction Matrix -->
+  <url>
+    <loc>https://waoufund.com/?view=market</loc>
+    <lastmod>2026-10-17T00:00:00+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.80</priority>
+  </url>
+
+  <!-- GTM Strategy & Sprint Verification -->
+  <url>
+    <loc>https://waoufund.com/?view=gtm</loc>
+    <lastmod>2026-10-17T00:00:00+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.80</priority>
+  </url>
+
+  <!-- Legal Standards & SAFE Agreements -->
+  <url>
+    <loc>https://waoufund.com/?view=legaldocs</loc>
+    <lastmod>2026-10-17T00:00:00+00:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.75</priority>
+  </url>
+
+  <!-- Mentor Directory & Advisor Network -->
+  <url>
+    <loc>https://waoufund.com/?view=mentors</loc>
+    <lastmod>2026-10-17T00:00:00+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.75</priority>
+  </url>
+</urlset>

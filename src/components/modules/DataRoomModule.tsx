@@ -418,6 +418,150 @@ export const DataRoomModule: React.FC<DataRoomModuleProps> = ({ startup, evaluat
           </div>
         </div>
       </div>
+
+      {/* ── Official Diligence & Financial Model Templates ──────────────── */}
+      <div className="card-elevated" style={{ borderRadius: '20px', padding: '1.75rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+          <div>
+            <div style={{ fontSize: '0.78rem', fontWeight: 800, color: 'var(--text-brand)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+              OFFICIAL DILIGENCE TEMPLATES & FINANCIAL FORECAST MODELS
+            </div>
+            <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
+              Standard institutional Excel workbooks and document templates formatted for Indian & Global VC syndicates.
+            </div>
+          </div>
+          <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#10B981', backgroundColor: 'var(--accent-bg-emerald)', padding: '4px 10px', borderRadius: '6px' }}>
+            7 Excel Models + 2 Guides Ready
+          </span>
+        </div>
+
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+          gap: '1rem',
+        }}>
+          {[
+            {
+              title: 'Cap Table Model (Fully Diluted)',
+              type: 'Excel (.xlsx)',
+              size: '10.4 KB',
+              href: '/templates/Cap_Table_Format.xlsx',
+              desc: 'Standard equity cap table with ESOP pool, seed convertible notes, and founder shares.',
+            },
+            {
+              title: '3-Statement Financial Forecast Base Case',
+              type: 'Excel (.xlsx)',
+              size: '88.3 KB',
+              href: '/templates/Financial_Forecast_baseCase.xlsx',
+              desc: 'Complete 3-year integrated P&L, balance sheet, cash flow, and runway model.',
+            },
+            {
+              title: 'Employee Headcount & Payroll Sheet',
+              type: 'Excel (.xlsx)',
+              size: '9.4 KB',
+              href: '/templates/Employee_Record_Format.xlsx',
+              desc: 'Structured employee compensation, department headcount, and burn projection format.',
+            },
+            {
+              title: 'SaaS Unit Economics Financial Model',
+              type: 'Excel (.xlsx)',
+              size: '49.1 KB',
+              href: '/templates/template_saas.xlsx',
+              desc: 'MRR MoM cohort retention, CAC payback, LTV:CAC, and churn diagnostic model.',
+            },
+            {
+              title: 'Manufacturing & Hardware Unit Model',
+              type: 'Excel (.xlsx)',
+              size: '48.1 KB',
+              href: '/templates/template_manufacturing.xlsx',
+              desc: 'BOM pricing, tooling capex, yield progression, and supply chain working capital.',
+            },
+            {
+              title: 'Services & Productized Agency Model',
+              type: 'Excel (.xlsx)',
+              size: '47.5 KB',
+              href: '/templates/template_services.xlsx',
+              desc: 'Value-based pricing, retainer gross margins, and billable hour utilization model.',
+            },
+            {
+              title: 'Narayan Dairy Institutional Project Forecast',
+              type: 'Excel (.xlsx)',
+              size: '260.9 KB',
+              href: '/templates/Narayan_Dairy_Project_Financial_Forecast.xlsx',
+              desc: 'Real institutional case financial forecast model with operational benchmarks.',
+            },
+            {
+              title: 'Investor Diligence FAQs & Script',
+              type: 'Word (.docx)',
+              size: '105.1 KB',
+              href: '/documents/Investor_FAQs.docx',
+              desc: 'Comprehensive VC diligence question set and acquisition FAQs.',
+            },
+            {
+              title: 'Founder Investor Call Training Script',
+              type: 'Word (.docx)',
+              size: '99.0 KB',
+              href: '/documents/Training_Script_Call_1.docx',
+              desc: 'Verbatim verbal script for pitching institutional partners and angel leads.',
+            },
+          ].map((t, idx) => (
+            <div
+              key={idx}
+              style={{
+                backgroundColor: 'var(--bg-secondary)',
+                borderRadius: '12px',
+                padding: '1.1rem',
+                border: '1px solid var(--border-subtle)',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between',
+                gap: '0.75rem',
+              }}
+            >
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.35rem' }}>
+                  <span style={{
+                    fontSize: '0.68rem',
+                    fontWeight: 800,
+                    color: t.type.includes('Excel') ? '#10B981' : '#38BDF8',
+                    backgroundColor: t.type.includes('Excel') ? 'rgba(16, 185, 129, 0.1)' : 'rgba(56, 189, 248, 0.1)',
+                    padding: '2px 6px',
+                    borderRadius: '4px',
+                  }}>
+                    {t.type}
+                  </span>
+                  <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>{t.size}</span>
+                </div>
+                <div style={{ fontSize: '0.88rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+                  {t.title}
+                </div>
+                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.3rem', lineHeight: 1.4 }}>
+                  {t.desc}
+                </div>
+              </div>
+
+              <a
+                href={t.href}
+                download
+                className="btn-cyan"
+                style={{
+                  padding: '0.45rem 0.85rem',
+                  fontSize: '0.78rem',
+                  textDecoration: 'none',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.4rem',
+                  borderRadius: '8px',
+                }}
+              >
+                <Download size={13} />
+                <span>Download Template</span>
+              </a>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 };

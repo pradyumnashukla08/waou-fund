@@ -75,22 +75,55 @@ export const FounderApp: React.FC<FounderAppProps> = ({
 
   return (
     <div className="bg-app-surface" style={{
-      minHeight: 'calc(100vh - 76px)',
+      minHeight: 'calc(100vh - 72px)',
       color: 'var(--text-primary)',
       display: 'flex',
+      flexDirection: 'column',
+      width: '100%',
     }}>
-      {/* ── Left Sidebar Navigation ──────────────────────────────────── */}
-      <aside className="sidebar-desktop" style={{
-        width: '280px',
-        flexShrink: 0,
-        backgroundColor: '#FFFFFF',
-        borderRight: '1px solid var(--border-subtle)',
-        padding: '1.5rem 1rem',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '1.5rem',
-        overflowY: 'auto',
-      }}>
+      {/* ── Mobile Horizontal Tab Navigation (Visible on mobile only) ────────────────── */}
+      <div className="show-on-mobile mobile-tabs-container">
+        {navItems.map((item) => {
+          const Icon = item.icon;
+          const isActive = activeTab === item.id;
+          return (
+            <button
+              key={item.id}
+              onClick={() => setActiveTab(item.id)}
+              className={`mobile-tab-btn ${isActive ? 'active' : ''}`}
+            >
+              <Icon size={14} color={isActive ? '#FFFFFF' : 'currentColor'} />
+              <span>{item.label}</span>
+              {item.badge && (
+                <span style={{
+                  fontSize: '0.62rem',
+                  padding: '1px 5px',
+                  borderRadius: '6px',
+                  backgroundColor: isActive ? 'rgba(255, 255, 255, 0.25)' : 'var(--accent-bg-blue)',
+                  color: isActive ? '#FFFFFF' : 'var(--text-brand)',
+                  fontWeight: 800,
+                }}>
+                  {item.badge}
+                </span>
+              )}
+            </button>
+          );
+        })}
+      </div>
+
+      <div style={{ display: 'flex', flex: 1, width: '100%' }}>
+        {/* ── Left Sidebar Navigation (Desktop) ──────────────────────────────────── */}
+        <aside className="sidebar-desktop" style={{
+          width: '280px',
+          flexShrink: 0,
+          backgroundColor: '#FFFFFF',
+          borderRight: '1px solid var(--border-subtle)',
+          padding: '1.5rem 1rem',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '1.5rem',
+          overflowY: 'auto',
+        }}>
         {/* Startup Card Mini */}
         <div style={{
           background: 'linear-gradient(135deg, rgba(37, 99, 235, 0.05) 0%, rgba(6, 182, 212, 0.05) 100%)',
@@ -236,14 +269,16 @@ export const FounderApp: React.FC<FounderAppProps> = ({
       </aside>
 
       {/* ── Main Workspace Content Area ──────────────────────────────── */}
-      <main style={{
-        flex: 1,
-        padding: '2.5rem',
-        maxWidth: '1200px',
-        margin: '0 auto',
-        width: '100%',
-        overflowY: 'auto',
-      }}>
+      <main 
+        className="founder-main-content"
+        style={{
+          flex: 1,
+          maxWidth: '1200px',
+          margin: '0 auto',
+          width: '100%',
+          overflowY: 'auto',
+        }}
+      >
         {activeTab === 'dashboard' && (
           <DashboardModule 
             startup={startup} 
@@ -332,6 +367,7 @@ export const FounderApp: React.FC<FounderAppProps> = ({
           />
         )}
       </main>
+      </div>
     </div>
   );
 };

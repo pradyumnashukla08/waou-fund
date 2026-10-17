@@ -25,16 +25,67 @@ interface FinanceModuleProps {
 export const FinanceModule: React.FC<FinanceModuleProps> = ({ startup, evaluation }) => {
   const fm = evaluation.financial_metrics;
 
-  // Dynamic Scenario Engine Sliders
-  const [hires, setHires] = useState(5);
-  const [growthPercent, setGrowthPercent] = useState(18);
-  const [fundraiseCr, setFundraiseCr] = useState(4); // ₹4 Cr
-  const [activeScenario, setActiveScenario] = useState<'base' | 'best' | 'worst'>('base');
+  // Dynamic Scenario Engine Sliders with draft restoration
+  const [hires, setHires] = useState(() => {
+    try {
+      const saved = sessionStorage.getItem('waou_fin_hires');
+      return saved ? parseInt(saved, 10) : 5;
+    } catch {
+      return 5;
+    }
+  });
+  const [growthPercent, setGrowthPercent] = useState(() => {
+    try {
+      const saved = sessionStorage.getItem('waou_fin_growth');
+      return saved ? parseInt(saved, 10) : 18;
+    } catch {
+      return 18;
+    }
+  });
+  const [fundraiseCr, setFundraiseCr] = useState(() => {
+    try {
+      const saved = sessionStorage.getItem('waou_fin_raise');
+      return saved ? parseInt(saved, 10) : 4;
+    } catch {
+      return 4;
+    }
+  });
+  const [activeScenario, setActiveScenario] = useState<'base' | 'best' | 'worst'>(() => {
+    try {
+      return (sessionStorage.getItem('waou_fin_scenario') as any) || 'base';
+    } catch {
+      return 'base';
+    }
+  });
 
   // AI CFO Chat
-  const [cfoQuestion, setCfoQuestion] = useState('');
-  const [cfoAnswer, setCfoAnswer] = useState<string | null>(null);
+  const [cfoQuestion, setCfoQuestion] = useState(() => {
+    try {
+      return sessionStorage.getItem('waou_fin_cfo_q') || '';
+    } catch {
+      return '';
+    }
+  });
+  const [cfoAnswer, setCfoAnswer] = useState<string | null>(() => {
+    try {
+      return sessionStorage.getItem('waou_fin_cfo_a') || null;
+    } catch {
+      return null;
+    }
+  });
   const [isAsking, setIsAsking] = useState(false);
+
+  // Synchronize financial simulation parameters
+  React.useEffect(() => {
+    try {
+      sessionStorage.setItem('waou_fin_hires', String(hires));
+      sessionStorage.setItem('waou_fin_growth', String(growthPercent));
+      sessionStorage.setItem('waou_fin_raise', String(fundraiseCr));
+      sessionStorage.setItem('waou_fin_scenario', activeScenario);
+      sessionStorage.setItem('waou_fin_cfo_q', cfoQuestion);
+      if (cfoAnswer) sessionStorage.setItem('waou_fin_cfo_a', cfoAnswer);
+    } catch {}
+  }, [hires, growthPercent, fundraiseCr, activeScenario, cfoQuestion, cfoAnswer]);
 
   // Calculations
   const fundraiseRaw = fundraiseCr * 10000000;
@@ -75,9 +126,14 @@ Sales & Outbound,${(190 * multiplier).toFixed(0)},${(440 * multiplier).toFixed(0
     if (!cfoQuestion.trim()) return;
 
     setIsAsking(true);
-    const ans = await api.askAI(cfoQuestion, evaluation);
-    setCfoAnswer(ans);
-    setIsAsking(false);
+    try {
+      const ans = await api.askAI(cfoQuestion, evaluation);
+      setCfoAnswer(ans);
+    } catch (err: any) {
+      setCfoAnswer(`⚠️ ${err.message || 'AI CFO service is currently unavailable. Please try again.'}`);
+    } finally {
+      setIsAsking(false);
+    }
   };
 
   return (
@@ -380,8 +436,8 @@ Sales & Outbound,${(190 * multiplier).toFixed(0)},${(440 * multiplier).toFixed(0
             placeholder="e.g. How does our ₹12L burn compare against Tier-1 Seed SaaS benchmarks?"
             style={{
               flex: 1,
-              backgroundColor: 'rgba(2, 4, 10, 0.7)',
-              border: '1px solid rgba(37, 99, 235, 0.15)',
+              backgroundColor: 'var(--bg-secondary)',
+              border: '1px solid var(--border-subtle)',
               borderRadius: '12px',
               padding: '0.75rem 1rem',
               color: 'var(--text-primary)',

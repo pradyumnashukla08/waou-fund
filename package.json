@@ -5,13 +5,18 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:backend": "npm run dev --prefix backend",
     "build": "tsc -b && vite build",
+    "build:backend": "npm run build --prefix backend",
+    "build:all": "npm run build && npm run build:backend",
+    "test:backend": "npm test --prefix backend",
     "lint": "oxlint",
     "preview": "vite preview"
   },
   "dependencies": {
     "@types/canvas-confetti": "^1.9.0",
     "canvas-confetti": "^1.9.4",
+    "firebase": "^13.0.0",
     "lucide-react": "^1.55.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8"
