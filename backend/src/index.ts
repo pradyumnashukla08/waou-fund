@@ -27,6 +27,7 @@ const ALLOWED_ORIGINS = [
   'https://www.waoufund.com',
   'https://project-f62f4191-7560-45ab-8f3.web.app',
   'https://project-f62f4191-7560-45ab-8f3.firebaseapp.com',
+  'https://waou-fund.vercel.app',
 ];
 
 // Middleware
@@ -40,6 +41,7 @@ app.use(cors({
       origin.endsWith('.netlify.app') ||
       origin.endsWith('.web.app') ||
       origin.endsWith('.firebaseapp.com') ||
+      origin.endsWith('.vercel.app') ||
       origin.startsWith('capacitor://') ||
       origin.startsWith('ionic://') ||
       origin.startsWith('exp://')
