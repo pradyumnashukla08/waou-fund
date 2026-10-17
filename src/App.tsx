@@ -23,75 +23,75 @@ type AppView = 'landing' | 'auth' | 'dataroom' | 'app';
 
 // ─── Helper to build a clean starter profile for a founder ──────────
 const getInitialStartup = (user?: { name?: string; email?: string } | null): StartupProfile => {
-  const founderName = user?.name || 'Founder';
-  const founderEmail = user?.email || 'founder@startup.com';
+  const founderName = user?.name || '';
+  const founderEmail = user?.email || '';
   const company = user?.name ? `${user.name}'s Venture` : 'My Venture';
 
   return {
     id: 'user_active_startup',
     name: company,
-    tagline: 'Autonomous AI enterprise infrastructure accelerating fundraising and diligence workflows.',
+    tagline: '',
     category: 'B2B SaaS / Enterprise AI',
     stage: 'Seed',
     founder: founderName,
     location: 'Bengaluru, India',
-    website: 'https://myventure.ai',
-    targetAsk: '₹3.5 Cr ($450K)',
-    valuation: '₹24.0 Cr ($3.0M)',
-    equityOffered: '14.6%',
-    mrr: '₹24,00,000',
-    burn: '₹7,50,000',
-    growth: '+22% MoM',
-    fundabilityScore: 82,
+    website: '',
+    targetAsk: '₹2.0 Cr ($250K)',
+    valuation: '₹15.0 Cr ($1.8M)',
+    equityOffered: '13.3%',
+    mrr: '₹0',
+    burn: '₹0',
+    growth: '0%',
+    fundabilityScore: 60,
     fullName: founderName,
     role: 'CEO & Co-Founder',
-    profileImage: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&fit=crop&q=80',
+    profileImage: '',
     linkedinUrl: '',
     email: founderEmail,
     pedigree: 'First-Time Founder',
     team: [],
     companyName: company,
-    websiteUrl: 'https://myventure.ai',
+    websiteUrl: '',
     companyType: 'Private Limited',
-    isRegistered: true,
-    registrationNo: '29ABCDE1234F1Z5',
+    isRegistered: false,
+    registrationNo: '',
     sector: 'SaaS',
-    pitch: 'Autonomous AI enterprise infrastructure accelerating fundraising and diligence workflows.',
+    pitch: '',
     currency: '₹ (INR)',
-    tam: '38000000000',
-    sam: '7800000000',
-    som: '1100000000',
-    competitor1: 'https://pitchbook.com',
-    competitor2: 'https://carta.com',
+    tam: '',
+    sam: '',
+    som: '',
+    competitor1: '',
+    competitor2: '',
     competitor3: '',
-    distributionMoat: 'Proprietary institutional intelligence graph and direct API integration with data rooms.',
-    targetRaise: '35000000',
-    valuationCap: '240000000',
-    capitalCommitted: '7500000',
-    currentMrr: '2400000',
-    userTraction: '14 Active Enterprise Pilots',
-    momGrowth: '22',
-    grossMargin: '84',
-    cac: '75000',
-    waitlistCount: '340',
-    betaConversion: '24',
-    productStatus: 'Functional MVP',
-    problemValidation: 'Founders spend 400+ hours manually preparing models and navigating investor diligence.',
-    teamCapability: 'Technical and business operators with prior scaling experience in venture-backed teams.',
-    runway: '14',
-    verifiedArr: '28800000',
-    churnRate: '1.4',
-    nrr: '121',
-    ltvcacRatio: '4:1',
-    cacPayback: '6',
-    burnRate: '750000',
+    distributionMoat: '',
+    targetRaise: '20000000',
+    valuationCap: '150000000',
+    capitalCommitted: '0',
+    currentMrr: '0',
+    userTraction: '',
+    momGrowth: '0',
+    grossMargin: '',
+    cac: '',
+    waitlistCount: '',
+    betaConversion: '',
+    productStatus: 'MVP in Development',
+    problemValidation: '',
+    teamCapability: '',
+    runway: '12',
+    verifiedArr: '0',
+    churnRate: '0',
+    nrr: '100',
+    ltvcacRatio: '',
+    cacPayback: '',
+    burnRate: '0',
     execSales: false,
-    execEng: true,
+    execEng: false,
     execMarketing: false,
-    annualRevenue: '28800000',
-    expansionVectors: ['New Product Lines'],
+    annualRevenue: '0',
+    expansionVectors: [],
     cSuiteComplete: false,
-    marketShare: '8',
+    marketShare: '0',
   };
 };
 
@@ -193,10 +193,35 @@ export default function App() {
         try {
           const res = await apiClient.get<{ success: boolean; profile: StartupProfile | null }>('/startup/profile');
           if (res && res.success && res.profile) {
-            setSelectedStartup(res.profile);
-            setAllStartups([res.profile, ...MOCK_STARTUPS.filter(s => s.id !== res.profile!.id)]);
+            let userProfile = res.profile;
+            // Clean out legacy mock data if this user was accidentally seeded with mock text
+            const isMockPitch = userProfile.pitch?.includes('AI spatial intelligence') ||
+                                userProfile.pitch?.includes('Autonomous AI enterprise');
+            const isMockFounder = userProfile.founder === 'Rahul Sharma' && name !== 'Rahul Sharma';
+            
+            if (isMockPitch || isMockFounder) {
+              userProfile = {
+                ...userProfile,
+                founder: name,
+                fullName: name,
+                email: email,
+                name: (userProfile.name?.includes('AvasPlot') || userProfile.name === 'My Venture') ? `${name}'s Venture` : userProfile.name,
+                companyName: (userProfile.companyName?.includes('AvasPlot') || userProfile.companyName === 'My Venture') ? `${name}'s Venture` : userProfile.companyName,
+                pitch: isMockPitch ? '' : userProfile.pitch,
+                tagline: isMockPitch ? '' : userProfile.tagline,
+                team: userProfile.team?.some(m => m.name === 'Kavita Sundaram') ? [] : (userProfile.team || []),
+                competitor1: userProfile.competitor1?.includes('costar.com') || userProfile.competitor1?.includes('pitchbook.com') ? '' : userProfile.competitor1,
+                competitor2: userProfile.competitor2?.includes('cherre.com') || userProfile.competitor2?.includes('carta.com') ? '' : userProfile.competitor2,
+                competitor3: userProfile.competitor3?.includes('reonomy.com') ? '' : userProfile.competitor3,
+              };
+              // Persist cleaned profile
+              apiClient.put('/startup/profile', userProfile).catch(() => {});
+            }
+
+            setSelectedStartup(userProfile);
+            setAllStartups([userProfile, ...MOCK_STARTUPS.filter(s => s.id !== userProfile.id)]);
           } else {
-            // First time login: seed default profile for this user
+            // First time login: seed default clean profile for this user
             const fresh = getInitialStartup({ name, email });
             setSelectedStartup(fresh);
             setAllStartups([fresh, ...MOCK_STARTUPS.filter(s => s.id !== fresh.id)]);
@@ -253,6 +278,13 @@ export default function App() {
     setUserName(name);
     setUserRole(role);
 
+    // Clear stale drafts from prior session / other users
+    try {
+      sessionStorage.removeItem('waou_profile_draft_user_active_startup');
+      sessionStorage.removeItem('waou_profile_draft_avasplot');
+      sessionStorage.removeItem('waou_selected_startup_draft');
+    } catch {}
+
     // Synchronize startup with the real founder's name and email
     setSelectedStartup(prev => {
       const updated: StartupProfile = {
@@ -260,8 +292,11 @@ export default function App() {
         founder: name,
         fullName: name,
         email: email,
-        name: prev.name.includes('AvasPlot') ? `${name}'s Venture` : prev.name,
-        companyName: prev.companyName?.includes('AvasPlot') ? `${name}'s Venture` : prev.companyName,
+        name: (prev.name.includes('AvasPlot') || prev.name === 'My Venture') ? `${name}'s Venture` : prev.name,
+        companyName: (prev.companyName?.includes('AvasPlot') || prev.companyName === 'My Venture') ? `${name}'s Venture` : prev.companyName,
+        pitch: prev.pitch?.includes('AI spatial intelligence') || prev.pitch?.includes('Autonomous AI enterprise') ? '' : prev.pitch,
+        tagline: prev.tagline?.includes('AI spatial intelligence') || prev.tagline?.includes('Autonomous AI enterprise') ? '' : prev.tagline,
+        team: prev.team?.some(m => m.name === 'Kavita Sundaram') ? [] : (prev.team || []),
       };
       setAllStartups([updated, ...MOCK_STARTUPS]);
 
@@ -355,12 +390,16 @@ export default function App() {
     try {
       sessionStorage.removeItem('waou_current_view');
       sessionStorage.removeItem('waou_active_tab');
+      sessionStorage.removeItem('waou_selected_startup_draft');
+      sessionStorage.removeItem('waou_profile_draft_user_active_startup');
+      sessionStorage.removeItem('waou_profile_draft_avasplot');
     } catch {
       // Ignore storage errors in restricted contexts
     }
     setUserName('');
     setUserEmail('');
     setUserRole('founder');
+    setSelectedStartup(getInitialStartup(null));
     setCurrentView('landing');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };

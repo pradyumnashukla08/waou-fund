@@ -57,6 +57,46 @@ export const getSafeExternalUrl = (url?: string): string => {
   return trimmed;
 };
 
+const BENCHMARK_SAMPLE_PROFILE: Partial<StartupProfile> = {
+  companyName: 'AvasPlot Technologies',
+  websiteUrl: 'https://avasplot.ai',
+  sector: 'PropTech / Spatial AI',
+  pitch: 'AI spatial intelligence platform enabling institutional REITs to evaluate commercial asset yields with 98% accuracy in 12 minutes.',
+  currency: '₹ (INR)',
+  tam: '42000000000',
+  sam: '8500000000',
+  som: '1200000000',
+  competitor1: 'https://costar.com',
+  competitor2: 'https://cherre.com',
+  competitor3: 'https://reonomy.com',
+  distributionMoat: 'Proprietary spatial graph of 1.4M commercial parcels and direct API integration with Indian municipal land registries.',
+  targetRaise: '40000000',
+  valuationCap: '280000000',
+  equityOffered: '14.2',
+  capitalCommitted: '18000000',
+  waitlistCount: '450',
+  betaConversion: '28',
+  productStatus: 'Functional MVP',
+  problemValidation: 'Commercial real estate underwriting takes 6 weeks of manual surveyor appraisals resulting in 18% pricing variance.',
+  teamCapability: 'Founders have 14+ years combined in enterprise GIS, spatial computer vision, and institutional REIT debt underwriting.',
+  currentMrr: '5000000',
+  userTraction: '18 Enterprise Clients',
+  momGrowth: '18',
+  grossMargin: '82',
+  cac: '85000',
+  verifiedArr: '60000000',
+  churnRate: '1.2',
+  nrr: '124',
+  ltvcacRatio: '4:1',
+  cacPayback: '5',
+  burnRate: '1200000',
+  runway: '14',
+  team: [
+    { name: 'Kavita Sundaram', role: 'CTO (Ex-Google Brain, IIT Madras)', linkedin: 'https://linkedin.com/in/kavita-sundaram' },
+    { name: 'Aditya Sen', role: 'Head of Growth (Ex-Razorpay)', linkedin: 'https://linkedin.com/in/aditya-sen' }
+  ],
+};
+
 export const ProfileTeaserModule: React.FC<ProfileTeaserModuleProps> = ({
   startup,
   onUpdateStartup,
@@ -71,62 +111,59 @@ export const ProfileTeaserModule: React.FC<ProfileTeaserModuleProps> = ({
     } catch {}
     return {
       ...startup,
-      fullName: startup.fullName || startup.founder || 'Rahul Sharma',
-    role: startup.role || 'CEO & Co-Founder',
-    profileImage: startup.profileImage || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&fit=crop&q=80',
-    linkedinUrl: startup.linkedinUrl || 'https://linkedin.com/in/rahulsharma-founder',
-    email: startup.email || 'founder@startup.com',
-    team: startup.team && startup.team.length > 0 ? startup.team : [
-      { name: 'Kavita Sundaram', role: 'CTO (Ex-Google Brain, IIT Madras)', linkedin: 'https://linkedin.com/in/kavita-sundaram' },
-      { name: 'Aditya Sen', role: 'Head of Growth (Ex-Razorpay)', linkedin: 'https://linkedin.com/in/aditya-sen' }
-    ],
-    companyName: startup.companyName || startup.name || 'Your Startup Inc.',
-    websiteUrl: startup.websiteUrl || startup.website || 'https://yourstartup.com',
-    companyType: startup.companyType || 'Private Limited',
-    isRegistered: startup.isRegistered !== undefined ? startup.isRegistered : true,
-    registrationNo: startup.registrationNo || '29ABCDE1234F1Z5',
-    sector: startup.sector || startup.category?.split('/')[0]?.trim() || 'SaaS',
-    pitch: startup.pitch || startup.tagline || 'AI spatial intelligence platform enabling institutional REITs to evaluate commercial asset yields with 98% accuracy in 12 minutes.',
-    currency: startup.currency || '₹ (INR)',
-    tam: startup.tam || '42000000000',
-    sam: startup.sam || '8500000000',
-    som: startup.som || '1200000000',
-    competitor1: startup.competitor1 || 'https://costar.com',
-    competitor2: startup.competitor2 || 'https://cherre.com',
-    competitor3: startup.competitor3 || 'https://reonomy.com',
-    distributionMoat: startup.distributionMoat || 'Proprietary spatial graph of 1.4M commercial parcels and direct API integration with Indian municipal land registries.',
-    targetRaise: startup.targetRaise || startup.targetAsk?.replace(/[^0-9]/g, '') || '40000000',
-    valuationCap: startup.valuationCap || startup.valuation?.replace(/[^0-9]/g, '') || '280000000',
-    equityOffered: startup.equityOffered?.replace(/%/g, '') || '14.2',
-    capitalCommitted: startup.capitalCommitted || '18000000',
-    // Pre-Seed
-    waitlistCount: startup.waitlistCount || '450',
-    betaConversion: startup.betaConversion || '28',
-    productStatus: startup.productStatus || 'Functional MVP',
-    problemValidation: startup.problemValidation || 'Commercial real estate underwriting takes 6 weeks of manual surveyor appraisals resulting in 18% pricing variance.',
-    teamCapability: startup.teamCapability || 'Founders have 14+ years combined in enterprise GIS, spatial computer vision, and institutional REIT debt underwriting.',
-    runway: startup.runway || '14',
-    // Seed
-    currentMrr: startup.currentMrr || startup.mrr?.replace(/[^0-9]/g, '') || '5000000',
-    userTraction: startup.userTraction || '18 Enterprise Clients',
-    momGrowth: startup.momGrowth || startup.growth?.replace(/[^0-9]/g, '') || '18',
-    grossMargin: startup.grossMargin || '82',
-    cac: startup.cac || '85000',
-    // Series A
-    verifiedArr: startup.verifiedArr || '60000000',
-    churnRate: startup.churnRate || '1.2',
-    nrr: startup.nrr || '124',
-    ltvcacRatio: startup.ltvcacRatio || '>4:1',
-    cacPayback: startup.cacPayback || '5',
-    burnRate: startup.burnRate || startup.burn?.replace(/[^0-9]/g, '') || '1200000',
-    execSales: startup.execSales !== undefined ? startup.execSales : true,
-    execEng: startup.execEng !== undefined ? startup.execEng : true,
-    execMarketing: startup.execMarketing !== undefined ? startup.execMarketing : false,
-    // Series B
-    annualRevenue: startup.annualRevenue || '60000000',
-    expansionVectors: startup.expansionVectors || ['International Expansion', 'New Product Lines'],
-    cSuiteComplete: startup.cSuiteComplete !== undefined ? startup.cSuiteComplete : true,
-    marketShare: startup.marketShare || '12',
+      fullName: startup.fullName || startup.founder || '',
+      role: startup.role || 'CEO & Co-Founder',
+      profileImage: startup.profileImage || '',
+      linkedinUrl: startup.linkedinUrl || '',
+      email: startup.email || '',
+      team: Array.isArray(startup.team) ? startup.team : [],
+      companyName: startup.companyName || startup.name || '',
+      websiteUrl: startup.websiteUrl || startup.website || '',
+      companyType: startup.companyType || 'Private Limited',
+      isRegistered: startup.isRegistered !== undefined ? startup.isRegistered : false,
+      registrationNo: startup.registrationNo || '',
+      sector: startup.sector || startup.category?.split('/')[0]?.trim() || 'SaaS',
+      pitch: startup.pitch || startup.tagline || '',
+      currency: startup.currency || '₹ (INR)',
+      tam: startup.tam || '',
+      sam: startup.sam || '',
+      som: startup.som || '',
+      competitor1: startup.competitor1 || '',
+      competitor2: startup.competitor2 || '',
+      competitor3: startup.competitor3 || '',
+      distributionMoat: startup.distributionMoat || '',
+      targetRaise: startup.targetRaise || startup.targetAsk?.replace(/[^0-9]/g, '') || '',
+      valuationCap: startup.valuationCap || startup.valuation?.replace(/[^0-9]/g, '') || '',
+      equityOffered: startup.equityOffered?.replace(/%/g, '') || '',
+      capitalCommitted: startup.capitalCommitted || '',
+      // Pre-Seed
+      waitlistCount: startup.waitlistCount || '',
+      betaConversion: startup.betaConversion || '',
+      productStatus: startup.productStatus || 'Functional MVP',
+      problemValidation: startup.problemValidation || '',
+      teamCapability: startup.teamCapability || '',
+      runway: startup.runway || '',
+      // Seed
+      currentMrr: startup.currentMrr || startup.mrr?.replace(/[^0-9]/g, '') || '',
+      userTraction: startup.userTraction || '',
+      momGrowth: startup.momGrowth || startup.growth?.replace(/[^0-9]/g, '') || '',
+      grossMargin: startup.grossMargin || '',
+      cac: startup.cac || '',
+      // Series A
+      verifiedArr: startup.verifiedArr || '',
+      churnRate: startup.churnRate || '',
+      nrr: startup.nrr || '',
+      ltvcacRatio: startup.ltvcacRatio || '',
+      cacPayback: startup.cacPayback || '',
+      burnRate: startup.burnRate || startup.burn?.replace(/[^0-9]/g, '') || '',
+      execSales: startup.execSales !== undefined ? startup.execSales : false,
+      execEng: startup.execEng !== undefined ? startup.execEng : false,
+      execMarketing: startup.execMarketing !== undefined ? startup.execMarketing : false,
+      // Series B
+      annualRevenue: startup.annualRevenue || '',
+      expansionVectors: startup.expansionVectors || [],
+      cSuiteComplete: startup.cSuiteComplete !== undefined ? startup.cSuiteComplete : false,
+      marketShare: startup.marketShare || '',
     };
   });
 
@@ -189,6 +226,58 @@ export const ProfileTeaserModule: React.FC<ProfileTeaserModuleProps> = ({
     });
     setSavedSuccess(true);
     setTimeout(() => setSavedSuccess(false), 3500);
+  };
+
+  const handleLoadSample = () => {
+    if (window.confirm('Load benchmark sample data? This fills sample traction metrics and pitch details so you can preview the full institutional 1-pager.')) {
+      setFormData(prev => ({
+        ...prev,
+        ...BENCHMARK_SAMPLE_PROFILE,
+        fullName: prev.fullName || 'Rahul Sharma',
+        role: prev.role || 'CEO & Co-Founder',
+      }));
+    }
+  };
+
+  const handleClearClean = () => {
+    if (window.confirm('Clear all form fields to a fresh clean state?')) {
+      setFormData(prev => ({
+        ...prev,
+        companyName: startup.name || '',
+        websiteUrl: '',
+        sector: 'SaaS',
+        pitch: '',
+        team: [],
+        tam: '',
+        sam: '',
+        som: '',
+        competitor1: '',
+        competitor2: '',
+        competitor3: '',
+        distributionMoat: '',
+        targetRaise: '',
+        valuationCap: '',
+        equityOffered: '',
+        capitalCommitted: '',
+        waitlistCount: '',
+        betaConversion: '',
+        problemValidation: '',
+        teamCapability: '',
+        currentMrr: '',
+        userTraction: '',
+        momGrowth: '',
+        grossMargin: '',
+        cac: '',
+        verifiedArr: '',
+        churnRate: '',
+        nrr: '',
+        burnRate: '',
+        runway: '',
+      }));
+      try {
+        sessionStorage.removeItem(`waou_profile_draft_${startup.id}`);
+      } catch {}
+    }
   };
 
   // AI Assist sparkle generator using live AI
@@ -304,22 +393,66 @@ export const ProfileTeaserModule: React.FC<ProfileTeaserModuleProps> = ({
           </button>
 
           {!showTeaserPreview && (
-            <button
-              type="button"
-              onClick={() => handleSave()}
-              className="btn-primary"
-              style={{
-                padding: '0.65rem 1.25rem',
-                fontSize: '0.86rem',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem',
-                borderRadius: '10px'
-              }}
-            >
-              <Save size={15} />
-              <span>{savedSuccess ? 'Saved to Cloud! ✓' : 'Save Changes'}</span>
-            </button>
+            <>
+              <button
+                type="button"
+                onClick={handleLoadSample}
+                title="Load sample venture benchmark"
+                style={{
+                  padding: '0.65rem 0.95rem',
+                  fontSize: '0.84rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.4rem',
+                  borderRadius: '10px',
+                  backgroundColor: '#F1F5F9',
+                  border: '1.5px solid #CBD5E1',
+                  color: '#334155',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                }}
+              >
+                <Sparkles size={14} color="#2563EB" />
+                <span>Load Sample</span>
+              </button>
+              <button
+                type="button"
+                onClick={handleClearClean}
+                title="Clear all fields to start fresh"
+                style={{
+                  padding: '0.65rem 0.95rem',
+                  fontSize: '0.84rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.4rem',
+                  borderRadius: '10px',
+                  backgroundColor: '#FFFFFF',
+                  border: '1.5px solid #E2E8F0',
+                  color: '#64748B',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                }}
+              >
+                <Trash2 size={14} color="#EF4444" />
+                <span>Clear Form</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => handleSave()}
+                className="btn-primary"
+                style={{
+                  padding: '0.65rem 1.25rem',
+                  fontSize: '0.86rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  borderRadius: '10px'
+                }}
+              >
+                <Save size={15} />
+                <span>{savedSuccess ? 'Saved to Cloud! ✓' : 'Save Changes'}</span>
+              </button>
+            </>
           )}
         </div>
       </div>
@@ -473,7 +606,7 @@ export const ProfileTeaserModule: React.FC<ProfileTeaserModuleProps> = ({
                   type="text"
                   value={formData.fullName}
                   onChange={(e) => handleChange('fullName', e.target.value)}
-                  placeholder="e.g. Rahul Sharma"
+                  placeholder="Enter your full name"
                   style={{
                     width: '100%',
                     backgroundColor: '#F8FAFC',
@@ -590,6 +723,19 @@ export const ProfileTeaserModule: React.FC<ProfileTeaserModuleProps> = ({
               </div>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+                {(!formData.team || formData.team.length === 0) && (
+                  <div style={{
+                    padding: '1.25rem',
+                    border: '1.5px dashed #CBD5E1',
+                    borderRadius: '12px',
+                    textAlign: 'center',
+                    backgroundColor: '#F8FAFC',
+                    color: '#64748B',
+                    fontSize: '0.88rem',
+                  }}>
+                    No additional co-founders or key leaders added yet. Click <strong>+ Add Member</strong> above to include your CTO, VP, or co-founders.
+                  </div>
+                )}
                 {(formData.team || []).map((member, idx) => (
                   <div
                     key={idx}
