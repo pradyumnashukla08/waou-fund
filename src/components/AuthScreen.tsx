@@ -369,8 +369,16 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onComplete }) => {
                   <div style={{ position: 'relative' }}>
                     <Mail size={16} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: '#94A3B8', pointerEvents: 'none' }} />
                     <input
-                      type="email"
-                      autoComplete="email"
+                      type="text"
+                      inputMode="email"
+                      autoComplete="off"
+                      data-1p-ignore
+                      data-bwignore="true"
+                      data-lpignore="true"
+                      data-protonpass-ignore="true"
+                      data-kpm-ignore="true"
+                      data-form-type="other"
+                      spellCheck={false}
                       value={email}
                       onChange={e => { setEmail(e.target.value); setErrors(p => ({ ...p, email: '', general: undefined })); }}
                       placeholder="name@company.com"
@@ -528,7 +536,16 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onComplete }) => {
                     <div style={{ position: 'relative' }}>
                       <Mail size={16} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: '#94A3B8' }} />
                       <input
-                        type="email"
+                        type="text"
+                        inputMode="email"
+                        autoComplete="off"
+                        data-1p-ignore
+                        data-bwignore="true"
+                        data-lpignore="true"
+                        data-protonpass-ignore="true"
+                        data-kpm-ignore="true"
+                        data-form-type="other"
+                        spellCheck={false}
                         value={email}
                         onChange={e => { setEmail(e.target.value); setErrors({}); }}
                         placeholder="name@company.com"

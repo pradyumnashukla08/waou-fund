@@ -675,7 +675,16 @@ export const ProfileTeaserModule: React.FC<ProfileTeaserModuleProps> = ({
                   Email Address
                 </label>
                 <input
-                  type="email"
+                  type="text"
+                  inputMode="email"
+                  autoComplete="off"
+                  data-1p-ignore
+                  data-bwignore="true"
+                  data-lpignore="true"
+                  data-protonpass-ignore="true"
+                  data-kpm-ignore="true"
+                  data-form-type="other"
+                  spellCheck={false}
                   value={formData.email}
                   onChange={(e) => handleChange('email', e.target.value)}
                   placeholder="founder@company.com"
@@ -689,6 +698,7 @@ export const ProfileTeaserModule: React.FC<ProfileTeaserModuleProps> = ({
                     fontSize: '0.94rem',
                     fontWeight: 500,
                     outline: 'none',
+                    boxSizing: 'border-box',
                   }}
                 />
               </div>

@@ -588,3 +588,17 @@ h1, h2, h3, h4, h5, h6 {
   from { transform: translateX(100%); }
   to { transform: translateX(0); }
 }
+
+/* Antivirus, Password Manager & Autofill Extension Layout Immunization */
+input[type="text"],
+input[type="email"],
+input[type="password"] {
+  max-width: 100%;
+  font-family: var(--font-sans);
+  box-sizing: border-box !important;
+}
+
+input:focus {
+  outline: none;
+}
+
