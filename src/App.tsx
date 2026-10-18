@@ -270,19 +270,25 @@ export default function App() {
             const isMockFounder = userProfile.founder === 'Rahul Sharma' && name !== 'Rahul Sharma';
             
             if (isMockPitch || isMockFounder) {
+              const defaultVentureName = name ? `${name}'s Venture` : 'My Venture';
+              const pName = userProfile.name || userProfile.companyName || '';
+              const isPlaceholder = !pName || pName.includes('AvasPlot') || pName === 'My Venture';
+              const cleanName = isPlaceholder ? defaultVentureName : pName;
+              const cleanCompanyName = userProfile.companyName || cleanName;
+
               userProfile = {
                 ...userProfile,
                 founder: name,
                 fullName: name,
                 email: email,
-                name: (userProfile.name?.includes('AvasPlot') || userProfile.name === 'My Venture') ? `${name}'s Venture` : userProfile.name,
-                companyName: (userProfile.companyName?.includes('AvasPlot') || userProfile.companyName === 'My Venture') ? `${name}'s Venture` : userProfile.companyName,
-                pitch: isMockPitch ? '' : userProfile.pitch,
-                tagline: isMockPitch ? '' : userProfile.tagline,
+                name: cleanName,
+                companyName: cleanCompanyName,
+                pitch: isMockPitch ? '' : (userProfile.pitch || ''),
+                tagline: isMockPitch ? '' : (userProfile.tagline || ''),
                 team: userProfile.team?.some(m => m.name === 'Kavita Sundaram') ? [] : (userProfile.team || []),
-                competitor1: userProfile.competitor1?.includes('costar.com') || userProfile.competitor1?.includes('pitchbook.com') ? '' : userProfile.competitor1,
-                competitor2: userProfile.competitor2?.includes('cherre.com') || userProfile.competitor2?.includes('carta.com') ? '' : userProfile.competitor2,
-                competitor3: userProfile.competitor3?.includes('reonomy.com') ? '' : userProfile.competitor3,
+                competitor1: userProfile.competitor1?.includes('costar.com') || userProfile.competitor1?.includes('pitchbook.com') ? '' : (userProfile.competitor1 || ''),
+                competitor2: userProfile.competitor2?.includes('cherre.com') || userProfile.competitor2?.includes('carta.com') ? '' : (userProfile.competitor2 || ''),
+                competitor3: userProfile.competitor3?.includes('reonomy.com') ? '' : (userProfile.competitor3 || ''),
               };
               // Persist cleaned profile
               apiClient.put('/startup/profile', userProfile).catch(() => {});
@@ -362,16 +368,22 @@ export default function App() {
 
     // Synchronize startup with the real founder's name and email
     setSelectedStartup(prev => {
+      const defaultVentureName = name ? `${name}'s Venture` : 'My Venture';
+      const prevName = prev?.name || prev?.companyName || '';
+      const isPlaceholder = !prevName || prevName.includes('AvasPlot') || prevName === 'My Venture';
+      const cleanName = isPlaceholder ? defaultVentureName : prevName;
+      const cleanCompanyName = prev?.companyName || cleanName;
+
       const updated: StartupProfile = {
         ...prev,
         founder: name,
         fullName: name,
         email: email,
-        name: (prev.name.includes('AvasPlot') || prev.name === 'My Venture') ? `${name}'s Venture` : prev.name,
-        companyName: (prev.companyName?.includes('AvasPlot') || prev.companyName === 'My Venture') ? `${name}'s Venture` : prev.companyName,
-        pitch: prev.pitch?.includes('AI spatial intelligence') || prev.pitch?.includes('Autonomous AI enterprise') ? '' : prev.pitch,
-        tagline: prev.tagline?.includes('AI spatial intelligence') || prev.tagline?.includes('Autonomous AI enterprise') ? '' : prev.tagline,
-        team: prev.team?.some(m => m.name === 'Kavita Sundaram') ? [] : (prev.team || []),
+        name: cleanName,
+        companyName: cleanCompanyName,
+        pitch: prev?.pitch?.includes('AI spatial intelligence') || prev?.pitch?.includes('Autonomous AI enterprise') ? '' : (prev?.pitch || ''),
+        tagline: prev?.tagline?.includes('AI spatial intelligence') || prev?.tagline?.includes('Autonomous AI enterprise') ? '' : (prev?.tagline || ''),
+        team: prev?.team?.some(m => m.name === 'Kavita Sundaram') ? [] : (prev?.team || []),
       };
       setAllStartups([updated]);
 
