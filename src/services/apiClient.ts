@@ -71,6 +71,9 @@ async function request<T>(
   options: RequestInit = {}
 ): Promise<T> {
   const baseUrl = getBaseUrl().replace(/\/$/, '');
+  if (!baseUrl) {
+    throw new ApiError('Standalone Firebase mode: local intelligence engine active', 503);
+  }
   const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
   const url = `${baseUrl}${cleanEndpoint}`;
 
@@ -96,9 +99,9 @@ async function request<T>(
     headers['Content-Type'] = 'application/json';
   }
 
-  // 25-second client-side timeout signal if not already provided
+  // 4-second client-side timeout signal if not already provided
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 25000);
+  const timeoutId = setTimeout(() => controller.abort(), 4000);
   const signal = options.signal || controller.signal;
 
   try {

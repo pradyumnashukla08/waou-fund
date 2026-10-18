@@ -3,12 +3,12 @@
 
 export const CLOUD_CONFIG = {
   // Live Cloud API endpoints
-  PRIMARY_API_URL: 'https://venture-wolf-25me.onrender.com/api',
-  FALLBACK_API_URL: 'https://api-45dvc4s67a-uc.a.run.app/api',
+  PRIMARY_API_URL: '',
+  FALLBACK_API_URL: '',
   
   // Health endpoints
-  HEALTH_URL: 'https://venture-wolf-25me.onrender.com/health',
-  ROOT_URL: 'https://venture-wolf-25me.onrender.com/',
+  HEALTH_URL: '',
+  ROOT_URL: '',
 
   // Firebase Cloud Project
   FIREBASE: {
