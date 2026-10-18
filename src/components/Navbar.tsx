@@ -91,15 +91,15 @@ export const Navbar: React.FC<NavbarProps> = ({
       <div style={{
         maxWidth: '1400px',
         margin: '0 auto',
-        padding: '0 1.5rem',
+        padding: '0 clamp(1rem, 2vw, 1.5rem)',
         height: '72px',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        gap: '1rem',
+        gap: '0.75rem',
       }}>
         {/* Brand Logo */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 'clamp(0.75rem, 1.5vw, 2rem)' }}>
           <div 
             onClick={() => setCurrentView('landing')}
             style={{ 
@@ -139,7 +139,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               }}>
                 Waou<span style={{ color: '#2563EB' }}>Fund</span>
               </span>
-              <span className="hide-on-mobile" style={{ 
+              <span className="hide-on-mobile hide-on-tablet" style={{ 
                 fontSize: '0.68rem', 
                 fontWeight: 700, 
                 letterSpacing: '0.08em', 
@@ -243,7 +243,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 backgroundColor: '#10B981',
                 boxShadow: '0 0 6px rgba(16, 185, 129, 0.5)',
               }} />
-              <span>{selectedStartup.name}</span>
+              <span style={{ maxWidth: '120px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{selectedStartup.name}</span>
               <span style={{ 
                 fontSize: '0.7rem', 
                 color: 'var(--text-brand)', 
@@ -349,7 +349,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           {/* Daily Directive Task Pill */}
           <button
             onClick={openDailyTaskModal}
-            className="hide-on-mobile"
+            className="hide-on-mobile hide-on-tablet"
             title="Today's AI Directive"
             style={{
               display: 'flex',

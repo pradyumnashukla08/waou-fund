@@ -607,6 +607,12 @@ button, a, input, select, textarea {
   }
 }
 
+@media (max-width: 1080px) {
+  .hide-on-tablet {
+    display: none !important;
+  }
+}
+
 /* Horizontal Scrollable Mobile Tab Bar */
 .mobile-tabs-container {
   display: flex;
