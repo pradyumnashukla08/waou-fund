@@ -53,10 +53,11 @@ export const DashboardModule: React.FC<DashboardModuleProps> = ({
       if (raw) {
         const parsed = JSON.parse(raw);
         if (Array.isArray(parsed)) {
-          if (startup.id === 'user_active_startup' && parsed.some((d: any) => d.name?.includes('Seed_Pitch_Deck_V3.pdf'))) {
-            return 0;
-          }
-          return parsed.length;
+          const realDocs = parsed.filter((d: any) => {
+            const n = String(d?.name || '').toLowerCase();
+            return !n.includes('propmatik') && !n.includes('seed_pitch_deck') && !n.includes('sample_');
+          });
+          return realDocs.length;
         }
       }
     } catch {}

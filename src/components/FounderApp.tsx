@@ -322,6 +322,8 @@ export const FounderApp: React.FC<FounderAppProps> = ({
           <FinanceModule 
             startup={startup} 
             evaluation={evaluation}
+            onUpdateStartup={onUpdateStartup}
+            onUpdateEvaluation={onUpdateEvaluation}
           />
         )}
 
@@ -367,6 +369,8 @@ export const FounderApp: React.FC<FounderAppProps> = ({
             startup={startup} 
             onUpdateStartup={onUpdateStartup} 
             evaluation={evaluation}
+            onUpdateEvaluation={onUpdateEvaluation}
+            setActiveTab={setActiveTab}
           />
         )}
       </main>

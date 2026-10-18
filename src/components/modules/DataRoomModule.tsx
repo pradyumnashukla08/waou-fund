@@ -56,13 +56,35 @@ export const DataRoomModule: React.FC<DataRoomModuleProps> = ({ startup, evaluat
   // Requirement currently being targeted by a direct "+ Upload" click
   const [activeUploadTarget, setActiveUploadTarget] = useState<{ id: string; label: string } | null>(null);
 
+  // Smart helper to detect mock or legacy sample documents
+  const isMockOrLegacyDoc = (d: any): boolean => {
+    if (!d || !d.name) return true;
+    const name = String(d.name).toLowerCase();
+    if (name.includes('propmatik')) return true;
+    if (name.includes('seed_pitch_deck_v3')) return true;
+    if (name.includes('sample_') || name.startsWith('sample')) return true;
+    return false;
+  };
+
   // Diligence analysis states
   const [isDiligenceRunning, setIsDiligenceRunning] = useState(false);
   const [diligenceStep, setDiligenceStep] = useState(0);
   const [diligenceReport, setDiligenceReport] = useState<DiligenceAuditReport | null>(() => {
     try {
+      const savedDocs = sessionStorage.getItem('waou_dataroom_docs');
+      if (!savedDocs || savedDocs === '[]') {
+        sessionStorage.removeItem('waou_dataroom_audit_report');
+        return null;
+      }
       const saved = sessionStorage.getItem('waou_dataroom_audit_report');
-      if (saved) return JSON.parse(saved);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (JSON.stringify(parsed).toLowerCase().includes('propmatik')) {
+          sessionStorage.removeItem('waou_dataroom_audit_report');
+          return null;
+        }
+        return parsed;
+      }
     } catch {}
     return null;
   });
@@ -141,24 +163,51 @@ export const DataRoomModule: React.FC<DataRoomModuleProps> = ({ startup, evaluat
     return name.includes(idLower) || name.includes(labelLower);
   };
 
-  // Uploaded docs state loaded from sessionStorage
+  // Uploaded docs state loaded from sessionStorage, strictly filtered to real user uploads
   const [docs, setDocs] = useState<UploadedDoc[]>(() => {
     try {
       const saved = sessionStorage.getItem('waou_dataroom_docs');
       if (saved) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed)) {
-          // Clean legacy fake docs if any
-          if (startup.id === 'user_active_startup' && parsed.some((d: any) => d.name?.includes('Seed_Pitch_Deck_V3.pdf'))) {
-            sessionStorage.removeItem('waou_dataroom_docs');
-            return [];
+          // Strictly purge legacy mock / sample docs (PropMatik, Seed_Pitch_Deck_V3, etc.)
+          const cleanDocs = parsed.filter((d: any) => !isMockOrLegacyDoc(d));
+          if (cleanDocs.length !== parsed.length) {
+            sessionStorage.setItem('waou_dataroom_docs', JSON.stringify(cleanDocs));
+            if (cleanDocs.length === 0) {
+              sessionStorage.removeItem('waou_dataroom_audit_report');
+            }
           }
-          return parsed;
+          return cleanDocs;
         }
       }
     } catch {}
     return [];
   });
+
+  // Ensure any stale mock or legacy data in storage is wiped cleanly on mount
+  useEffect(() => {
+    try {
+      const saved = sessionStorage.getItem('waou_dataroom_docs');
+      if (saved && (saved.toLowerCase().includes('propmatik') || saved.toLowerCase().includes('seed_pitch_deck_v3'))) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) {
+          const cleanDocs = parsed.filter((d: any) => !isMockOrLegacyDoc(d));
+          sessionStorage.setItem('waou_dataroom_docs', JSON.stringify(cleanDocs));
+          setDocs(cleanDocs);
+          if (cleanDocs.length === 0) {
+            sessionStorage.removeItem('waou_dataroom_audit_report');
+            setDiligenceReport(null);
+          }
+        }
+      }
+      const savedReport = sessionStorage.getItem('waou_dataroom_audit_report');
+      if (savedReport && savedReport.toLowerCase().includes('propmatik')) {
+        sessionStorage.removeItem('waou_dataroom_audit_report');
+        setDiligenceReport(null);
+      }
+    } catch {}
+  }, []);
 
   // Sync to session storage
   useEffect(() => {
@@ -170,13 +219,13 @@ export const DataRoomModule: React.FC<DataRoomModuleProps> = ({ startup, evaluat
   // Sync report to session storage
   useEffect(() => {
     try {
-      if (diligenceReport) {
+      if (diligenceReport && docs.length > 0) {
         sessionStorage.setItem('waou_dataroom_audit_report', JSON.stringify(diligenceReport));
       } else {
         sessionStorage.removeItem('waou_dataroom_audit_report');
       }
     } catch {}
-  }, [diligenceReport]);
+  }, [diligenceReport, docs.length]);
 
   // Multi-step animation labels
   const diligenceSteps = [
@@ -375,7 +424,28 @@ export const DataRoomModule: React.FC<DataRoomModuleProps> = ({ startup, evaluat
 
   // Delete document
   const handleDeleteDoc = (id: string) => {
-    setDocs((prev) => prev.filter((d) => d.id !== id));
+    setDocs((prev) => {
+      const updated = prev.filter((d) => d.id !== id);
+      if (updated.length === 0) {
+        setDiligenceReport(null);
+        try {
+          sessionStorage.removeItem('waou_dataroom_audit_report');
+        } catch {}
+      }
+      return updated;
+    });
+  };
+
+  // Clear all documents from repository
+  const handleClearAllDocs = () => {
+    setDocs([]);
+    setDiligenceReport(null);
+    try {
+      sessionStorage.removeItem('waou_dataroom_docs');
+      sessionStorage.removeItem('waou_dataroom_audit_report');
+    } catch {}
+    setDiligenceNotice('Data room repository cleared. Ready for your uploads.');
+    setTimeout(() => setDiligenceNotice(null), 3000);
   };
 
   // Manual re-assignment of document category
@@ -1175,25 +1245,51 @@ export const DataRoomModule: React.FC<DataRoomModuleProps> = ({ startup, evaluat
               </div>
             </div>
 
-            <button
-              onClick={() => fileInputRef.current?.click()}
-              style={{
-                fontSize: '0.75rem',
-                color: 'var(--text-brand)',
-                backgroundColor: 'var(--accent-bg-blue)',
-                padding: '0.4rem 0.8rem',
-                borderRadius: '8px',
-                border: '1px solid rgba(37, 99, 235, 0.25)',
-                fontWeight: 700,
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.35rem',
-              }}
-            >
-              <UploadCloud size={13} />
-              <span>+ Upload Device Files</span>
-            </button>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              {docs.length > 0 && (
+                <button
+                  type="button"
+                  onClick={handleClearAllDocs}
+                  style={{
+                    fontSize: '0.75rem',
+                    color: '#EF4444',
+                    backgroundColor: 'rgba(239, 68, 68, 0.08)',
+                    padding: '0.4rem 0.75rem',
+                    borderRadius: '8px',
+                    border: '1px solid rgba(239, 68, 68, 0.25)',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.35rem',
+                  }}
+                  title="Clear all documents from secure repository"
+                >
+                  <Trash2 size={13} />
+                  <span>Clear All</span>
+                </button>
+              )}
+
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                style={{
+                  fontSize: '0.75rem',
+                  color: 'var(--text-brand)',
+                  backgroundColor: 'var(--accent-bg-blue)',
+                  padding: '0.4rem 0.8rem',
+                  borderRadius: '8px',
+                  border: '1px solid rgba(37, 99, 235, 0.25)',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.35rem',
+                }}
+              >
+                <UploadCloud size={13} />
+                <span>+ Upload Device Files</span>
+              </button>
+            </div>
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>

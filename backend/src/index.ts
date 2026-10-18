@@ -104,15 +104,17 @@ registerProcessGuards();
 // Export the Express app as a Firebase Cloud Function
 export const api = onRequest({ cors: true, maxInstances: 10, timeoutSeconds: 300, memory: '1GiB', invoker: 'public' }, app);
 
-// Start Server locally only when NOT running in Firebase Cloud Functions or discovery mode
-const isFirebaseRuntime = Boolean(
-  process.env.FIREBASE_CONFIG || 
-  process.env.FUNCTION_TARGET || 
-  process.env.K_SERVICE || 
-  process.env.FUNCTIONS_EMULATOR
+// Only start standalone HTTP server when explicitly requested or run directly
+const isDirectExecution = Boolean(
+  process.env.STANDALONE_SERVER === 'true' ||
+  (process.env.NODE_ENV !== 'production' && 
+   !process.env.K_SERVICE && 
+   !process.env.FUNCTION_TARGET && 
+   !process.env.FIREBASE_CONFIG &&
+   !process.argv.some(arg => arg.includes('firebase')))
 );
 
-if (!isFirebaseRuntime && process.env.NODE_ENV !== 'production') {
+if (isDirectExecution) {
   app.listen(PORT, '0.0.0.0', () => {
     console.log(`Server is running on port ${PORT} (0.0.0.0)`);
   });

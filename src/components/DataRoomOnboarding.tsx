@@ -53,7 +53,16 @@ export const DataRoomOnboarding: React.FC<DataRoomOnboardingProps> = ({ userName
   const [files, setFiles] = useState<UploadedFile[]>(() => {
     try {
       const saved = sessionStorage.getItem('waou_onboard_files');
-      return saved ? JSON.parse(saved) : [];
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) {
+          return parsed.filter((f: any) => {
+            const n = String(f?.name || '').toLowerCase();
+            return !n.includes('propmatik') && !n.includes('seed_pitch_deck');
+          });
+        }
+      }
+      return [];
     } catch {
       return [];
     }
@@ -105,6 +114,30 @@ export const DataRoomOnboarding: React.FC<DataRoomOnboardingProps> = ({ userName
       status: 'uploaded',
     }));
     setFiles(prev => [...prev, ...added]);
+
+    // Synchronize into Virtual Data Room docs so they persist in the data locker
+    try {
+      const existingRaw = sessionStorage.getItem('waou_dataroom_docs');
+      const existingDocs = existingRaw ? JSON.parse(existingRaw) : [];
+      const newDataroomDocs = rawFiles.map(f => {
+        const ext = f.name.split('.').pop()?.toUpperCase() || 'FILE';
+        const sizeMb = (f.size / (1024 * 1024)).toFixed(1);
+        const isPitch = f.name.toLowerCase().includes('pitch') || f.name.toLowerCase().includes('deck') || f.type.includes('presentation');
+        const isFin = f.name.toLowerCase().includes('fin') || f.name.toLowerCase().includes('model') || f.name.endsWith('.xlsx');
+        return {
+          id: `onboard_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+          name: f.name,
+          size: sizeMb === '0.0' ? `${(f.size / 1024).toFixed(0)} KB` : `${sizeMb} MB`,
+          date: new Date().toISOString().split('T')[0],
+          format: ext.includes('XLS') ? 'Excel' : ext,
+          status: 'verified' as const,
+          isCloudStored: true,
+          requirementId: isPitch ? 'pitch_deck' : isFin ? 'fin_model' : undefined,
+          categoryLabel: isPitch ? 'Seed Pitch Deck' : isFin ? 'Dynamic Financial Model' : 'General Diligence File',
+        };
+      });
+      sessionStorage.setItem('waou_dataroom_docs', JSON.stringify([...newDataroomDocs, ...existingDocs]));
+    } catch {}
 
     // Asynchronously store into Google Cloud Storage (gs://project-f62f4191-7560-45ab-8f3)
     rawFiles.forEach(file => {
@@ -182,7 +215,7 @@ export const DataRoomOnboarding: React.FC<DataRoomOnboardingProps> = ({ userName
         <p style={{ fontSize: '1rem', color: '#64748B', lineHeight: 1.6 }}>
           {phase === 'upload' && 'Upload your pitch deck, financial model, or business plan. Our AI will extract key data and auto-fill your founder profile.'}
           {phase === 'analyzing' && 'Our institutional-grade AI is analyzing your documents across 48 fundraising vectors…'}
-          {phase === 'results' && 'Based on your uploaded documents, here\'s your preliminary funding readiness assessment.'}
+          {phase === 'results' && 'Your documents have been analyzed and your founder profile has been pre-filled. Click below to review your details and run full institutional analysis.'}
         </p>
       </div>
 
@@ -556,7 +589,7 @@ export const DataRoomOnboarding: React.FC<DataRoomOnboardingProps> = ({ userName
                 boxShadow: '0 8px 24px rgba(37,99,235,0.3)',
               }}
             >
-              <span>Open My Founder Studio</span>
+              <span>Review Pre-Filled Profile & Complete Details</span>
               <ArrowRight size={18} />
             </button>
           </div>

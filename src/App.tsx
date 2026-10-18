@@ -408,6 +408,11 @@ export default function App() {
 
   // ─── Data room analysis completed: auto-fill real startup profile ──
   const handleDataRoomComplete = (extractedData: ExtractedStartupData) => {
+    const rawAsk = extractedData.askAmount || '';
+    const numericAsk = rawAsk.replace(/[^0-9]/g, '');
+    const rawMrr = extractedData.mrr || '';
+    const numericMrr = rawMrr.replace(/[^0-9]/g, '');
+
     const merged: StartupProfile = {
       ...selectedStartup,
       name: extractedData.companyName || selectedStartup.name,
@@ -418,7 +423,9 @@ export default function App() {
       category: extractedData.sector || selectedStartup.category,
       sector: extractedData.sector || selectedStartup.sector,
       targetAsk: extractedData.askAmount || selectedStartup.targetAsk,
+      targetRaise: numericAsk || selectedStartup.targetRaise,
       mrr: extractedData.mrr || selectedStartup.mrr,
+      currentMrr: numericMrr || selectedStartup.currentMrr,
       tam: extractedData.tam || selectedStartup.tam,
       sam: extractedData.sam || selectedStartup.sam,
       som: extractedData.som || selectedStartup.som,
@@ -427,6 +434,12 @@ export default function App() {
 
     setSelectedStartup(merged);
     setAllStartups([merged]);
+
+    // Save draft for profile module so it immediately has all prefilled values
+    try {
+      sessionStorage.setItem(`waou_profile_draft_${merged.id}`, JSON.stringify(merged));
+      sessionStorage.setItem('waou_profile_prefilled_notice', 'true');
+    } catch {}
 
     // Persist to server
     if (auth.currentUser) {
@@ -456,14 +469,15 @@ export default function App() {
       origin: { y: 0.6 },
     });
 
+    // REDIRECT TO PROFILE AS REQUESTED: User reviews pre-filled data, completes profile, then runs analysis
     setCurrentView('app');
-    setActiveAppTab('dashboard');
+    setActiveAppTab('profile');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleSkipDataRoom = () => {
     setCurrentView('app');
-    setActiveAppTab('dashboard');
+    setActiveAppTab('profile');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
