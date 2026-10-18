@@ -243,7 +243,7 @@ export const WorkspaceModule: React.FC<WorkspaceModuleProps> = ({ startup, evalu
           </div>
         </div>
 
-        <div style={{ width: '280px' }}>
+        <div style={{ width: 'min(100%, 280px)' }}>
           <div style={{
             height: '10px',
             backgroundColor: 'var(--bg-secondary)',

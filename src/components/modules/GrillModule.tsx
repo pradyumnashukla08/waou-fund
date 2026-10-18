@@ -326,7 +326,7 @@ export const GrillModule: React.FC<GrillModuleProps> = ({ startup, setActiveTab 
 
           <div style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(3, 1fr)',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 200px), 1fr))',
             gap: '1rem',
             textAlign: 'left',
             marginBottom: '2.5rem',
@@ -600,7 +600,7 @@ export const GrillModule: React.FC<GrillModuleProps> = ({ startup, setActiveTab 
             {/* 4 Vector Scores Bar */}
             <div style={{
               display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 130px), 1fr))',
               gap: '1rem',
               marginBottom: '2rem',
             }}>

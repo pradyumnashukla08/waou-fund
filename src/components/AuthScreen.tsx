@@ -605,7 +605,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onComplete }) => {
                 </p>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '2rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 180px), 1fr))', gap: '1rem', marginBottom: '2rem' }}>
                 {ROLE_OPTIONS.map(opt => (
                   <button
                     key={opt.id}

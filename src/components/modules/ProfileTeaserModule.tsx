@@ -375,7 +375,7 @@ export const ProfileTeaserModule: React.FC<ProfileTeaserModuleProps> = ({
           </p>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem' }}>
           <button
             type="button"
             onClick={() => setShowTeaserPreview(!showTeaserPreview)}
@@ -764,13 +764,13 @@ export const ProfileTeaserModule: React.FC<ProfileTeaserModuleProps> = ({
                       backgroundColor: '#F8FAFC',
                       borderRadius: '12px',
                       border: '1px solid #E2E8F0',
-                      display: 'grid',
-                      gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr)) 40px',
+                      display: 'flex',
+                      flexWrap: 'wrap',
                       gap: '0.85rem',
                       alignItems: 'center',
                     }}
                   >
-                    <div>
+                    <div style={{ flex: '1 1 min(100%, 180px)' }}>
                       <input
                         type="text"
                         placeholder="Member Name"
@@ -788,7 +788,7 @@ export const ProfileTeaserModule: React.FC<ProfileTeaserModuleProps> = ({
                         }}
                       />
                     </div>
-                    <div>
+                    <div style={{ flex: '1 1 min(100%, 180px)' }}>
                       <input
                         type="text"
                         placeholder="Role / Responsibility (e.g. CTO)"
@@ -806,7 +806,7 @@ export const ProfileTeaserModule: React.FC<ProfileTeaserModuleProps> = ({
                         }}
                       />
                     </div>
-                    <div>
+                    <div style={{ flex: '1 1 min(100%, 180px)' }}>
                       <input
                         type="url"
                         placeholder="LinkedIn Profile URL"
@@ -2332,8 +2332,9 @@ export const ProfileTeaserModule: React.FC<ProfileTeaserModuleProps> = ({
             borderRadius: '20px',
             border: '2px solid #E2E8F0',
             boxShadow: '0 20px 40px rgba(0,0,0,0.06)',
-            padding: '3rem',
+            padding: 'clamp(1rem, 3.5vw, 3rem)',
             color: '#0F172A',
+            wordBreak: 'break-word',
           }}>
             {/* 1-Pager Header */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1.5rem', borderBottom: '2px solid #0F172A', paddingBottom: '1.5rem', marginBottom: '2rem' }}>
@@ -2341,7 +2342,7 @@ export const ProfileTeaserModule: React.FC<ProfileTeaserModuleProps> = ({
                 <span style={{ fontSize: '0.78rem', fontWeight: 800, color: '#2563EB', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
                   EXECUTIVE VENTURE TEASER • CONFIDENTIAL
                 </span>
-                <h1 style={{ fontSize: '2.5rem', fontWeight: 900, color: '#0F172A', letterSpacing: '-0.02em', marginTop: '4px' }}>
+                <h1 style={{ fontSize: 'clamp(1.6rem, 4vw, 2.5rem)', fontWeight: 900, color: '#0F172A', letterSpacing: '-0.02em', marginTop: '4px' }}>
                   {formData.companyName || formData.name}
                 </h1>
                 <p style={{ fontSize: '1.1rem', color: '#475569', fontWeight: 600, maxWidth: '680px', marginTop: '4px' }}>
@@ -2405,7 +2406,7 @@ export const ProfileTeaserModule: React.FC<ProfileTeaserModuleProps> = ({
             </div>
 
             {/* 2-Column Content: Market vs Defensibility */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '2rem', marginBottom: '2rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))', gap: '1.5rem', marginBottom: '2rem' }}>
               <div>
                 <h4 style={{ fontSize: '0.94rem', fontWeight: 800, color: '#0F172A', textTransform: 'uppercase', borderBottom: '1px solid #E2E8F0', paddingBottom: '0.5rem', marginBottom: '1rem' }}>
                   Market Opportunity (TAM / SAM / SOM)

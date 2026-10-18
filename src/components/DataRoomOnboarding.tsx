@@ -404,8 +404,8 @@ export const DataRoomOnboarding: React.FC<DataRoomOnboardingProps> = ({ userName
               border: '1px solid #E2E8F0',
               padding: '2rem',
               display: 'grid',
-              gridTemplateColumns: '1fr auto',
-              gap: '2rem',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 220px), 1fr))',
+              gap: '1.5rem',
               alignItems: 'center',
               boxShadow: '0 8px 30px rgba(0,0,0,0.05)',
             }}>
@@ -464,7 +464,7 @@ export const DataRoomOnboarding: React.FC<DataRoomOnboardingProps> = ({ userName
             )}
 
             {/* Two Column: Strengths & Red Flags */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 260px), 1fr))', gap: '1rem' }}>
               {/* Strengths */}
               <div style={{ backgroundColor: '#F0FDF4', borderRadius: '16px', border: '1px solid #BBF7D0', padding: '1.25rem' }}>
                 <h4 style={{ fontSize: '0.88rem', fontWeight: 800, color: '#15803D', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
@@ -495,7 +495,7 @@ export const DataRoomOnboarding: React.FC<DataRoomOnboardingProps> = ({ userName
               <h4 style={{ fontSize: '0.9rem', fontWeight: 800, color: '#0F172A', marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
                 <Eye size={16} color="#2563EB" /> Auto-Filled Profile Fields
               </h4>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.75rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 140px), 1fr))', gap: '0.75rem' }}>
                 {[
                   { label: 'Company', value: analysisResult.companyName },
                   { label: 'Funding Stage', value: analysisResult.stage },

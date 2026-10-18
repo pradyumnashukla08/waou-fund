@@ -104,8 +104,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         <div style={{ maxWidth: '1300px', margin: '0 auto', padding: '0 1.5rem', position: 'relative', zIndex: 1 }}>
           <div style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))',
-            gap: '3.5rem',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 320px), 1fr))',
+            gap: '3rem',
             alignItems: 'center',
           }}>
             {/* Left Column: Headline & Pitch */}
@@ -127,6 +127,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 lineHeight: 1.12,
                 color: '#0F172A',
                 letterSpacing: '-0.035em',
+                wordBreak: 'break-word',
               }}>
                 Raise Faster.<br />
                 Meet the Right<br />
@@ -134,7 +135,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               </h1>
 
               <p style={{
-                fontSize: '1.18rem',
+                fontSize: 'clamp(1rem, 2.5vw, 1.18rem)',
                 color: '#64748B',
                 lineHeight: 1.65,
                 maxWidth: '540px',
@@ -143,14 +144,15 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               </p>
 
               {/* Action Buttons */}
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', alignItems: 'center', paddingTop: '0.5rem' }}>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.85rem', alignItems: 'center', paddingTop: '0.5rem' }}>
                 <button 
                   onClick={onGetStarted}
                   className="btn-primary" 
                   style={{
-                    padding: '1rem 2rem',
-                    fontSize: '1.05rem',
+                    padding: '0.85rem 1.75rem',
+                    fontSize: '1rem',
                     borderRadius: '999px',
+                    minHeight: '48px',
                   }}
                 >
                   <span>Launch Founder Studio</span>
@@ -159,11 +161,12 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
                 <button 
                   onClick={onOpenDiagnostic}
-                  className="btn-outline"
+                  className="btn-outline" 
                   style={{
-                    padding: '1rem 1.75rem',
-                    fontSize: '1.02rem',
+                    padding: '0.85rem 1.6rem',
+                    fontSize: '0.98rem',
                     borderRadius: '999px',
+                    minHeight: '48px',
                   }}
                 >
                   <Sparkles size={18} color="#2563EB" />
@@ -174,21 +177,22 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               {/* Value Badges */}
               <div style={{
                 display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 140px), 1fr))',
                 gap: '1.25rem',
                 paddingTop: '1.5rem',
                 borderTop: '1px solid rgba(226, 232, 240, 0.8)',
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
                   <div style={{
-                    width: '34px',
-                    height: '34px',
+                    width: '36px',
+                    height: '36px',
                     borderRadius: '50%',
                     backgroundColor: '#EFF6FF',
                     color: '#2563EB',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
+                    flexShrink: 0,
                   }}>
                     <Zap size={16} />
                   </div>
@@ -200,14 +204,15 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
                   <div style={{
-                    width: '34px',
-                    height: '34px',
+                    width: '36px',
+                    height: '36px',
                     borderRadius: '50%',
                     backgroundColor: '#F0FDF4',
                     color: '#10B981',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
+                    flexShrink: 0,
                   }}>
                     <ShieldCheck size={16} />
                   </div>
@@ -219,14 +224,15 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
                   <div style={{
-                    width: '34px',
-                    height: '34px',
+                    width: '36px',
+                    height: '36px',
                     borderRadius: '50%',
                     backgroundColor: '#FAF5FF',
                     color: '#7857FF',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
+                    flexShrink: 0,
                   }}>
                     <TrendingUp size={16} />
                   </div>
@@ -239,7 +245,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             </div>
 
             {/* Right Column: Hero Interactive Diagnostic Card */}
-            <div style={{ display: 'flex', justifyContent: 'center' }}>
+            <div style={{ display: 'flex', justifyContent: 'center', width: '100%', minWidth: 0 }}>
               <div 
                 className="hero-preview-card"
                 style={{
@@ -431,8 +437,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         <div style={{ maxWidth: '1300px', margin: '0 auto' }}>
           <div style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-            gap: '2.5rem',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 140px), 1fr))',
+            gap: 'clamp(1.5rem, 3vw, 2.5rem)',
             textAlign: 'center',
           }}>
             <div>
@@ -483,8 +489,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
           <div style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))',
-            gap: '2rem',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 300px), 1fr))',
+            gap: 'clamp(1.25rem, 2.5vw, 2rem)',
           }}>
             {/* Feature 1 */}
             <div style={{
@@ -711,7 +717,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           <div style={{
             backgroundColor: '#FFFFFF',
             borderRadius: '24px',
-            padding: '3rem 2.5rem',
+            padding: 'clamp(1.5rem, 4vw, 3rem) clamp(1rem, 3vw, 2.5rem)',
             boxShadow: '0 20px 50px -10px rgba(0,0,0,0.06)',
             border: '1px solid #CBD5E1',
           }}>
@@ -729,8 +735,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
             <form onSubmit={calculateScore} style={{
               display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-              gap: '1.5rem',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 200px), 1fr))',
+              gap: '1.25rem',
               alignItems: 'flex-end',
             }}>
               <div>
@@ -877,8 +883,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
           <div style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
-            gap: '2rem',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))',
+            gap: 'clamp(1rem, 2vw, 2rem)',
           }}>
             <div style={{
               backgroundColor: '#FFFFFF',
@@ -1139,11 +1145,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             </div>
           </div>
 
-          <div style={{ display: 'flex', gap: '1.75rem', flexWrap: 'wrap' }}>
-            <a href="#privacy" style={{ color: '#64748B', textDecoration: 'none', fontWeight: 500 }}>Privacy Policy</a>
-            <a href="#terms" style={{ color: '#64748B', textDecoration: 'none', fontWeight: 500 }}>Terms of Service</a>
-            <a href="#security" style={{ color: '#64748B', textDecoration: 'none', fontWeight: 500 }}>Security & Cloud API</a>
-            <a href="#contact" style={{ color: '#2563EB', textDecoration: 'none', fontWeight: 600 }}>Contact Founder Team</a>
+          <div style={{ display: 'flex', gap: '1.25rem', flexWrap: 'wrap', alignItems: 'center' }}>
+            <a href="#privacy" style={{ color: '#64748B', textDecoration: 'none', fontWeight: 500, minHeight: '44px', display: 'inline-flex', alignItems: 'center' }}>Privacy Policy</a>
+            <a href="#terms" style={{ color: '#64748B', textDecoration: 'none', fontWeight: 500, minHeight: '44px', display: 'inline-flex', alignItems: 'center' }}>Terms of Service</a>
+            <a href="#security" style={{ color: '#64748B', textDecoration: 'none', fontWeight: 500, minHeight: '44px', display: 'inline-flex', alignItems: 'center' }}>Security & Cloud API</a>
+            <a href="#contact" style={{ color: '#2563EB', textDecoration: 'none', fontWeight: 600, minHeight: '44px', display: 'inline-flex', alignItems: 'center' }}>Contact Founder Team</a>
           </div>
         </div>
       </footer>

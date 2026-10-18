@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import confetti from 'canvas-confetti';
 import { 
   Users, 
@@ -23,6 +23,17 @@ export const MentorsModule: React.FC = () => {
   const [bookingTime, setBookingTime] = useState('15:00');
   const [bookingNotes, setBookingNotes] = useState('');
   const [isBooked, setIsBooked] = useState(false);
+
+  useEffect(() => {
+    if (selectedMentor) {
+      document.body.classList.add('modal-open');
+    } else {
+      document.body.classList.remove('modal-open');
+    }
+    return () => {
+      document.body.classList.remove('modal-open');
+    };
+  }, [selectedMentor]);
 
   const handleConfirmBooking = (e: React.FormEvent) => {
     e.preventDefault();
@@ -68,7 +79,7 @@ export const MentorsModule: React.FC = () => {
       {/* ── Mentors Grid ───────────────────────────────────────────────── */}
       <div style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))',
         gap: '1.5rem',
       }}>
         {MOCK_MENTORS.map((mentor) => (
@@ -181,18 +192,26 @@ export const MentorsModule: React.FC = () => {
             backgroundColor: '#FFFFFF',
             borderRadius: '24px',
             border: '1px solid rgba(20, 184, 166, 0.4)',
-            padding: '2.5rem',
+            padding: 'clamp(1.25rem, 4vw, 2.5rem)',
             maxWidth: '520px',
             width: '100%',
+            maxHeight: '90dvh',
+            overflowY: 'auto',
             boxShadow: 'var(--shadow-2xl)',
             position: 'relative',
           }}>
             <button
               onClick={() => setSelectedMentor(null)}
+              aria-label="Close modal"
               style={{
                 position: 'absolute',
-                top: '1.5rem',
-                right: '1.5rem',
+                top: '1rem',
+                right: '1rem',
+                width: '44px',
+                height: '44px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
                 background: 'none',
                 border: 'none',
                 color: 'var(--text-muted)',
@@ -222,7 +241,7 @@ export const MentorsModule: React.FC = () => {
                 </div>
 
                 <form onSubmit={handleConfirmBooking} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 180px), 1fr))', gap: '1rem' }}>
                     <div>
                       <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '0.35rem' }}>
                         Date

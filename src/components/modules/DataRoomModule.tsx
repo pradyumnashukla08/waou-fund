@@ -265,7 +265,7 @@ export const DataRoomModule: React.FC<DataRoomModuleProps> = ({ startup, evaluat
           </div>
         </div>
 
-        <div style={{ width: '260px' }}>
+        <div style={{ width: 'min(100%, 260px)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.74rem', color: 'var(--text-muted)', marginBottom: '4px' }}>
             <span>Progress</span>
             <span style={{ color: '#10B981', fontWeight: 800 }}>{readinessPercent}%</span>
@@ -289,7 +289,7 @@ export const DataRoomModule: React.FC<DataRoomModuleProps> = ({ startup, evaluat
       {/* ── Two Column: Required Checklist & Uploaded Files ────────────── */}
       <div style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))',
         gap: '1.5rem',
       }}>
         {/* Left: Stage-Aware Required Checklist */}
@@ -544,7 +544,7 @@ export const DataRoomModule: React.FC<DataRoomModuleProps> = ({ startup, evaluat
 
         <div style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))',
           gap: '1rem',
         }}>
           {[

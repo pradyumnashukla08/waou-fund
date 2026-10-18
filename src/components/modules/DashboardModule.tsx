@@ -173,8 +173,8 @@ export const DashboardModule: React.FC<DashboardModuleProps> = ({
 
         <div style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-          gap: '2.5rem',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))',
+          gap: '2rem',
           alignItems: 'center',
           position: 'relative',
           zIndex: 1,
@@ -248,7 +248,7 @@ export const DashboardModule: React.FC<DashboardModuleProps> = ({
           {/* Sub-Metric Columns */}
           <div style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(2, 1fr)',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 140px), 1fr))',
             gap: '1rem',
           }}>
             <div className="stat-card">
@@ -322,7 +322,7 @@ export const DashboardModule: React.FC<DashboardModuleProps> = ({
       {/* ── System Alerts & Daily AI Directive Two-Column ─────────────── */}
       <div style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))',
         gap: '1.5rem',
       }}>
         {/* Left: System Alerts & Vulnerabilities */}
@@ -577,7 +577,7 @@ export const DashboardModule: React.FC<DashboardModuleProps> = ({
 
         <div style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 240px), 1fr))',
           gap: '1rem',
         }}>
           {terminals.map((item) => {

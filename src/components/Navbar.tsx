@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { 
   Sparkles, 
   Flame, 
@@ -10,7 +10,16 @@ import {
   LogOut,
   Menu,
   X,
-  User
+  User,
+  Briefcase,
+  FileText,
+  Cpu,
+  Calculator,
+  Database,
+  TrendingUp,
+  Rocket,
+  Scale,
+  Users
 } from 'lucide-react';
 import { StartupProfile } from '../data/defaultData';
 
@@ -43,6 +52,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   openStreakModal,
   openDailyTaskModal,
   isDailyTaskDone,
+  activeAppTab,
   setActiveAppTab,
   onSignIn,
   onSignOut,
@@ -53,6 +63,18 @@ export const Navbar: React.FC<NavbarProps> = ({
   const [dropdownOpen, setDropdownOpen] = React.useState(false);
   const [userMenuOpen, setUserMenuOpen] = React.useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
+
+  // Prevent background scrolling when mobile menu drawer is open
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      document.body.classList.add('modal-open');
+    } else {
+      document.body.classList.remove('modal-open');
+    }
+    return () => {
+      document.body.classList.remove('modal-open');
+    };
+  }, [mobileMenuOpen]);
 
   return (
     <header style={{
@@ -541,9 +563,11 @@ export const Navbar: React.FC<NavbarProps> = ({
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             className="show-on-mobile"
             style={{
-              width: '40px',
-              height: '40px',
-              borderRadius: '10px',
+              width: '44px',
+              height: '44px',
+              minWidth: '44px',
+              minHeight: '44px',
+              borderRadius: '12px',
               backgroundColor: 'var(--bg-secondary)',
               border: '1px solid var(--border-subtle)',
               color: 'var(--text-primary)',
@@ -554,7 +578,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             }}
             aria-label="Toggle Navigation Menu"
           >
-            {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+            {mobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
           </button>
         </div>
       </div>
@@ -564,19 +588,28 @@ export const Navbar: React.FC<NavbarProps> = ({
         <div className="mobile-drawer-overlay" onClick={() => setMobileMenuOpen(false)}>
           <div className="mobile-drawer-content" onClick={(e) => e.stopPropagation()}>
             {/* Drawer Header */}
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: '1rem', borderBottom: '1px solid var(--border-subtle)', marginBottom: '1.25rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: '0.85rem', borderBottom: '1px solid var(--border-subtle)', marginBottom: '1rem' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-                <img src="/logo.png" alt="Logo" style={{ width: '28px', height: '28px', borderRadius: '8px' }} />
-                <span style={{ fontWeight: 800, fontSize: '1.1rem', color: 'var(--text-primary)' }}>Waou<span style={{ color: '#2563EB' }}>Fund</span></span>
+                <img src="/logo.png" alt="Logo" style={{ width: '32px', height: '32px', borderRadius: '8px', border: '1px solid #E2E8F0' }} />
+                <span style={{ fontWeight: 800, fontSize: '1.15rem', color: 'var(--text-primary)' }}>Waou<span style={{ color: '#2563EB' }}>Fund</span></span>
               </div>
               <button
+                type="button"
                 onClick={() => setMobileMenuOpen(false)}
+                aria-label="Close Navigation Drawer"
                 style={{
-                  background: 'none',
-                  border: 'none',
+                  background: 'var(--bg-secondary)',
+                  border: '1px solid var(--border-subtle)',
+                  borderRadius: '8px',
                   color: 'var(--text-muted)',
                   cursor: 'pointer',
-                  padding: '4px',
+                  width: '44px',
+                  height: '44px',
+                  minWidth: '44px',
+                  minHeight: '44px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
                 }}
               >
                 <X size={20} />
@@ -588,45 +621,49 @@ export const Navbar: React.FC<NavbarProps> = ({
               <div style={{
                 backgroundColor: 'var(--bg-secondary)',
                 borderRadius: '12px',
-                padding: '0.85rem',
-                marginBottom: '1.25rem',
+                padding: '0.75rem 0.85rem',
+                marginBottom: '1rem',
                 border: '1px solid var(--border-subtle)',
               }}>
-                <div style={{ fontSize: '0.72rem', fontWeight: 800, color: 'var(--text-hint)', textTransform: 'uppercase', marginBottom: '2px' }}>
+                <div style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-hint)', textTransform: 'uppercase', marginBottom: '2px' }}>
                   Authenticated Founder
                 </div>
-                <div style={{ fontSize: '0.92rem', fontWeight: 800, color: 'var(--text-primary)' }}>{userName || 'Founder'}</div>
-                {userEmail && <div style={{ fontSize: '0.76rem', color: 'var(--text-muted)' }}>{userEmail}</div>}
+                <div style={{ fontSize: '0.9rem', fontWeight: 800, color: 'var(--text-primary)' }}>{userName || 'Founder'}</div>
+                {userEmail && <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>{userEmail}</div>}
               </div>
             )}
 
             {/* Navigation Mode Switcher */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '1.25rem' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '1rem' }}>
               <button
+                type="button"
                 onClick={() => {
                   setCurrentView('landing');
                   setMobileMenuOpen(false);
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
                 }}
                 style={{
                   display: 'flex',
                   alignItems: 'center',
                   gap: '0.6rem',
                   padding: '0.75rem 1rem',
+                  minHeight: '44px',
                   borderRadius: '12px',
                   border: '1px solid var(--border-subtle)',
                   backgroundColor: currentView === 'landing' ? 'var(--accent-bg-blue)' : '#FFFFFF',
                   color: currentView === 'landing' ? 'var(--text-brand)' : 'var(--text-primary)',
                   fontWeight: 700,
-                  fontSize: '0.9rem',
+                  fontSize: '0.88rem',
                   cursor: 'pointer',
                   textAlign: 'left',
                 }}
               >
-                <Globe size={16} />
+                <Globe size={18} />
                 <span>Overview & Product Tour</span>
               </button>
 
               <button
+                type="button"
                 onClick={() => {
                   if (isLoggedIn) {
                     setCurrentView('app');
@@ -634,23 +671,25 @@ export const Navbar: React.FC<NavbarProps> = ({
                     onSignIn?.();
                   }
                   setMobileMenuOpen(false);
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
                 }}
                 style={{
                   display: 'flex',
                   alignItems: 'center',
                   gap: '0.6rem',
                   padding: '0.75rem 1rem',
+                  minHeight: '44px',
                   borderRadius: '12px',
                   border: '1px solid var(--border-subtle)',
                   backgroundColor: currentView === 'app' ? 'var(--accent-bg-blue)' : '#FFFFFF',
                   color: currentView === 'app' ? 'var(--text-brand)' : 'var(--text-primary)',
                   fontWeight: 700,
-                  fontSize: '0.9rem',
+                  fontSize: '0.88rem',
                   cursor: 'pointer',
                   textAlign: 'left',
                 }}
               >
-                <LayoutDashboard size={16} />
+                <LayoutDashboard size={18} />
                 <span>Founder Studio Workspace</span>
                 <span style={{
                   marginLeft: 'auto',
@@ -667,21 +706,24 @@ export const Navbar: React.FC<NavbarProps> = ({
             </div>
 
             {/* Quick Actions */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', marginBottom: '1.5rem' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '1.25rem' }}>
               <button
+                type="button"
                 onClick={() => {
                   setActiveAppTab('diagnostic');
                   setCurrentView('app');
                   setMobileMenuOpen(false);
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
                 }}
                 className="btn-cyan"
-                style={{ width: '100%', padding: '0.7rem 1rem', fontSize: '0.88rem' }}
+                style={{ width: '100%', padding: '0.7rem 1rem', fontSize: '0.88rem', minHeight: '44px' }}
               >
-                <Sparkles size={15} />
+                <Sparkles size={16} />
                 <span>Diagnose Pitch Deck</span>
               </button>
 
               <button
+                type="button"
                 onClick={() => {
                   openDailyTaskModal();
                   setMobileMenuOpen(false);
@@ -692,6 +734,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                   justifyContent: 'center',
                   gap: '0.5rem',
                   padding: '0.7rem 1rem',
+                  minHeight: '44px',
                   borderRadius: 'var(--radius-full)',
                   backgroundColor: isDailyTaskDone ? 'var(--accent-bg-emerald)' : 'var(--accent-bg-blue)',
                   border: isDailyTaskDone ? '1px solid rgba(16, 185, 129, 0.3)' : '1px solid rgba(37, 99, 235, 0.2)',
@@ -701,10 +744,94 @@ export const Navbar: React.FC<NavbarProps> = ({
                   cursor: 'pointer',
                 }}
               >
-                <ShieldCheck size={15} />
+                <ShieldCheck size={16} />
                 <span>{isDailyTaskDone ? 'Daily Directive: Completed' : 'Open Daily AI Directive'}</span>
               </button>
             </div>
+
+            {/* If in app mode, render full modular workspace directory */}
+            {currentView === 'app' && (
+              <div style={{ marginBottom: '1.25rem' }}>
+                <div style={{
+                  fontSize: '0.7rem',
+                  fontWeight: 800,
+                  color: 'var(--text-hint)',
+                  letterSpacing: '0.08em',
+                  textTransform: 'uppercase',
+                  marginBottom: '0.4rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.35rem',
+                }}>
+                  <Sparkles size={11} color="var(--text-brand)" />
+                  Studio Modules
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
+                  {[
+                    { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, badge: 'HOT' },
+                    { id: 'workspace', label: 'Readiness Hub', icon: Briefcase },
+                    { id: 'diagnostic', label: 'Deck Diagnostic', icon: FileText, badge: 'AI' },
+                    { id: 'grill', label: 'AI Investor Grill', icon: Cpu, badge: 'CALL 1' },
+                    { id: 'finance', label: 'Financial Command', icon: Calculator },
+                    { id: 'dataroom', label: 'Virtual Data Room', icon: Database },
+                    { id: 'market', label: 'Market & Traction', icon: TrendingUp },
+                    { id: 'gtm', label: 'GTM Strategy', icon: Rocket },
+                    { id: 'actionplan', label: 'Action Plan', icon: ShieldCheck },
+                    { id: 'legaldocs', label: 'Legal Standards', icon: Scale },
+                    { id: 'mentors', label: 'Mentor Directory', icon: Users },
+                    { id: 'profile', label: 'Profile & 1-Pager', icon: User },
+                  ].map((m) => {
+                    const ModIcon = m.icon;
+                    const isModActive = activeAppTab === m.id;
+                    return (
+                      <button
+                        key={m.id}
+                        type="button"
+                        onClick={() => {
+                          setActiveAppTab(m.id);
+                          setMobileMenuOpen(false);
+                          window.scrollTo({ top: 0, behavior: 'smooth' });
+                        }}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          padding: '0.65rem 0.75rem',
+                          minHeight: '44px',
+                          borderRadius: '8px',
+                          border: isModActive ? '1px solid rgba(37, 99, 235, 0.2)' : 'none',
+                          backgroundColor: isModActive ? 'var(--accent-bg-blue)' : 'transparent',
+                          color: isModActive ? 'var(--text-brand)' : 'var(--text-secondary)',
+                          cursor: 'pointer',
+                          textAlign: 'left',
+                          fontFamily: 'var(--font-sans)',
+                          width: '100%',
+                        }}
+                      >
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+                          <ModIcon size={16} color={isModActive ? 'var(--text-brand)' : 'var(--text-muted)'} />
+                          <span style={{ fontSize: '0.85rem', fontWeight: isModActive ? 800 : 500 }}>
+                            {m.label}
+                          </span>
+                        </div>
+                        {m.badge && (
+                          <span style={{
+                            fontSize: '0.62rem',
+                            fontWeight: 800,
+                            padding: '1px 5px',
+                            borderRadius: '4px',
+                            backgroundColor: isModActive ? 'var(--color-brand-600)' : 'var(--bg-secondary)',
+                            color: isModActive ? '#FFFFFF' : 'var(--text-hint)',
+                          }}>
+                            {m.badge}
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
 
             {/* Active Venture Picker in Drawer */}
             <div style={{ marginBottom: 'auto' }}>
@@ -720,7 +847,8 @@ export const Navbar: React.FC<NavbarProps> = ({
                       setMobileMenuOpen(false);
                     }}
                     style={{
-                      padding: '0.6rem 0.75rem',
+                      padding: '0.65rem 0.75rem',
+                      minHeight: '44px',
                       borderRadius: '8px',
                       cursor: 'pointer',
                       display: 'flex',
@@ -735,7 +863,9 @@ export const Navbar: React.FC<NavbarProps> = ({
                       <div style={{ fontSize: '0.84rem', fontWeight: 700 }}>{s.name}</div>
                       <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>{s.stage}</div>
                     </div>
-                    <span style={{ fontSize: '0.75rem', color: '#10B981', fontWeight: 700 }}>{s.fundabilityScore}/100</span>
+                    <span style={{ fontSize: '0.75rem', color: s.fundabilityScore ? '#10B981' : 'var(--text-hint)', fontWeight: 700 }}>
+                      {s.fundabilityScore ? `${s.fundabilityScore}/100` : 'Not Scored'}
+                    </span>
                   </div>
                 ))}
               </div>
@@ -745,12 +875,13 @@ export const Navbar: React.FC<NavbarProps> = ({
             <div style={{ paddingTop: '1.25rem', borderTop: '1px solid var(--border-subtle)', marginTop: '1.25rem' }}>
               {!isLoggedIn ? (
                 <button
+                  type="button"
                   onClick={() => {
                     onSignIn?.();
                     setMobileMenuOpen(false);
                   }}
                   className="btn-primary"
-                  style={{ width: '100%', padding: '0.75rem', fontSize: '0.9rem' }}
+                  style={{ width: '100%', padding: '0.75rem', fontSize: '0.9rem', minHeight: '44px' }}
                 >
                   <span>Sign In to Account</span>
                   <ArrowRight size={15} />
@@ -758,6 +889,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               ) : (
                 onSignOut && (
                   <button
+                    type="button"
                     onClick={() => {
                       onSignOut();
                       setMobileMenuOpen(false);
@@ -769,6 +901,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                       justifyContent: 'center',
                       gap: '0.5rem',
                       padding: '0.7rem',
+                      minHeight: '44px',
                       borderRadius: 'var(--radius-full)',
                       border: '1.5px solid #FEE2E2',
                       backgroundColor: '#FEF2F2',
@@ -778,7 +911,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                       cursor: 'pointer',
                     }}
                   >
-                    <LogOut size={15} />
+                    <LogOut size={16} />
                     <span>Sign Out</span>
                   </button>
                 )

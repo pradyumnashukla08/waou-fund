@@ -127,7 +127,7 @@ export const ActionPlanModule: React.FC<ActionPlanModuleProps> = ({ evaluation, 
           </div>
         </div>
 
-        <div style={{ width: '260px' }}>
+        <div style={{ width: 'min(100%, 260px)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.74rem', color: 'var(--text-muted)', marginBottom: '4px' }}>
             <span>Milestones</span>
             <span style={{ color: '#10B981', fontWeight: 800 }}>{progressPercent}%</span>

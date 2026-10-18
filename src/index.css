@@ -406,6 +406,68 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 /* ── Responsive Mobile Utilities ──────────────────────── */
+body.modal-open {
+  overflow: hidden !important;
+  touch-action: none;
+}
+
+/* Touch targets and form controls */
+button, a, input, select, textarea {
+  touch-action: manipulation;
+}
+
+/* Ensure inputs on mobile are at least 16px to prevent iOS Safari auto-zoom jump */
+@media (max-width: 768px) {
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="number"],
+  input[type="url"],
+  input[type="date"],
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+}
+
+/* Responsive Table Container with smooth horizontal scroll */
+.table-responsive-container {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border-radius: var(--radius-md);
+  scrollbar-width: thin;
+}
+
+.table-responsive-container table {
+  min-width: 600px;
+  width: 100%;
+}
+
+/* ── Tablet Breakpoints (769px - 1024px) ─────────────── */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .sidebar-desktop {
+    width: 220px !important;
+    padding: 1.25rem 0.75rem !important;
+    gap: 1rem !important;
+  }
+
+  .founder-main-content {
+    padding: 1.75rem 1.25rem !important;
+  }
+
+  .nav-item {
+    padding: 0.6rem 0.65rem !important;
+    font-size: 0.82rem !important;
+  }
+
+  .landing-page section {
+    padding-left: 1.5rem !important;
+    padding-right: 1.5rem !important;
+  }
+}
+
+/* ── Mobile Devices (<= 768px) ────────────────────────── */
 @media (max-width: 768px) {
   .sidebar-desktop {
     display: none !important;
@@ -419,8 +481,19 @@ h1, h2, h3, h4, h5, h6 {
     display: flex !important;
   }
 
+  header {
+    height: 64px !important;
+  }
+
+  header > div {
+    height: 64px !important;
+    padding: 0 1rem !important;
+  }
+
   .founder-main-content {
-    padding: 1rem 0.75rem !important;
+    padding: 1rem 0.85rem !important;
+    max-width: 100vw !important;
+    box-sizing: border-box !important;
   }
 
   .card-elevated, .card-gradient-top {
@@ -438,11 +511,11 @@ h1, h2, h3, h4, h5, h6 {
   }
 
   .dataroom-page-container {
-    padding: 1.5rem 1rem !important;
+    padding: 1.25rem 0.85rem !important;
   }
 
   .dataroom-dropzone {
-    padding: 2rem 1rem !important;
+    padding: 1.75rem 1rem !important;
   }
 
   /* Prevent any element or grid from overflowing mobile viewport */
@@ -457,7 +530,8 @@ h1, h2, h3, h4, h5, h6 {
   div[style*="minmax(26"], 
   div[style*="minmax(25"],
   div[style*="minmax(24"],
-  div[style*="minmax(22"] {
+  div[style*="minmax(22"],
+  div[style*="minmax(20"] {
     grid-template-columns: 1fr !important;
   }
 
@@ -472,7 +546,7 @@ h1, h2, h3, h4, h5, h6 {
     padding-left: 1rem !important;
     padding-right: 1rem !important;
     padding-top: 2.5rem !important;
-    padding-bottom: 3.5rem !important;
+    padding-bottom: 3rem !important;
   }
 
   /* Compact button styling on mobile */
@@ -483,22 +557,47 @@ h1, h2, h3, h4, h5, h6 {
 
   /* Touch targets minimum */
   button, a {
-    min-height: 40px;
+    min-height: 44px;
   }
 
   /* Heading adjustments for mobile screens */
   h1 {
-    font-size: clamp(1.5rem, 5vw, 2.2rem) !important;
-    line-height: 1.25 !important;
+    font-size: clamp(1.45rem, 5.5vw, 2.1rem) !important;
+    line-height: 1.22 !important;
+    word-break: break-word;
   }
 
   h2 {
-    font-size: clamp(1.25rem, 4vw, 1.75rem) !important;
+    font-size: clamp(1.2rem, 4.5vw, 1.65rem) !important;
+    line-height: 1.28 !important;
+    word-break: break-word;
+  }
+
+  h3 {
+    font-size: clamp(1.05rem, 3.8vw, 1.35rem) !important;
     line-height: 1.3 !important;
   }
 
   p {
     font-size: 0.88rem !important;
+    line-height: 1.55 !important;
+  }
+}
+
+/* ── Small Mobile Devices (<= 380px) ──────────────────── */
+@media (max-width: 380px) {
+  .founder-main-content {
+    padding: 0.75rem 0.5rem !important;
+  }
+
+  .card-elevated, .card-gradient-top {
+    padding: 1rem 0.75rem !important;
+    border-radius: 14px !important;
+  }
+
+  .btn-primary, .btn-cyan, .btn-outline {
+    padding: 0.6rem 0.95rem;
+    font-size: 0.82rem;
   }
 }
 
@@ -514,13 +613,13 @@ h1, h2, h3, h4, h5, h6 {
   overflow-x: auto;
   white-space: nowrap;
   gap: 0.5rem;
-  padding: 0.65rem 1rem;
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  padding: 0.5rem 0.85rem;
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border-bottom: 1px solid var(--border-subtle);
   position: sticky;
-  top: 72px;
+  top: 64px;
   z-index: 40;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
@@ -534,7 +633,8 @@ h1, h2, h3, h4, h5, h6 {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  padding: 0.5rem 0.9rem;
+  padding: 0.45rem 0.85rem;
+  min-height: 38px;
   border-radius: var(--radius-full);
   font-size: 0.8rem;
   font-weight: 700;
@@ -557,9 +657,9 @@ h1, h2, h3, h4, h5, h6 {
 .mobile-drawer-overlay {
   position: fixed;
   inset: 0;
-  background-color: rgba(15, 23, 42, 0.6);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
+  background-color: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
   z-index: 100;
   display: flex;
   justifyContent: flex-end;
@@ -567,15 +667,18 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .mobile-drawer-content {
-  width: 85%;
-  max-width: 340px;
+  width: 88%;
+  max-width: 360px;
   height: 100%;
+  max-height: 100dvh;
   background: #FFFFFF;
-  box-shadow: -8px 0 24px rgba(0, 0, 0, 0.15);
+  box-shadow: -8px 0 30px rgba(0, 0, 0, 0.2);
   display: flex;
   flex-direction: column;
-  padding: 1.5rem;
+  padding: 1.25rem 1.15rem;
+  padding-bottom: calc(1.25rem + env(safe-area-inset-bottom, 0px));
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   animation: slideDrawer 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 

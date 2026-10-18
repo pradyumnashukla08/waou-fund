@@ -187,7 +187,7 @@ Sales & Outbound,${(190 * multiplier).toFixed(0)},${(440 * multiplier).toFixed(0
       {/* ── Key Metrics Cards Row ───────────────────────────────────────── */}
       <div style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 200px), 1fr))',
         gap: '1rem',
       }}>
         <div className="card-elevated" style={{ borderRadius: '16px', padding: '1.25rem' }}>
@@ -242,7 +242,7 @@ Sales & Outbound,${(190 * multiplier).toFixed(0)},${(440 * multiplier).toFixed(0
 
         <div style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 240px), 1fr))',
           gap: '2rem',
         }}>
           {/* Slider 1: Hires */}
@@ -371,8 +371,8 @@ Sales & Outbound,${(190 * multiplier).toFixed(0)},${(440 * multiplier).toFixed(0
           </div>
         </div>
 
-        <div style={{ overflowX: 'auto' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.88rem' }}>
+        <div className="table-responsive-container" style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch', margin: '0 -0.5rem', padding: '0 0.5rem' }}>
+          <table style={{ width: '100%', minWidth: '600px', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.88rem' }}>
             <thead>
               <tr style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.1)', color: 'var(--text-muted)' }}>
                 <th style={{ padding: '0.85rem 1rem', fontWeight: 700 }}>Line Item</th>

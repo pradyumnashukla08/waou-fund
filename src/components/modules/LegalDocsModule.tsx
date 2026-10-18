@@ -276,12 +276,13 @@ Authorized Representative`,
               <div
                 onClick={() => setExpandedIdx(isOpen ? null : idx)}
                 style={{
-                  padding: '1.25rem 1.75rem',
+                  padding: '1rem clamp(1rem, 3vw, 1.75rem)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'space-between',
                   cursor: 'pointer',
                   userSelect: 'none',
+                  gap: '0.75rem',
                 }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
@@ -312,7 +313,7 @@ Authorized Representative`,
 
               {isOpen && (
                 <div style={{
-                  padding: '0 1.75rem 1.75rem 1.75rem',
+                  padding: '0 clamp(1rem, 3vw, 1.75rem) 1.5rem clamp(1rem, 3vw, 1.75rem)',
                   display: 'flex',
                   flexDirection: 'column',
                   gap: '1rem',

@@ -237,6 +237,18 @@ export default function App() {
   const [showStreakModal, setShowStreakModal] = useState<boolean>(false);
   const [showDailyTaskModal, setShowDailyTaskModal] = useState<boolean>(false);
 
+  // Sync scroll lock with modal states
+  useEffect(() => {
+    if (showStreakModal || showDailyTaskModal) {
+      document.body.classList.add('modal-open');
+    } else {
+      document.body.classList.remove('modal-open');
+    }
+    return () => {
+      document.body.classList.remove('modal-open');
+    };
+  }, [showStreakModal, showDailyTaskModal]);
+
   // ─── Firebase Auth Session Observer ──────────────────────────────────
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
@@ -604,25 +616,28 @@ export default function App() {
             backgroundColor: '#FFFFFF',
             borderRadius: '24px',
             border: '1px solid var(--border-subtle)',
-            padding: '2.5rem',
+            padding: 'clamp(1.25rem, 4vw, 2.5rem)',
             maxWidth: '480px',
             width: '100%',
+            maxHeight: '90dvh',
+            overflowY: 'auto',
             textAlign: 'center',
             boxShadow: 'var(--shadow-2xl)',
             position: 'relative',
           }}>
             <button
               onClick={() => setShowStreakModal(false)}
+              aria-label="Close streak modal"
               style={{
                 position: 'absolute',
-                top: '1.25rem',
-                right: '1.25rem',
+                top: '1rem',
+                right: '1rem',
                 background: 'var(--bg-secondary)',
                 border: '1px solid var(--border-subtle)',
                 color: 'var(--text-muted)',
-                width: '32px',
-                height: '32px',
-                borderRadius: '8px',
+                width: '44px',
+                height: '44px',
+                borderRadius: '10px',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -698,24 +713,27 @@ export default function App() {
             backgroundColor: '#FFFFFF',
             borderRadius: '24px',
             border: '1px solid var(--border-subtle)',
-            padding: '2.5rem',
+            padding: 'clamp(1.25rem, 4vw, 2.5rem)',
             maxWidth: '520px',
             width: '100%',
+            maxHeight: '90dvh',
+            overflowY: 'auto',
             boxShadow: 'var(--shadow-2xl)',
             position: 'relative',
           }}>
             <button
               onClick={() => setShowDailyTaskModal(false)}
+              aria-label="Close daily task modal"
               style={{
                 position: 'absolute',
-                top: '1.25rem',
-                right: '1.25rem',
+                top: '1rem',
+                right: '1rem',
                 background: 'var(--bg-secondary)',
                 border: '1px solid var(--border-subtle)',
                 color: 'var(--text-muted)',
-                width: '32px',
-                height: '32px',
-                borderRadius: '8px',
+                width: '44px',
+                height: '44px',
+                borderRadius: '10px',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',

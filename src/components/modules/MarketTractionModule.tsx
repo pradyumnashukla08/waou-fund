@@ -137,10 +137,10 @@ export const MarketTractionModule: React.FC<MarketTractionModuleProps> = ({ star
           {/* Concentric Circle Visual & Stat Grid */}
           <div className="card-elevated" style={{
             borderRadius: '20px',
-            padding: '2.5rem',
+            padding: 'clamp(1.25rem, 4vw, 2.5rem)',
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-            gap: '2.5rem',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 260px), 1fr))',
+            gap: '2rem',
             alignItems: 'center',
           }}>
             {/* Concentric Circles Visualization */}
@@ -267,7 +267,7 @@ export const MarketTractionModule: React.FC<MarketTractionModuleProps> = ({ star
                 No competitors benchmarked yet. Add competitor URLs and defensibility moats in Profile & 1-Pager or upload your deck to analyze market moats.
               </div>
             ) : (
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 240px), 1fr))', gap: '1rem' }}>
                 {ml.competitors.map((comp, idx) => (
                   <div
                     key={idx}

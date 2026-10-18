@@ -75,11 +75,12 @@ export const FounderApp: React.FC<FounderAppProps> = ({
 
   return (
     <div className="bg-app-surface" style={{
-      minHeight: 'calc(100vh - 72px)',
+      minHeight: 'calc(100dvh - 64px)',
       color: 'var(--text-primary)',
       display: 'flex',
       flexDirection: 'column',
       width: '100%',
+      overflowX: 'hidden',
     }}>
       {/* ── Mobile Horizontal Tab Navigation (Visible on mobile only) ────────────────── */}
       <div className="show-on-mobile mobile-tabs-container">
@@ -111,7 +112,7 @@ export const FounderApp: React.FC<FounderAppProps> = ({
         })}
       </div>
 
-      <div style={{ display: 'flex', flex: 1, width: '100%' }}>
+      <div style={{ display: 'flex', flex: 1, width: '100%', minWidth: 0 }}>
         {/* ── Left Sidebar Navigation (Desktop) ──────────────────────────────────── */}
         <aside className="sidebar-desktop" style={{
           width: '280px',
@@ -278,6 +279,7 @@ export const FounderApp: React.FC<FounderAppProps> = ({
           margin: '0 auto',
           width: '100%',
           overflowY: 'auto',
+          minWidth: 0,
         }}
       >
         {activeTab === 'dashboard' && (
