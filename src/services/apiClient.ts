@@ -99,9 +99,9 @@ async function request<T>(
     headers['Content-Type'] = 'application/json';
   }
 
-  // 4-second client-side timeout signal if not already provided
+  // 12-second client-side timeout signal if not already provided
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 4000);
+  const timeoutId = setTimeout(() => controller.abort(), 12000);
   const signal = options.signal || controller.signal;
 
   try {

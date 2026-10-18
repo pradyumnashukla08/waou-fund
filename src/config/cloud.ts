@@ -2,13 +2,13 @@
 // Sourced from pitchy backend & Google Cloud / Render deployment
 
 export const CLOUD_CONFIG = {
-  // Live Cloud API endpoints
-  PRIMARY_API_URL: '',
-  FALLBACK_API_URL: '',
+  // Live Cloud API endpoints (Google Cloud / Firebase Functions)
+  PRIMARY_API_URL: 'https://api-45dvc4s67a-uc.a.run.app/api',
+  FALLBACK_API_URL: 'https://api-45dvc4s67a-uc.a.run.app',
   
   // Health endpoints
-  HEALTH_URL: '',
-  ROOT_URL: '',
+  HEALTH_URL: 'https://api-45dvc4s67a-uc.a.run.app/health',
+  ROOT_URL: 'https://api-45dvc4s67a-uc.a.run.app',
 
   // Firebase Cloud Project
   FIREBASE: {

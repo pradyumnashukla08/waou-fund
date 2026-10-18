@@ -35,7 +35,7 @@ export const api = {
         fileSize,
         stage,
       }, {
-        signal: AbortSignal.timeout(3500)
+        signal: AbortSignal.timeout(12000)
       });
 
       if (response && response.success && response.result?.overall_score) {

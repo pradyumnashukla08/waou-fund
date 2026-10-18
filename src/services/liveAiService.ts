@@ -166,7 +166,7 @@ export const liveAiService = {
         question,
         startupContext,
       }, {
-        signal: AbortSignal.timeout(3500)
+        signal: AbortSignal.timeout(12000)
       });
 
       if (response && response.success && response.answer) {
@@ -203,7 +203,7 @@ export const liveAiService = {
         context,
         instruction,
       }, {
-        signal: AbortSignal.timeout(3500)
+        signal: AbortSignal.timeout(12000)
       });
 
       if (response && response.success && response.result) {
@@ -251,7 +251,7 @@ export const liveAiService = {
       const response = await apiClient.post<{ success: boolean; data: ExtractedStartupData }>('/ai/extract-documents', {
         files: filePayload,
       }, {
-        signal: AbortSignal.timeout(3500)
+        signal: AbortSignal.timeout(12000)
       });
 
       if (response && response.success && response.data?.companyName) {
@@ -277,7 +277,7 @@ export const liveAiService = {
         qaPairs,
         startupContext,
       }, {
-        signal: AbortSignal.timeout(3500)
+        signal: AbortSignal.timeout(12000)
       });
 
       if (response && response.success && response.verdict?.clarity_score) {
