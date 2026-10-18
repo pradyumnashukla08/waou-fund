@@ -85,14 +85,20 @@ app.use('/api/finance', ipAiLimiter, financeRouter);
 // limiter: rate limiting it would throttle a client polling its own score.
 app.use('/api/readiness', readinessRouter);
 
-// Root endpoint for Uptime monitors
-app.get('/', (req, res) => {
-  res.status(200).send('Venture Wolf API is online.');
+// Root and API status endpoints
+app.get(['/', '/api'], (req, res) => {
+  res.status(200).json({
+    status: 'online',
+    service: 'WaouFund Backend Cloud API',
+    version: '1.0.0',
+    webApp: 'https://project-f62f4191-7560-45ab-8f3.web.app',
+    message: 'WaouFund Backend API is running and ready for requests.',
+  });
 });
 
 // Health check endpoint
-app.get('/health', (req, res) => {
-  res.status(200).json({ status: 'ok', message: 'Venture Wolf Backend is running' });
+app.get(['/health', '/api/health'], (req, res) => {
+  res.status(200).json({ status: 'ok', message: 'WaouFund Backend is running' });
 });
 
 // Global Error Handler — MUST be registered after all routes
