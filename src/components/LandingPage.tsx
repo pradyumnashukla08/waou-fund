@@ -1148,8 +1148,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           <div style={{ display: 'flex', gap: '1.25rem', flexWrap: 'wrap', alignItems: 'center' }}>
             <a href="#privacy" style={{ color: '#64748B', textDecoration: 'none', fontWeight: 500, minHeight: '44px', display: 'inline-flex', alignItems: 'center' }}>Privacy Policy</a>
             <a href="#terms" style={{ color: '#64748B', textDecoration: 'none', fontWeight: 500, minHeight: '44px', display: 'inline-flex', alignItems: 'center' }}>Terms of Service</a>
-            <a href="#security" style={{ color: '#64748B', textDecoration: 'none', fontWeight: 500, minHeight: '44px', display: 'inline-flex', alignItems: 'center' }}>Security & Cloud API</a>
-            <a href="#contact" style={{ color: '#2563EB', textDecoration: 'none', fontWeight: 600, minHeight: '44px', display: 'inline-flex', alignItems: 'center' }}>Contact Founder Team</a>
           </div>
         </div>
       </footer>
