@@ -97,7 +97,7 @@ export const GTMModule: React.FC<GTMModuleProps> = ({ startup, evaluation }) => 
         <div className="card-elevated" style={{ borderRadius: '16px', padding: '1.25rem' }}>
           <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 800 }}>BLENDED CAC</span>
           <div style={{ fontSize: '1.6rem', fontWeight: 900, color: 'var(--text-brand)', marginTop: '0.25rem', fontFamily: 'var(--font-mono)' }}>
-            ₹{gtm.blended_cac.toLocaleString()}
+            {gtm.blended_cac > 0 ? `₹${gtm.blended_cac.toLocaleString()}` : 'Not Set'}
           </div>
           <span style={{ fontSize: '0.72rem', color: 'var(--text-hint)' }}>Per enterprise account</span>
         </div>
@@ -105,7 +105,7 @@ export const GTMModule: React.FC<GTMModuleProps> = ({ startup, evaluation }) => 
         <div className="card-elevated" style={{ borderRadius: '16px', padding: '1.25rem' }}>
           <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 800 }}>ESTIMATED LTV</span>
           <div style={{ fontSize: '1.6rem', fontWeight: 900, color: '#10B981', marginTop: '0.25rem', fontFamily: 'var(--font-mono)' }}>
-            ₹{gtm.ltv.toLocaleString()}
+            {gtm.ltv > 0 ? `₹${gtm.ltv.toLocaleString()}` : 'Not Set'}
           </div>
           <span style={{ fontSize: '0.72rem', color: '#34D399' }}>36-month net retention</span>
         </div>
@@ -113,7 +113,7 @@ export const GTMModule: React.FC<GTMModuleProps> = ({ startup, evaluation }) => 
         <div className="card-elevated" style={{ borderRadius: '16px', padding: '1.25rem' }}>
           <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 800 }}>LTV : CAC RATIO</span>
           <div style={{ fontSize: '1.6rem', fontWeight: 900, color: '#D97706', marginTop: '0.25rem', fontFamily: 'var(--font-mono)' }}>
-            {gtm.ltv_cac_ratio.toFixed(1)}x
+            {gtm.ltv_cac_ratio > 0 ? `${gtm.ltv_cac_ratio.toFixed(1)}x` : 'Not Set'}
           </div>
           <span style={{ fontSize: '0.72rem', color: '#B45309', fontWeight: 700 }}>Benchmark &gt; 3.0x</span>
         </div>
@@ -121,7 +121,7 @@ export const GTMModule: React.FC<GTMModuleProps> = ({ startup, evaluation }) => 
         <div className="card-elevated" style={{ borderRadius: '16px', padding: '1.25rem' }}>
           <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 800 }}>PAYBACK DURATION</span>
           <div style={{ fontSize: '1.6rem', fontWeight: 900, color: '#EF4444', marginTop: '0.25rem', fontFamily: 'var(--font-mono)' }}>
-            {gtm.payback_period} Mos
+            {gtm.payback_period > 0 ? `${gtm.payback_period} Mos` : 'Not Set'}
           </div>
           <span style={{ fontSize: '0.72rem', color: '#F87171' }}>Target &lt; 9 months</span>
         </div>
@@ -133,41 +133,55 @@ export const GTMModule: React.FC<GTMModuleProps> = ({ startup, evaluation }) => 
           ACTIVE CUSTOMER ACQUISITION CHANNELS
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1rem' }}>
-          {gtm.channels.map((ch, idx) => (
-            <div
-              key={idx}
-              style={{
-                backgroundColor: 'var(--bg-secondary)',
-                borderRadius: '14px',
-                padding: '1.25rem',
-                border: '1px solid var(--border-subtle)',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '0.5rem',
-              }}
-            >
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontSize: '0.92rem', fontWeight: 800, color: 'var(--text-primary)' }}>
-                  {ch.name}
-                </span>
-                <span style={{
-                  fontSize: '0.7rem',
-                  fontWeight: 800,
-                  padding: '3px 8px',
-                  borderRadius: '6px',
-                  backgroundColor: ch.status === 'Scaling' ? 'rgba(16, 185, 129, 0.15)' : ch.status === 'Testing' ? 'rgba(56, 189, 248, 0.15)' : 'rgba(239, 68, 68, 0.15)',
-                  color: ch.status === 'Scaling' ? '#059669' : ch.status === 'Testing' ? '#0284C7' : '#DC2626',
-                }}>
-                  {ch.status.toUpperCase()}
-                </span>
+        {gtm.channels.length === 0 ? (
+          <div style={{
+            padding: '2rem 1.5rem',
+            textAlign: 'center',
+            backgroundColor: 'var(--bg-secondary)',
+            borderRadius: '14px',
+            border: '1px dashed var(--border-subtle)',
+            color: 'var(--text-hint)',
+            fontSize: '0.85rem',
+          }}>
+            No customer acquisition channels mapped yet. Complete your GTM strategy or upload your pitch deck to benchmark your CAC across channels.
+          </div>
+        ) : (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1rem' }}>
+            {gtm.channels.map((ch, idx) => (
+              <div
+                key={idx}
+                style={{
+                  backgroundColor: 'var(--bg-secondary)',
+                  borderRadius: '14px',
+                  padding: '1.25rem',
+                  border: '1px solid var(--border-subtle)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '0.5rem',
+                }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontSize: '0.92rem', fontWeight: 800, color: 'var(--text-primary)' }}>
+                    {ch.name}
+                  </span>
+                  <span style={{
+                    fontSize: '0.7rem',
+                    fontWeight: 800,
+                    padding: '3px 8px',
+                    borderRadius: '6px',
+                    backgroundColor: ch.status === 'Scaling' ? 'rgba(16, 185, 129, 0.15)' : ch.status === 'Testing' ? 'rgba(56, 189, 248, 0.15)' : 'rgba(239, 68, 68, 0.15)',
+                    color: ch.status === 'Scaling' ? '#059669' : ch.status === 'Testing' ? '#0284C7' : '#DC2626',
+                  }}>
+                    {ch.status.toUpperCase()}
+                  </span>
+                </div>
+                <div style={{ fontSize: '1.2rem', fontWeight: 900, color: 'var(--text-primary)', fontFamily: 'var(--font-mono)' }}>
+                  ₹{ch.cac.toLocaleString()} <span style={{ fontSize: '0.74rem', color: 'var(--text-hint)' }}>CAC</span>
+                </div>
               </div>
-              <div style={{ fontSize: '1.2rem', fontWeight: 900, color: 'var(--text-primary)', fontFamily: 'var(--font-mono)' }}>
-                ₹{ch.cac.toLocaleString()} <span style={{ fontSize: '0.74rem', color: 'var(--text-hint)' }}>CAC</span>
-              </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* ── Active Sprints & Proof Verification ────────────────────────── */}
@@ -186,8 +200,21 @@ export const GTMModule: React.FC<GTMModuleProps> = ({ startup, evaluation }) => 
           </span>
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          {experiments.map((exp, idx) => (
+        {experiments.length === 0 ? (
+          <div style={{
+            padding: '2rem 1.5rem',
+            textAlign: 'center',
+            backgroundColor: 'var(--bg-secondary)',
+            borderRadius: '14px',
+            border: '1px dashed var(--border-subtle)',
+            color: 'var(--text-hint)',
+            fontSize: '0.85rem',
+          }}>
+            No growth sprint experiments active. Upload your deck or complete your profile to generate custom GTM sprint tasks.
+          </div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            {experiments.map((exp, idx) => (
             <div
               key={idx}
               style={{
@@ -244,7 +271,8 @@ export const GTMModule: React.FC<GTMModuleProps> = ({ startup, evaluation }) => 
             </div>
           ))}
         </div>
-      </div>
+      )}
+    </div>
 
       {/* ── Sprint Verification Modal ──────────────────────────────────── */}
       {selectedExp && (

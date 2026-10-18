@@ -287,7 +287,9 @@ export const Navbar: React.FC<NavbarProps> = ({
                           </span>
                         )}
                       </span>
-                      <span style={{ fontSize: '0.72rem', color: '#10B981', fontWeight: 700 }}>{s.fundabilityScore}/100</span>
+                      <span style={{ fontSize: '0.72rem', color: s.fundabilityScore ? '#10B981' : 'var(--text-hint)', fontWeight: 700 }}>
+                        {s.fundabilityScore ? `${s.fundabilityScore}/100` : 'Not Scored'}
+                      </span>
                     </div>
                     <span style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>
                       {idx === 0 ? 'Active Production Dossier' : `Sample Benchmark • ${s.stage}`}

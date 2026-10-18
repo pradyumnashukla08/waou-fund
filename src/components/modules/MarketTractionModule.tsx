@@ -24,15 +24,31 @@ export const MarketTractionModule: React.FC<MarketTractionModuleProps> = ({ star
   const tm = evaluation.traction_metrics;
 
   const [activeTab, setActiveTab] = useState<'market' | 'traction'>('market');
-  const revenuePoints = tm.historical_revenue_6m || [28, 33, 37, 42, 46, 50];
+  const revenuePoints = (tm.historical_revenue_6m && tm.historical_revenue_6m.length > 0)
+    ? tm.historical_revenue_6m
+    : (startup.id !== 'user_active_startup' ? [28, 33, 37, 42, 46, 50] : []);
+
+  const tamDisplay = startup.tam || (ml.tam !== 'Not defined' ? ml.tam : 'Not Set');
+  const samDisplay = startup.sam || (ml.sam !== 'Not defined' ? ml.sam : 'Not Set');
+  const somDisplay = startup.som || (ml.som !== 'Not defined' ? ml.som : 'Not Set');
+
+  const tamDesc = startup.category 
+    ? `Total addressable universe for ${startup.category}.` 
+    : 'Total addressable industry universe.';
+  const samDesc = startup.location 
+    ? `Serviceable segment reachable across ${startup.location} and expansion regions.` 
+    : 'Serviceable geographic and customer segment.';
+  const somDesc = startup.targetAsk 
+    ? `Realistic 24-36 month target capture funded by ${startup.targetAsk} round.` 
+    : 'Initial beachhead target capture.';
 
   // SVG Line Chart math
-  const maxVal = Math.max(...revenuePoints);
-  const minVal = Math.min(...revenuePoints);
+  const maxVal = revenuePoints.length > 0 ? Math.max(...revenuePoints) : 100;
+  const minVal = revenuePoints.length > 0 ? Math.min(...revenuePoints) : 0;
   const range = maxVal - minVal || 1;
   const chartWidth = 560;
   const chartHeight = 160;
-  const stepX = chartWidth / (revenuePoints.length - 1);
+  const stepX = revenuePoints.length > 1 ? chartWidth / (revenuePoints.length - 1) : chartWidth;
 
   const pointsString = revenuePoints
     .map((val, i) => {
@@ -143,7 +159,7 @@ export const MarketTractionModule: React.FC<MarketTractionModuleProps> = ({ star
                   paddingTop: '12px',
                 }}>
                   <span style={{ fontSize: '0.7rem', fontWeight: 800, color: '#7E22CE' }}>
-                    TAM: {ml.tam}
+                    TAM: {tamDisplay}
                   </span>
                 </div>
 
@@ -160,7 +176,7 @@ export const MarketTractionModule: React.FC<MarketTractionModuleProps> = ({ star
                   paddingTop: '12px',
                 }}>
                   <span style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-brand)' }}>
-                    SAM: {ml.sam}
+                    SAM: {samDisplay}
                   </span>
                 </div>
 
@@ -182,7 +198,7 @@ export const MarketTractionModule: React.FC<MarketTractionModuleProps> = ({ star
                     SOM (CORE)
                   </span>
                   <span style={{ fontSize: '0.92rem', fontWeight: 900, color: 'var(--text-primary)', marginTop: '2px' }}>
-                    {ml.som}
+                    {somDisplay}
                   </span>
                   <span style={{ fontSize: '0.62rem', color: 'var(--text-secondary)' }}>Beachhead target</span>
                 </div>
@@ -198,9 +214,9 @@ export const MarketTractionModule: React.FC<MarketTractionModuleProps> = ({ star
                 border: '1px solid rgba(168, 85, 247, 0.2)',
               }}>
                 <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#7E22CE' }}>TOTAL ADDRESSABLE MARKET (TAM)</span>
-                <div style={{ fontSize: '1.4rem', fontWeight: 900, color: 'var(--text-primary)' }}>{ml.tam}</div>
+                <div style={{ fontSize: '1.4rem', fontWeight: 900, color: 'var(--text-primary)' }}>{tamDisplay}</div>
                 <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '2px' }}>
-                  Global spatial asset underwriting and commercial property intelligence.
+                  {tamDesc}
                 </p>
               </div>
 
@@ -211,9 +227,9 @@ export const MarketTractionModule: React.FC<MarketTractionModuleProps> = ({ star
                 border: '1px solid rgba(37, 99, 235, 0.15)',
               }}>
                 <span style={{ fontSize: '0.72rem', fontWeight: 800, color: 'var(--text-brand)' }}>SERVICEABLE ADDRESSABLE MARKET (SAM)</span>
-                <div style={{ fontSize: '1.4rem', fontWeight: 900, color: 'var(--text-primary)' }}>{ml.sam}</div>
+                <div style={{ fontSize: '1.4rem', fontWeight: 900, color: 'var(--text-primary)' }}>{samDisplay}</div>
                 <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '2px' }}>
-                  Tier-1 and Tier-2 Indian & SE Asia commercial developers and private equity funds.
+                  {samDesc}
                 </p>
               </div>
 
@@ -224,9 +240,9 @@ export const MarketTractionModule: React.FC<MarketTractionModuleProps> = ({ star
                 border: '1px solid rgba(16, 185, 129, 0.2)',
               }}>
                 <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#059669' }}>SERVICEABLE OBTAINABLE MARKET (SOM)</span>
-                <div style={{ fontSize: '1.4rem', fontWeight: 900, color: 'var(--text-primary)' }}>{ml.som}</div>
+                <div style={{ fontSize: '1.4rem', fontWeight: 900, color: 'var(--text-primary)' }}>{somDisplay}</div>
                 <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '2px' }}>
-                  Realistic 36-month capture across Bengaluru, Mumbai, and NCR pilot metros.
+                  {somDesc}
                 </p>
               </div>
             </div>
@@ -238,29 +254,43 @@ export const MarketTractionModule: React.FC<MarketTractionModuleProps> = ({ star
               COMPETITIVE LANDSCAPE & UNFAIR ADVANTAGES
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1rem' }}>
-              {ml.competitors.map((comp, idx) => (
-                <div
-                  key={idx}
-                  style={{
-                    backgroundColor: 'var(--bg-secondary)',
-                    borderRadius: '14px',
-                    padding: '1.25rem',
-                    border: '1px solid var(--border-subtle)',
-                  }}
-                >
-                  <div style={{ fontSize: '0.95rem', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '0.5rem' }}>
-                    {comp.name}
+            {ml.competitors.length === 0 ? (
+              <div style={{
+                padding: '2rem 1.5rem',
+                textAlign: 'center',
+                backgroundColor: 'var(--bg-secondary)',
+                borderRadius: '14px',
+                border: '1px dashed var(--border-subtle)',
+                color: 'var(--text-hint)',
+                fontSize: '0.85rem',
+              }}>
+                No competitors benchmarked yet. Add competitor URLs and defensibility moats in Profile & 1-Pager or upload your deck to analyze market moats.
+              </div>
+            ) : (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1rem' }}>
+                {ml.competitors.map((comp, idx) => (
+                  <div
+                    key={idx}
+                    style={{
+                      backgroundColor: 'var(--bg-secondary)',
+                      borderRadius: '14px',
+                      padding: '1.25rem',
+                      border: '1px solid var(--border-subtle)',
+                    }}
+                  >
+                    <div style={{ fontSize: '0.95rem', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '0.5rem' }}>
+                      {comp.name}
+                    </div>
+                    <div style={{ fontSize: '0.72rem', fontWeight: 800, color: '#EF4444', letterSpacing: '0.05em' }}>
+                      COMPETITOR WEAKNESS:
+                    </div>
+                    <p style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', marginTop: '2px', lineHeight: 1.5 }}>
+                      {comp.weakness}
+                    </p>
                   </div>
-                  <div style={{ fontSize: '0.72rem', fontWeight: 800, color: '#EF4444', letterSpacing: '0.05em' }}>
-                    COMPETITOR WEAKNESS:
-                  </div>
-                  <p style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', marginTop: '2px', lineHeight: 1.5 }}>
-                    {comp.weakness}
-                  </p>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -280,61 +310,77 @@ export const MarketTractionModule: React.FC<MarketTractionModuleProps> = ({ star
                 </h3>
               </div>
               <div style={{
-                backgroundColor: 'var(--accent-bg-emerald)',
-                color: '#10B981',
+                backgroundColor: revenuePoints.length > 0 ? 'var(--accent-bg-emerald)' : 'var(--bg-secondary)',
+                color: revenuePoints.length > 0 ? '#10B981' : 'var(--text-hint)',
                 padding: '4px 10px',
                 borderRadius: '8px',
                 fontWeight: 800,
                 fontSize: '0.85rem',
               }}>
-                +18% MoM COMPOUND
+                {startup.momGrowth && startup.momGrowth !== '0' 
+                  ? `+${startup.momGrowth}% MoM COMPOUND` 
+                  : (revenuePoints.length > 0 ? '+18% MoM COMPOUND' : 'Pending MRR Data')}
               </div>
             </div>
 
-            {/* SVG Chart */}
-            <div style={{ width: '100%', overflowX: 'auto', padding: '1rem 0' }}>
-              <svg width="100%" height="180" viewBox={`0 0 ${chartWidth} ${chartHeight}`} preserveAspectRatio="none">
-                <defs>
-                  <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#06B6D4" stopOpacity="0.3" />
-                    <stop offset="100%" stopColor="#06B6D4" stopOpacity="0.0" />
-                  </linearGradient>
-                </defs>
-                <polygon 
-                  points={`0,${chartHeight} ${pointsString} ${chartWidth},${chartHeight}`} 
-                  fill="url(#areaGrad)" 
-                />
-                <polyline 
-                  fill="none" 
-                  stroke="#06B6D4" 
-                  strokeWidth="3.5" 
-                  points={pointsString} 
-                  strokeLinecap="round" 
-                  strokeLinejoin="round" 
-                />
-                {revenuePoints.map((val, i) => {
-                  const x = i * stepX;
-                  const y = chartHeight - ((val - minVal) / range) * (chartHeight - 40) - 20;
-                  return (
-                    <g key={i}>
-                      <circle cx={x} cy={y} r="5" fill="#FFFFFF" stroke="#0284C7" strokeWidth="2.5" />
-                      <text x={x} y={y - 12} textAnchor="middle" fill="var(--text-primary)" fontSize="11" fontWeight="800">
-                        ₹{val}L
-                      </text>
-                    </g>
-                  );
-                })}
-              </svg>
-
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.76rem', color: 'var(--text-hint)', marginTop: '0.5rem' }}>
-                <span>May</span>
-                <span>Jun</span>
-                <span>Jul</span>
-                <span>Aug</span>
-                <span>Sep</span>
-                <span>Current (Oct)</span>
+            {/* SVG Chart or Empty State */}
+            {revenuePoints.length === 0 ? (
+              <div style={{
+                padding: '3rem 1.5rem',
+                textAlign: 'center',
+                backgroundColor: 'var(--bg-secondary)',
+                borderRadius: '12px',
+                border: '1px dashed var(--border-subtle)',
+                color: 'var(--text-hint)',
+                fontSize: '0.86rem',
+              }}>
+                No historical MRR expansion points logged yet. Enter your MRR and growth rate in Profile & 1-Pager to visualize your 6-month growth curve.
               </div>
-            </div>
+            ) : (
+              <div style={{ width: '100%', overflowX: 'auto', padding: '1rem 0' }}>
+                <svg width="100%" height="180" viewBox={`0 0 ${chartWidth} ${chartHeight}`} preserveAspectRatio="none">
+                  <defs>
+                    <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#06B6D4" stopOpacity="0.3" />
+                      <stop offset="100%" stopColor="#06B6D4" stopOpacity="0.0" />
+                    </linearGradient>
+                  </defs>
+                  <polygon 
+                    points={`0,${chartHeight} ${pointsString} ${chartWidth},${chartHeight}`} 
+                    fill="url(#areaGrad)" 
+                  />
+                  <polyline 
+                    fill="none" 
+                    stroke="#06B6D4" 
+                    strokeWidth="3.5" 
+                    points={pointsString} 
+                    strokeLinecap="round" 
+                    strokeLinejoin="round" 
+                  />
+                  {revenuePoints.map((val, i) => {
+                    const x = i * stepX;
+                    const y = chartHeight - ((val - minVal) / range) * (chartHeight - 40) - 20;
+                    return (
+                      <g key={i}>
+                        <circle cx={x} cy={y} r="5" fill="#FFFFFF" stroke="#0284C7" strokeWidth="2.5" />
+                        <text x={x} y={y - 12} textAnchor="middle" fill="var(--text-primary)" fontSize="11" fontWeight="800">
+                          ₹{val}L
+                        </text>
+                      </g>
+                    );
+                  })}
+                </svg>
+
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.76rem', color: 'var(--text-hint)', marginTop: '0.5rem' }}>
+                  <span>Month 1</span>
+                  <span>Month 2</span>
+                  <span>Month 3</span>
+                  <span>Month 4</span>
+                  <span>Month 5</span>
+                  <span>Current</span>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Core Health Metrics Strip */}
@@ -346,33 +392,41 @@ export const MarketTractionModule: React.FC<MarketTractionModuleProps> = ({ star
             <div className="card-elevated" style={{ borderRadius: '16px', padding: '1.25rem' }}>
               <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 800 }}>WAITLIST REACH</span>
               <div style={{ fontSize: '1.6rem', fontWeight: 900, color: 'var(--text-brand)', marginTop: '0.25rem' }}>
-                {tm.waitlist_count.toLocaleString()}
+                {startup.waitlistCount ? Number(startup.waitlistCount).toLocaleString() : (tm.waitlist_count ? tm.waitlist_count.toLocaleString() : 'Not Set')}
               </div>
-              <span style={{ fontSize: '0.72rem', color: '#10B981', fontWeight: 700 }}>+{tm.waitlist_growth}% MoM</span>
+              <span style={{ fontSize: '0.72rem', color: tm.waitlist_growth ? '#10B981' : 'var(--text-hint)', fontWeight: 700 }}>
+                {tm.waitlist_growth ? `+${tm.waitlist_growth}% MoM` : 'Pending tracking'}
+              </span>
             </div>
 
             <div className="card-elevated" style={{ borderRadius: '16px', padding: '1.25rem' }}>
               <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 800 }}>BETA ENTERPRISES</span>
               <div style={{ fontSize: '1.6rem', fontWeight: 900, color: '#10B981', marginTop: '0.25rem' }}>
-                {tm.beta_users} Accounts
+                {startup.userTraction || (tm.beta_users ? `${tm.beta_users} Accounts` : 'Not Set')}
               </div>
-              <span style={{ fontSize: '0.72rem', color: '#059669', fontWeight: 700 }}>+{tm.beta_conversion_growth}% conversion</span>
+              <span style={{ fontSize: '0.72rem', color: tm.beta_conversion_growth ? '#059669' : 'var(--text-hint)', fontWeight: 700 }}>
+                {tm.beta_conversion_growth ? `+${tm.beta_conversion_growth}% conversion` : 'Pending tracking'}
+              </span>
             </div>
 
             <div className="card-elevated" style={{ borderRadius: '16px', padding: '1.25rem' }}>
               <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 800 }}>NET REVENUE RETENTION</span>
               <div style={{ fontSize: '1.6rem', fontWeight: 900, color: '#D97706', marginTop: '0.25rem' }}>
-                {tm.nrr}%
+                {startup.nrr ? `${startup.nrr}%` : (tm.nrr ? `${tm.nrr}%` : 'Not Set')}
               </div>
-              <span style={{ fontSize: '0.72rem', color: '#B45309', fontWeight: 700 }}>Top decile SaaS</span>
+              <span style={{ fontSize: '0.72rem', color: '#B45309', fontWeight: 700 }}>
+                {tm.nrr >= 100 ? 'Top decile SaaS' : 'Benchmark > 100%'}
+              </span>
             </div>
 
             <div className="card-elevated" style={{ borderRadius: '16px', padding: '1.25rem' }}>
               <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 800 }}>BURN MULTIPLE</span>
               <div style={{ fontSize: '1.6rem', fontWeight: 900, color: '#EC4899', marginTop: '0.25rem' }}>
-                {tm.burn_multiple}x
+                {tm.burn_multiple ? `${tm.burn_multiple}x` : 'Not Set'}
               </div>
-              <span style={{ fontSize: '0.72rem', color: '#10B981' }}>Capital efficient</span>
+              <span style={{ fontSize: '0.72rem', color: tm.burn_multiple > 0 ? '#10B981' : 'var(--text-hint)' }}>
+                {tm.burn_multiple > 0 ? 'Capital efficient' : 'Pending model'}
+              </span>
             </div>
           </div>
         </div>

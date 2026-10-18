@@ -197,6 +197,82 @@ export const MOCK_STARTUPS: StartupProfile[] = [
   },
 ];
 
+export const INITIAL_USER_EVALUATION: EvaluationResult = {
+  overall_score: 0,
+  team_score: 0,
+  market_score: 0,
+  execution_score: 0,
+  product_score: 0,
+  traction_score: 0,
+  red_flags: [
+    'Profile Incomplete: Core startup narrative and market opportunity not yet entered.',
+    'No Pitch Deck: Virtual data room is empty. Upload your deck to run automated AI diligence analysis.',
+    'Financials Pending: Enter your current MRR, burn rate, and target raise to model your runway.',
+  ],
+  daily_tasks: [
+    'Complete your Startup Profile in the Workspace Readiness Hub.',
+    'Upload your Pitch Deck (PDF/PPT) to the Virtual Data Room.',
+    'Run AI Investor Grill simulation to test your narrative.',
+  ],
+  stage_advice:
+    'Welcome to WaouFund! Start by completing your startup profile and uploading your pitch deck. Our deterministic AI diligence engine will analyze your deck and calculate your verified VC fundability score.',
+  questions: [
+    {
+      question: 'What core customer problem does your startup solve, and why now?',
+      reason: 'Validates founder clarity and fundamental value proposition.',
+    },
+    {
+      question: 'What is your primary go-to-market channel to acquire your first 100 paying customers?',
+      reason: 'Assesses commercial distribution reality and CAC expectations.',
+    },
+    {
+      question: 'How much capital are you raising in this round, and what key milestone will it fund?',
+      reason: 'Evaluates capital allocation and valuation discipline.',
+    },
+  ],
+  financial_metrics: {
+    cash_balance: 0,
+    monthly_burn: 0,
+    default_runway: 0,
+    arr: 0,
+    mrr: 0,
+    headcount_cost: 180000,
+  },
+  gtm_strategy: {
+    blended_cac: 0,
+    ltv: 0,
+    payback_period: 0,
+    ltv_cac_ratio: 0,
+    ltv_cac_growth: 0,
+    channels: [],
+    experiments: [],
+  },
+  financial_forecast: {
+    revenue: {},
+    cogs: {},
+    opex: {},
+  },
+  traction_metrics: {
+    waitlist_count: 0,
+    waitlist_growth: 0,
+    beta_users: 0,
+    beta_conversion_growth: 0,
+    arr: 0,
+    arr_mom_growth: 0,
+    nrr: 0,
+    nrr_growth: 0,
+    burn_multiple: 0,
+    burn_growth: 0,
+    historical_revenue_6m: [],
+  },
+  market_landscape: {
+    tam: 'Not defined',
+    sam: 'Not defined',
+    som: 'Not defined',
+    competitors: [],
+  },
+};
+
 export const DEFAULT_EVALUATION: EvaluationResult = {
   overall_score: 88,
   team_score: 92,

@@ -46,10 +46,14 @@ export const FinanceModule: React.FC<FinanceModuleProps> = ({ startup, evaluatio
     try {
       const saved = sessionStorage.getItem('waou_fin_raise');
       if (saved) return parseInt(saved, 10);
-      const parsed = parseFloat((startup.targetRaise || '').replace(/[^0-9.]/g, ''));
-      return !isNaN(parsed) && parsed > 0 ? Math.min(Math.round(parsed), 20) : 4;
+      const raw = parseFloat((startup.targetRaise || '').replace(/[^0-9.]/g, ''));
+      if (!isNaN(raw) && raw > 0) {
+        const inCr = raw >= 1000000 ? raw / 10000000 : raw;
+        return Math.min(Math.max(Math.round(inCr), 1), 20);
+      }
+      return startup.id === 'user_active_startup' ? 2 : 4;
     } catch {
-      return 4;
+      return 2;
     }
   });
   const [activeScenario, setActiveScenario] = useState<'base' | 'best' | 'worst'>(() => {
@@ -191,7 +195,9 @@ Sales & Outbound,${(190 * multiplier).toFixed(0)},${(440 * multiplier).toFixed(0
           <div style={{ fontSize: '1.6rem', fontWeight: 900, color: 'var(--text-brand)', marginTop: '0.25rem', fontFamily: 'var(--font-mono)' }}>
             {formatINR(fm.cash_balance)}
           </div>
-          <span style={{ fontSize: '0.72rem', color: 'var(--text-hint)' }}>Verified reserves</span>
+          <span style={{ fontSize: '0.72rem', color: 'var(--text-hint)' }}>
+            {fm.cash_balance > 0 ? 'Verified reserves' : 'Not configured'}
+          </span>
         </div>
 
         <div className="card-elevated" style={{ borderRadius: '16px', padding: '1.25rem' }}>
@@ -207,7 +213,9 @@ Sales & Outbound,${(190 * multiplier).toFixed(0)},${(440 * multiplier).toFixed(0
           <div style={{ fontSize: '1.6rem', fontWeight: 900, color: '#10B981', marginTop: '0.25rem', fontFamily: 'var(--font-mono)' }}>
             {newRunwayMonths} Months
           </div>
-          <span style={{ fontSize: '0.72rem', color: '#34D399' }}>+{runwayDelta} mos with ₹{fundraiseCr}Cr raise</span>
+          <span style={{ fontSize: '0.72rem', color: '#34D399' }}>
+            {runwayDelta !== 0 ? `${runwayDelta > 0 ? '+' : ''}${runwayDelta} mos with ₹${fundraiseCr}Cr raise` : `Based on ₹${fundraiseCr}Cr model`}
+          </span>
         </div>
 
         <div className="card-elevated" style={{ borderRadius: '16px', padding: '1.25rem' }}>

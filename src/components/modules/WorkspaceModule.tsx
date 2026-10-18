@@ -22,27 +22,90 @@ interface WorkspaceModuleProps {
 }
 
 export const WorkspaceModule: React.FC<WorkspaceModuleProps> = ({ startup, evaluation, setActiveTab }) => {
+  // Real dynamic checks based on actual user data
+  const hasCompany = Boolean(
+    (startup.companyName || startup.name) && 
+    startup.pitch && 
+    startup.pitch.trim().length > 10
+  );
+
+  const hasProduct = Boolean(
+    startup.productStatus && 
+    startup.problemValidation && 
+    startup.problemValidation.trim().length > 10
+  );
+
+  const hasTeam = Boolean(
+    (startup.team && startup.team.length > 0) || 
+    (startup.linkedinUrl && startup.linkedinUrl.trim().length > 10 && startup.fullName)
+  );
+
+  const hasFundraising = Boolean(
+    startup.targetRaise && 
+    startup.targetRaise !== '0' && 
+    startup.targetRaise !== '' && 
+    startup.valuationCap && 
+    startup.valuationCap !== '0' &&
+    startup.valuationCap !== ''
+  );
+
+  const hasMarket = Boolean(
+    startup.tam && 
+    startup.tam !== '0' && 
+    startup.tam !== '' && 
+    startup.tam !== 'Not defined' &&
+    startup.sam && 
+    startup.sam !== '0' &&
+    startup.sam !== 'Not defined'
+  );
+
+  const hasTraction = Boolean(
+    startup.currentMrr && 
+    startup.currentMrr !== '0' && 
+    startup.currentMrr !== '' && 
+    startup.momGrowth && 
+    startup.momGrowth !== '0'
+  );
+
+  const hasDataRoom = Boolean(
+    (() => {
+      try {
+        if (sessionStorage.getItem('waou_dataroom_verified') === 'true') return true;
+        const raw = sessionStorage.getItem('waou_dataroom_docs');
+        if (!raw) return false;
+        const parsed = JSON.parse(raw);
+        if (!Array.isArray(parsed) || parsed.length === 0) return false;
+        if (startup.id === 'user_active_startup' && parsed.some((d: any) => d.name?.includes('Seed_Pitch_Deck_V3.pdf'))) {
+          return false;
+        }
+        return parsed.length > 0;
+      } catch {
+        return false;
+      }
+    })()
+  );
+
   const coreProfile = [
-    { id: '1', title: 'Company Overview & Elevator Pitch', status: 'done', route: 'profile', icon: Building },
-    { id: '2', title: `Product & Core Architecture (${startup.category || 'Tech'})`, status: 'done', route: 'diagnostic', icon: Layers },
-    { id: '4', title: 'Founding Team Pedigree & Equity Split', status: 'done', route: 'profile', icon: Users },
-    { id: '7', title: 'Fundraising Goal & Use of Funds', status: 'done', route: 'finance', icon: DollarSign },
+    { id: '1', title: 'Company Overview & Elevator Pitch', status: hasCompany ? 'done' : 'pending', route: 'profile', icon: Building },
+    { id: '2', title: `Product & Core Architecture (${startup.category || 'Tech'})`, status: hasProduct ? 'done' : 'pending', route: 'diagnostic', icon: Layers },
+    { id: '4', title: 'Founding Team Pedigree & Equity Split', status: hasTeam ? 'done' : 'pending', route: 'profile', icon: Users },
+    { id: '7', title: 'Fundraising Goal & Use of Funds', status: hasFundraising ? 'done' : 'pending', route: 'finance', icon: DollarSign },
   ];
 
   const marketMetrics = [
-    { id: '3', title: 'Market Opportunity & Concentric TAM', status: 'done', route: 'market', icon: PieChart },
-    { id: '5', title: 'Traction & 6-Month MRR Expansion', status: 'done', route: 'market', icon: TrendingUp },
+    { id: '3', title: 'Market Opportunity & Concentric TAM', status: hasMarket ? 'done' : 'pending', route: 'market', icon: PieChart },
+    { id: '5', title: 'Traction & 6-Month MRR Expansion', status: hasTraction ? 'done' : 'pending', route: 'market', icon: TrendingUp },
   ];
 
   const aiVerification = [
-    { id: '6', title: 'Virtual Data Room & AI Diligence Scan', status: 'pending', route: 'dataroom', icon: ShieldCheck },
+    { id: '6', title: 'Virtual Data Room & AI Diligence Scan', status: hasDataRoom ? 'done' : 'pending', route: 'dataroom', icon: ShieldCheck },
   ];
 
   const allItems = [...coreProfile, ...marketMetrics, ...aiVerification];
   const completedCount = allItems.filter((i) => i.status === 'done').length;
   const progressPercent = Math.round((completedCount / allItems.length) * 100);
 
-  let readinessLevel = 'Level 1: Ideation';
+  let readinessLevel = 'Level 1: Profile Incomplete';
   if (progressPercent >= 100) readinessLevel = 'Level 3: Investor Ready';
   else if (progressPercent >= 50) readinessLevel = 'Level 2: Data Room Build';
 
@@ -56,7 +119,7 @@ export const WorkspaceModule: React.FC<WorkspaceModuleProps> = ({ startup, evalu
           <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--text-primary)' }}>
             {title}
           </h3>
-          <span style={{ fontSize: '0.82rem', fontWeight: 800, color: cardProgress === 100 ? '#10B981' : '#38BDF8' }}>
+          <span style={{ fontSize: '0.82rem', fontWeight: 800, color: cardProgress === 100 ? '#10B981' : 'var(--text-hint)' }}>
             {cardProgress}% COMPLETE
           </span>
         </div>
@@ -87,8 +150,8 @@ export const WorkspaceModule: React.FC<WorkspaceModuleProps> = ({ startup, evalu
                     width: '38px',
                     height: '38px',
                     borderRadius: '10px',
-                    backgroundColor: isDone ? 'rgba(16, 185, 129, 0.15)' : 'rgba(56, 189, 248, 0.15)',
-                    color: isDone ? '#10B981' : '#38BDF8',
+                    backgroundColor: isDone ? 'rgba(16, 185, 129, 0.15)' : 'rgba(100, 116, 139, 0.12)',
+                    color: isDone ? '#10B981' : 'var(--text-muted)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -100,15 +163,17 @@ export const WorkspaceModule: React.FC<WorkspaceModuleProps> = ({ startup, evalu
                     <div style={{ fontSize: '0.92rem', fontWeight: 700, color: 'var(--text-primary)' }}>
                       {item.title}
                     </div>
-                    <div style={{ fontSize: '0.72rem', color: isDone ? '#10B981' : '#F59E0B', fontWeight: 800 }}>
+                    <div style={{ fontSize: '0.72rem', color: isDone ? '#10B981' : '#D97706', fontWeight: 800 }}>
                       {isDone ? 'COMPLETED' : 'ACTION REQUIRED'}
                     </div>
                   </div>
                 </div>
 
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <span style={{ fontSize: '0.76rem', color: 'var(--text-muted)' }}>Inspect</span>
-                  <ArrowRight size={14} color="var(--text-hint)" />
+                  <span style={{ fontSize: '0.76rem', color: isDone ? 'var(--text-muted)' : 'var(--text-brand)', fontWeight: isDone ? 500 : 700 }}>
+                    {isDone ? 'Inspect' : 'Complete Step'}
+                  </span>
+                  <ArrowRight size={14} color={isDone ? 'var(--text-hint)' : 'var(--text-brand)'} />
                 </div>
               </div>
             );

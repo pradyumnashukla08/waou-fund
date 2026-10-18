@@ -13,6 +13,7 @@ import {
   AlertTriangle
 } from 'lucide-react';
 import { EvaluationResult, ActionStep } from '../../types';
+import { generateActionSteps } from '../../utils/remediationMapper';
 
 interface ActionPlanModuleProps {
   evaluation: EvaluationResult;
@@ -20,40 +21,23 @@ interface ActionPlanModuleProps {
 }
 
 export const ActionPlanModule: React.FC<ActionPlanModuleProps> = ({ evaluation, setActiveTab }) => {
-  const [tasks, setTasks] = useState<ActionStep[]>([
-    {
-      id: 'task_1',
-      title: 'Compress CAC Payback to Under 10 Months',
-      task: 'Unit Economic Gap: CAC payback period is currently 13.8 months across paid acquisition channels.',
-      type: 'financial',
-      isComplete: false,
-      fix: 'Shift 25% of paid marketing budget to outbound LinkedIn SDR prospecting. Introduce a 15% upfront annual contract discount.',
-    },
-    {
-      id: 'task_2',
-      title: 'Diversify Client ARR Beyond Top 3 Accounts',
-      task: 'Customer Concentration: Top 3 enterprise client accounts represent 61% of current recurring ARR.',
-      type: 'market',
-      isComplete: true,
-      fix: 'Close at least 4 mid-market accounts at ₹1.5L/mo to lower single-client revenue concentration below 40%.',
-    },
-    {
-      id: 'task_3',
-      title: 'Automate Interactive Onboarding Funnel',
-      task: 'Conversion Funnel Drag: Onboarding trial-to-paid conversion plateaued at 4.2% due to multi-step configuration friction.',
-      type: 'product',
-      isComplete: false,
-      fix: 'Pre-populate interactive demonstration sandbox environments so prospective buyers experience core platform value in under 60 seconds.',
-    },
-    {
-      id: 'task_4',
-      title: 'Formalize 12-Month Seed Use of Funds',
-      task: 'Runway Sensitivity: Current net burn allows 11.6 months of operations without the proposed ₹4 Cr Seed extension.',
-      type: 'financial',
-      isComplete: true,
-      fix: 'Include a detailed headcount hiring roadmap in your virtual data room proving the ₹4 Cr round provides 20 months of runway.',
-    },
-  ]);
+  const [tasks, setTasks] = useState<ActionStep[]>(() => {
+    try {
+      const saved = sessionStorage.getItem('waou_action_tasks');
+      if (saved) return JSON.parse(saved);
+    } catch {}
+    return generateActionSteps(evaluation.red_flags);
+  });
+
+  React.useEffect(() => {
+    try {
+      sessionStorage.setItem('waou_action_tasks', JSON.stringify(tasks));
+    } catch {}
+  }, [tasks]);
+
+  React.useEffect(() => {
+    setTasks(generateActionSteps(evaluation.red_flags));
+  }, [evaluation.red_flags]);
 
   const [filter, setFilter] = useState<'all' | 'financial' | 'product' | 'team' | 'market'>('all');
 

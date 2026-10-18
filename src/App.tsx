@@ -8,7 +8,7 @@ import {
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { auth } from './config/firebase';
 import { apiClient } from './services/apiClient';
-import { MOCK_STARTUPS, DEFAULT_EVALUATION, StartupProfile } from './data/defaultData';
+import { MOCK_STARTUPS, DEFAULT_EVALUATION, INITIAL_USER_EVALUATION, StartupProfile } from './data/defaultData';
 import { EvaluationResult } from './types';
 import { UserRole, ExtractedStartupData } from './types/user';
 import { Navbar } from './components/Navbar';
@@ -21,7 +21,7 @@ import { updatePageSeo } from './utils/seo';
 // ─── App view states ────────────────────────────────────────────────
 type AppView = 'landing' | 'auth' | 'dataroom' | 'app';
 
-// ─── Helper to build a clean starter profile for a founder ──────────
+// ─── Helper to build a completely clean starter profile for a real founder ──────────
 const getInitialStartup = (user?: { name?: string; email?: string } | null): StartupProfile => {
   const founderName = user?.name || '';
   const founderEmail = user?.email || '';
@@ -31,31 +31,31 @@ const getInitialStartup = (user?: { name?: string; email?: string } | null): Sta
     id: 'user_active_startup',
     name: company,
     tagline: '',
-    category: 'B2B SaaS / Enterprise AI',
+    category: '',
     stage: 'Seed',
     founder: founderName,
-    location: 'Bengaluru, India',
+    location: '',
     website: '',
-    targetAsk: '₹2.0 Cr ($250K)',
-    valuation: '₹15.0 Cr ($1.8M)',
-    equityOffered: '13.3%',
-    mrr: '₹0',
-    burn: '₹0',
-    growth: '0%',
-    fundabilityScore: 60,
+    targetAsk: '',
+    valuation: '',
+    equityOffered: '',
+    mrr: '',
+    burn: '',
+    growth: '',
+    fundabilityScore: 0,
     fullName: founderName,
     role: 'CEO & Co-Founder',
     profileImage: '',
     linkedinUrl: '',
     email: founderEmail,
-    pedigree: 'First-Time Founder',
+    pedigree: '',
     team: [],
     companyName: company,
     websiteUrl: '',
-    companyType: 'Private Limited',
+    companyType: '',
     isRegistered: false,
     registrationNo: '',
-    sector: 'SaaS',
+    sector: '',
     pitch: '',
     currency: '₹ (INR)',
     tam: '',
@@ -65,33 +65,59 @@ const getInitialStartup = (user?: { name?: string; email?: string } | null): Sta
     competitor2: '',
     competitor3: '',
     distributionMoat: '',
-    targetRaise: '20000000',
-    valuationCap: '150000000',
-    capitalCommitted: '0',
-    currentMrr: '0',
+    targetRaise: '',
+    valuationCap: '',
+    capitalCommitted: '',
+    currentMrr: '',
     userTraction: '',
-    momGrowth: '0',
+    momGrowth: '',
     grossMargin: '',
     cac: '',
     waitlistCount: '',
     betaConversion: '',
-    productStatus: 'MVP in Development',
+    productStatus: '',
     problemValidation: '',
     teamCapability: '',
-    runway: '12',
-    verifiedArr: '0',
-    churnRate: '0',
-    nrr: '100',
+    runway: '',
+    verifiedArr: '',
+    churnRate: '',
+    nrr: '',
     ltvcacRatio: '',
     cacPayback: '',
-    burnRate: '0',
+    burnRate: '',
     execSales: false,
     execEng: false,
     execMarketing: false,
-    annualRevenue: '0',
+    annualRevenue: '',
     expansionVectors: [],
     cSuiteComplete: false,
-    marketShare: '0',
+    marketShare: '',
+  };
+};
+
+const sanitizeStartupDraft = (startup: StartupProfile): StartupProfile => {
+  const isLegacyMockAsk = startup.targetAsk === '₹2.0 Cr ($250K)' || startup.targetAsk === '₹4 Cr';
+  const isLegacyMockVal = startup.valuation === '₹15.0 Cr ($1.8M)';
+  const isLegacyMockScore = startup.fundabilityScore === 60 || startup.fundabilityScore === 85;
+  const isLegacyMockRaise = startup.targetRaise === '20000000';
+  const isLegacyMockCap = startup.valuationCap === '150000000';
+  const isLegacyMockCategory = startup.category === 'B2B SaaS / Enterprise AI' && !startup.pitch;
+  const isLegacyMockLocation = startup.location === 'Bengaluru, India' && !startup.website;
+  const isLegacyMockPedigree = startup.pedigree === 'First-Time Founder' && (!startup.team || startup.team.length === 0);
+
+  return {
+    ...startup,
+    targetAsk: isLegacyMockAsk ? '' : startup.targetAsk,
+    valuation: isLegacyMockVal ? '' : startup.valuation,
+    equityOffered: isLegacyMockAsk ? '' : startup.equityOffered,
+    fundabilityScore: isLegacyMockScore ? 0 : startup.fundabilityScore,
+    targetRaise: isLegacyMockRaise ? '' : startup.targetRaise,
+    valuationCap: isLegacyMockCap ? '' : startup.valuationCap,
+    category: isLegacyMockCategory ? '' : startup.category,
+    location: isLegacyMockLocation ? '' : startup.location,
+    pedigree: isLegacyMockPedigree ? '' : startup.pedigree,
+    productStatus: startup.productStatus === 'MVP in Development' && !startup.problemValidation ? '' : startup.productStatus,
+    runway: startup.runway === '12' && (!startup.currentMrr || startup.currentMrr === '0') ? '' : startup.runway,
   };
 };
 
@@ -157,7 +183,13 @@ export default function App() {
   const [selectedStartup, setSelectedStartup] = useState<StartupProfile>(() => {
     try {
       const draft = sessionStorage.getItem('waou_selected_startup_draft');
-      if (draft) return JSON.parse(draft);
+      if (draft) {
+        const parsed = JSON.parse(draft);
+        if (parsed.id === 'user_active_startup') {
+          return sanitizeStartupDraft(parsed);
+        }
+        return parsed;
+      }
     } catch {}
     return getInitialStartup(null);
   });
@@ -172,10 +204,35 @@ export default function App() {
     const active = getInitialStartup(null);
     return [active, ...MOCK_STARTUPS.filter(s => s.id !== active.id)];
   });
-  const [evaluation, setEvaluation] = useState<EvaluationResult>(DEFAULT_EVALUATION);
 
-  // Gamification & Streak state
-  const [streakCount, setStreakCount] = useState<number>(5);
+  const [evaluation, setEvaluation] = useState<EvaluationResult>(() => {
+    try {
+      const saved = sessionStorage.getItem('waou_user_evaluation');
+      if (saved) return JSON.parse(saved);
+    } catch {}
+    return INITIAL_USER_EVALUATION;
+  });
+
+  // Switch evaluation automatically between real active startup and benchmark sample startups
+  useEffect(() => {
+    if (selectedStartup.id === 'avasplot') {
+      setEvaluation(DEFAULT_EVALUATION);
+    } else if (selectedStartup.id === 'user_active_startup') {
+      try {
+        const saved = sessionStorage.getItem('waou_user_evaluation');
+        if (saved) {
+          setEvaluation(JSON.parse(saved));
+        } else {
+          setEvaluation(INITIAL_USER_EVALUATION);
+        }
+      } catch {
+        setEvaluation(INITIAL_USER_EVALUATION);
+      }
+    }
+  }, [selectedStartup.id]);
+
+  // Gamification & Streak state (starts at 1 for genuine new users)
+  const [streakCount, setStreakCount] = useState<number>(1);
   const [isDailyTaskDone, setIsDailyTaskDone] = useState<boolean>(false);
   const [showStreakModal, setShowStreakModal] = useState<boolean>(false);
   const [showDailyTaskModal, setShowDailyTaskModal] = useState<boolean>(false);
@@ -270,6 +327,11 @@ export default function App() {
 
   const handleUpdateEvaluation = (res: EvaluationResult) => {
     setEvaluation(res);
+    try {
+      if (selectedStartup.id === 'user_active_startup') {
+        sessionStorage.setItem('waou_user_evaluation', JSON.stringify(res));
+      }
+    } catch {}
   };
 
   // ─── Auth completion: genuine user authenticated with role ─────────
@@ -393,6 +455,8 @@ export default function App() {
       sessionStorage.removeItem('waou_selected_startup_draft');
       sessionStorage.removeItem('waou_profile_draft_user_active_startup');
       sessionStorage.removeItem('waou_profile_draft_avasplot');
+      sessionStorage.removeItem('waou_user_evaluation');
+      sessionStorage.removeItem('waou_dataroom_docs');
     } catch {
       // Ignore storage errors in restricted contexts
     }

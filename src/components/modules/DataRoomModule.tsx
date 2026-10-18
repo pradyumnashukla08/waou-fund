@@ -27,12 +27,39 @@ export const DataRoomModule: React.FC<DataRoomModuleProps> = ({ startup, evaluat
   const fileInputRef = useRef<HTMLInputElement>(null);
   const startupPrefix = (startup.name || 'Startup').replace(/\s+/g, '_');
 
-  const [docs, setDocs] = useState<UploadedDoc[]>([
-    { id: '1', name: `${startupPrefix}_Seed_Pitch_Deck_V3.pdf`, size: '12.4 MB', date: '2026-10-09', format: 'PDF', status: 'verified' },
-    { id: '2', name: `${startupPrefix}_Cap_Table_Fully_Diluted.xlsx`, size: '2.1 MB', date: '2026-10-08', format: 'Excel', status: 'verified' },
-    { id: '3', name: `${startupPrefix}_Financial_Model_3Y.xlsx`, size: '4.8 MB', date: '2026-10-07', format: 'Excel', status: 'verified' },
-    { id: '4', name: 'Certificate_of_Incorporation_MCA.pdf', size: '1.2 MB', date: '2026-09-15', format: 'PDF', status: 'verified' },
-  ]);
+  const [docs, setDocs] = useState<UploadedDoc[]>(() => {
+    try {
+      const saved = sessionStorage.getItem('waou_dataroom_docs');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) {
+          // If active user session was accidentally stored with legacy mock docs, purge them
+          if (startup.id === 'user_active_startup' && parsed.some((d: any) => d.name?.includes('Seed_Pitch_Deck_V3.pdf'))) {
+            sessionStorage.removeItem('waou_dataroom_docs');
+            return [];
+          }
+          return parsed;
+        }
+      }
+    } catch {}
+    // If viewing demo mock startup explicitly (e.g. avasplot from switcher), show demo files
+    if (startup.id && startup.id !== 'user_active_startup' && startup.id !== 'custom_startup') {
+      return [
+        { id: '1', name: `${startupPrefix}_Seed_Pitch_Deck_V3.pdf`, size: '12.4 MB', date: '2026-10-09', format: 'PDF', status: 'verified' },
+        { id: '2', name: `${startupPrefix}_Cap_Table_Fully_Diluted.xlsx`, size: '2.1 MB', date: '2026-10-08', format: 'Excel', status: 'verified' },
+        { id: '3', name: `${startupPrefix}_Financial_Model_3Y.xlsx`, size: '4.8 MB', date: '2026-10-07', format: 'Excel', status: 'verified' },
+        { id: '4', name: 'Certificate_of_Incorporation_MCA.pdf', size: '1.2 MB', date: '2026-09-15', format: 'PDF', status: 'verified' },
+      ];
+    }
+    // Real user starts clean with 0 fake files
+    return [];
+  });
+
+  React.useEffect(() => {
+    try {
+      sessionStorage.setItem('waou_dataroom_docs', JSON.stringify(docs));
+    } catch {}
+  }, [docs]);
 
   const [isDiligenceRunning, setIsDiligenceRunning] = useState(false);
   const [diligenceStep, setDiligenceStep] = useState(0);
@@ -99,7 +126,7 @@ export const DataRoomModule: React.FC<DataRoomModuleProps> = ({ startup, evaluat
     docs.some((d) => d.name.toLowerCase().includes(item.id.toLowerCase()) || d.name.toLowerCase().includes(item.label.toLowerCase().split(' ')[0]))
   ).length;
 
-  const readinessPercent = Math.min(100, Math.round(((completedChecklistCount + 2) / (checklist.length + 2)) * 100));
+  const readinessPercent = docs.length === 0 ? 0 : Math.min(100, Math.round((completedChecklistCount / checklist.length) * 100));
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
@@ -379,80 +406,122 @@ export const DataRoomModule: React.FC<DataRoomModuleProps> = ({ startup, evaluat
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-            {docs.map((doc) => (
-              <div
-                key={doc.id}
-                style={{
-                  backgroundColor: 'var(--bg-secondary)',
-                  borderRadius: '12px',
-                  padding: '1rem',
-                  border: '1px solid var(--border-subtle)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  gap: '0.75rem',
-                }}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', overflow: 'hidden' }}>
-                  <div style={{
-                    width: '34px',
-                    height: '34px',
+            {docs.length === 0 ? (
+              <div style={{
+                padding: '2.5rem 1.5rem',
+                textAlign: 'center',
+                backgroundColor: 'var(--bg-secondary)',
+                borderRadius: '12px',
+                border: '2px dashed var(--border-subtle)',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: '0.75rem',
+              }}>
+                <FileText size={32} style={{ color: 'var(--text-hint)' }} />
+                <div style={{ fontWeight: 700, fontSize: '0.92rem', color: 'var(--text-primary)' }}>
+                  No Documents in Data Room Yet
+                </div>
+                <div style={{ fontSize: '0.78rem', color: 'var(--text-hint)', maxWidth: '380px', lineHeight: 1.4 }}>
+                  Upload your pitch deck, financials, cap table, or legal docs above to build your due diligence locker.
+                </div>
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  style={{
+                    marginTop: '0.5rem',
+                    fontSize: '0.78rem',
+                    fontWeight: 700,
+                    padding: '0.5rem 1rem',
                     borderRadius: '8px',
-                    backgroundColor: doc.format === 'PDF' ? 'rgba(239, 68, 68, 0.15)' : 'rgba(16, 185, 129, 0.15)',
-                    color: doc.format === 'PDF' ? '#EF4444' : '#10B981',
+                    border: 'none',
+                    backgroundColor: 'var(--color-brand-600)',
+                    color: '#fff',
+                    cursor: 'pointer',
                     display: 'flex',
                     alignItems: 'center',
-                    justifyContent: 'center',
-                    flexShrink: 0,
-                    fontSize: '0.7rem',
-                    fontWeight: 900,
-                  }}>
-                    {doc.format}
-                  </div>
-                  <div style={{ overflow: 'hidden' }}>
-                    <div style={{
-                      fontSize: '0.84rem',
-                      fontWeight: 700,
-                      color: 'var(--text-primary)',
-                      whiteSpace: 'nowrap',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                    }}>
-                      {doc.name}
-                    </div>
-                    <div style={{ fontSize: '0.72rem', color: 'var(--text-hint)' }}>
-                      {doc.size} • Uploaded {doc.date}
-                    </div>
-                  </div>
-                </div>
-
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <span style={{
-                    fontSize: '0.68rem',
-                    fontWeight: 800,
-                    backgroundColor: 'var(--accent-bg-emerald)',
-                    color: '#10B981',
-                    padding: '2px 6px',
-                    borderRadius: '4px',
-                  }}>
-                    VERIFIED
-                  </span>
-                  <button
-                    onClick={() => handleDeleteDoc(doc.id)}
-                    style={{
-                      background: 'none',
-                      border: 'none',
-                      color: 'var(--text-hint)',
-                      cursor: 'pointer',
-                      padding: '4px',
-                    }}
-                    title="Remove File"
-                  >
-                    <Trash2 size={14} />
-                  </button>
-                </div>
+                    gap: '0.4rem',
+                  }}
+                >
+                  <UploadCloud size={14} />
+                  <span>Upload First Document</span>
+                </button>
               </div>
-            ))}
+            ) : (
+              docs.map((doc) => (
+                <div
+                  key={doc.id}
+                  style={{
+                    backgroundColor: 'var(--bg-secondary)',
+                    borderRadius: '12px',
+                    padding: '1rem',
+                    border: '1px solid var(--border-subtle)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: '0.75rem',
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', overflow: 'hidden' }}>
+                    <div style={{
+                      width: '34px',
+                      height: '34px',
+                      borderRadius: '8px',
+                      backgroundColor: doc.format === 'PDF' ? 'rgba(239, 68, 68, 0.15)' : 'rgba(16, 185, 129, 0.15)',
+                      color: doc.format === 'PDF' ? '#EF4444' : '#10B981',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexShrink: 0,
+                      fontSize: '0.7rem',
+                      fontWeight: 900,
+                    }}>
+                      {doc.format}
+                    </div>
+                    <div style={{ overflow: 'hidden' }}>
+                      <div style={{
+                        fontSize: '0.84rem',
+                        fontWeight: 700,
+                        color: 'var(--text-primary)',
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                      }}>
+                        {doc.name}
+                      </div>
+                      <div style={{ fontSize: '0.72rem', color: 'var(--text-hint)' }}>
+                        {doc.size} • Uploaded {doc.date}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <span style={{
+                      fontSize: '0.68rem',
+                      fontWeight: 800,
+                      backgroundColor: 'var(--accent-bg-emerald)',
+                      color: '#10B981',
+                      padding: '2px 6px',
+                      borderRadius: '4px',
+                    }}>
+                      VERIFIED
+                    </span>
+                    <button
+                      onClick={() => handleDeleteDoc(doc.id)}
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        color: 'var(--text-hint)',
+                        cursor: 'pointer',
+                        padding: '4px',
+                      }}
+                      title="Remove File"
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </div>
       </div>

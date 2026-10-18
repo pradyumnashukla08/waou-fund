@@ -33,22 +33,32 @@ export const DiagnosticModule: React.FC<DiagnosticModuleProps> = ({
 }) => {
   const [isScanning, setIsScanning] = useState(false);
   const [scanStep, setScanStep] = useState(0);
-  const defaultDeckName = startup?.pitchDeckUrl 
-    ? (startup.pitchDeckUrl.split('/').pop() || `${startup.name.replace(/\s+/g, '_')}_Pitch_Deck.pdf`)
-    : `${startup?.name ? startup.name.replace(/\s+/g, '_') : 'My_Startup'}_Pitch_Deck.pdf`;
   const [activeFileName, setActiveFileName] = useState(() => {
     try {
-      return sessionStorage.getItem('waou_diag_file') || defaultDeckName;
+      const saved = sessionStorage.getItem('waou_diag_file');
+      if (saved && !saved.includes('My_Startup_Pitch_Deck.pdf') && !saved.includes('My_Venture_Pitch_Deck.pdf')) {
+        return saved;
+      }
+      if (startup?.pitchDeckUrl) {
+        return startup.pitchDeckUrl.split('/').pop() || '';
+      }
+      if (startup?.id && startup.id !== 'user_active_startup' && startup.id !== 'custom_startup') {
+        return `${startup.name.replace(/\s+/g, '_')}_Pitch_Deck.pdf`;
+      }
+      return '';
     } catch {
-      return defaultDeckName;
+      return '';
     }
   });
+  const defaultDeckName = activeFileName || `${startup?.name ? startup.name.replace(/\s+/g, '_') : 'My_Startup'}_Pitch_Deck.pdf`;
   const [selectedFinding, setSelectedFinding] = useState<number | null>(null);
   const [scanError, setScanError] = useState<string | null>(null);
 
   React.useEffect(() => {
     try {
-      sessionStorage.setItem('waou_diag_file', activeFileName);
+      if (activeFileName) {
+        sessionStorage.setItem('waou_diag_file', activeFileName);
+      }
     } catch {}
   }, [activeFileName]);
 
@@ -91,6 +101,7 @@ export const DiagnosticModule: React.FC<DiagnosticModuleProps> = ({
   };
 
   const getGrade = (score: number) => {
+    if (score === 0) return '-';
     if (score >= 90) return 'A+';
     if (score >= 82) return 'A';
     if (score >= 74) return 'B+';
@@ -244,10 +255,16 @@ export const DiagnosticModule: React.FC<DiagnosticModuleProps> = ({
 
             <div>
               <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--text-primary)' }}>
-                Active Document: <span style={{ color: 'var(--text-brand)' }}>{activeFileName}</span>
+                {activeFileName ? (
+                  <>Active Document: <span style={{ color: 'var(--text-brand)' }}>{activeFileName}</span></>
+                ) : (
+                  <span>Upload Your Pitch Deck (PDF / PPTX)</span>
+                )}
               </h3>
               <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
-                Drag and drop your updated pitch deck PDF (max 25MB) or run diagnostic on preset samples.
+                {activeFileName 
+                  ? 'Drag and drop an updated revision or re-analyze against the VC benchmark model.'
+                  : 'Upload your presentation slides to vectorize narrative, team pedigree, and unit economics.'}
               </p>
             </div>
 
@@ -257,7 +274,7 @@ export const DiagnosticModule: React.FC<DiagnosticModuleProps> = ({
                 style={{ padding: '0.65rem 1.25rem', fontSize: '0.86rem', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}
               >
                 <UploadCloud size={15} />
-                <span>Upload New Deck File</span>
+                <span>{activeFileName ? 'Upload New Deck File' : 'Browse Pitch Deck (PDF)'}</span>
                 <input 
                   type="file" 
                   accept=".pdf,.pptx,.ppt" 
@@ -266,23 +283,25 @@ export const DiagnosticModule: React.FC<DiagnosticModuleProps> = ({
                 />
               </label>
 
-              <button
-                onClick={() => handleSimulateScan(activeFileName, '12.4 MB')}
-                className="btn-outline"
-                style={{
-                  padding: '0.65rem 1.25rem',
-                  fontSize: '0.86rem',
-                  backgroundColor: 'var(--bg-secondary)',
-                  color: 'var(--text-primary)',
-                  borderColor: 'rgba(226, 232, 240, 0.8)',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '0.5rem',
-                }}
-              >
-                <RefreshCw size={14} />
-                <span>Re-Analyze {startup?.name ? `${startup.name} Deck` : 'Current Deck'}</span>
-              </button>
+              {activeFileName ? (
+                <button
+                  onClick={() => handleSimulateScan(activeFileName, '12.4 MB')}
+                  className="btn-outline"
+                  style={{
+                    padding: '0.65rem 1.25rem',
+                    fontSize: '0.86rem',
+                    backgroundColor: 'var(--bg-secondary)',
+                    color: 'var(--text-primary)',
+                    borderColor: 'rgba(226, 232, 240, 0.8)',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                  }}
+                >
+                  <RefreshCw size={14} />
+                  <span>Re-Analyze {startup?.name ? `${startup.name} Deck` : 'Current Deck'}</span>
+                </button>
+              ) : null}
 
               <button
                 onClick={() => handleSimulateScan('FinFlow_SeriesA_Growth_Deck.pdf', '18.2 MB')}
@@ -353,9 +372,13 @@ export const DiagnosticModule: React.FC<DiagnosticModuleProps> = ({
             <div style={{ fontSize: '2rem', fontWeight: 900, color: 'var(--text-primary)', fontFamily: 'var(--font-mono)' }}>
               {evaluation.overall_score} <span style={{ fontSize: '1rem', color: 'var(--text-muted)' }}>/ 100</span>
             </div>
-            <div style={{ fontSize: '0.82rem', color: '#10B981', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <div style={{ fontSize: '0.82rem', color: evaluation.overall_score > 0 ? '#10B981' : 'var(--text-hint)', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px' }}>
               <CheckCircle2 size={13} />
-              {evaluation.overall_score >= 85 ? 'Strong Seed Match (Top Decile)' : 'Meets Baseline Seed Standards'}
+              {evaluation.overall_score === 0 
+                ? 'Upload pitch deck to run AI analysis' 
+                : evaluation.overall_score >= 85 
+                ? 'Strong Seed Match (Top Decile)' 
+                : 'Meets Baseline Seed Standards'}
             </div>
           </div>
         </div>
@@ -369,19 +392,25 @@ export const DiagnosticModule: React.FC<DiagnosticModuleProps> = ({
           <div style={{ backgroundColor: 'var(--bg-secondary)', padding: '0.85rem', borderRadius: '12px', border: '1px solid var(--border-subtle)' }}>
             <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 700 }}>TEAM PEDIGREE</span>
             <div style={{ fontSize: '1.3rem', fontWeight: 900, color: 'var(--text-brand)' }}>{evaluation.team_score}/100</div>
-            <span style={{ fontSize: '0.68rem', color: '#10B981' }}>Ex-Flipkart / Founders</span>
+            <span style={{ fontSize: '0.68rem', color: evaluation.team_score > 0 ? '#10B981' : 'var(--text-hint)' }}>
+              {startup?.pedigree || (startup?.team && startup.team.length > 0 ? `${startup.team.length} members` : 'Pending input')}
+            </span>
           </div>
 
           <div style={{ backgroundColor: 'var(--bg-secondary)', padding: '0.85rem', borderRadius: '12px', border: '1px solid var(--border-subtle)' }}>
             <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 700 }}>MARKET / TAM</span>
             <div style={{ fontSize: '1.3rem', fontWeight: 900, color: '#D97706' }}>{evaluation.market_score}/100</div>
-            <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>₹48,000 Cr TAM</span>
+            <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>
+              {startup?.tam || (evaluation.market_landscape?.tam !== 'Not defined' ? evaluation.market_landscape?.tam : 'Not sized')}
+            </span>
           </div>
 
           <div style={{ backgroundColor: 'var(--bg-secondary)', padding: '0.85rem', borderRadius: '12px', border: '1px solid var(--border-subtle)' }}>
             <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 700 }}>UNIT ECONOMICS</span>
             <div style={{ fontSize: '1.3rem', fontWeight: 900, color: '#EC4899' }}>{evaluation.execution_score}/100</div>
-            <span style={{ fontSize: '0.68rem', color: '#F59E0B' }}>Payback 13.8 mos</span>
+            <span style={{ fontSize: '0.68rem', color: '#F59E0B' }}>
+              {evaluation.gtm_strategy?.payback_period ? `Payback ${evaluation.gtm_strategy.payback_period} mos` : 'Pending model'}
+            </span>
           </div>
         </div>
       </div>

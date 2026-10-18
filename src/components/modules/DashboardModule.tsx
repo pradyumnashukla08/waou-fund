@@ -47,6 +47,22 @@ export const DashboardModule: React.FC<DashboardModuleProps> = ({
   const investorReadiness = Math.min(100, evaluation.market_score + (isDailyTaskDone ? 2 : 0));
   const fundingProbability = Math.min(100, evaluation.execution_score + (resolvedIssues.length * 2));
 
+  const storedDocCount = (() => {
+    try {
+      const raw = sessionStorage.getItem('waou_dataroom_docs');
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) {
+          if (startup.id === 'user_active_startup' && parsed.some((d: any) => d.name?.includes('Seed_Pitch_Deck_V3.pdf'))) {
+            return 0;
+          }
+          return parsed.length;
+        }
+      }
+    } catch {}
+    return 0;
+  })();
+
   const toggleResolve = (idx: number, e: React.MouseEvent) => {
     e.stopPropagation();
     if (resolvedIssues.includes(idx)) {
@@ -219,10 +235,12 @@ export const DashboardModule: React.FC<DashboardModuleProps> = ({
                 VC FUNDABILITY SCORE
               </div>
               <h3 style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--text-primary)' }}>
-                {fundabilityScore >= 85 ? 'Top Quartile Match' : 'Nearing Investor Readiness'}
+                {fundabilityScore === 0 ? 'Profile Setup Required' : fundabilityScore >= 85 ? 'Top Quartile Match' : 'Nearing Investor Readiness'}
               </h3>
               <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '0.25rem', lineHeight: 1.5 }}>
-                Derived from 14 vectors across Team, TAM, CAC payback, and virtual data room completeness.
+                {fundabilityScore === 0 
+                  ? 'Complete your startup profile in the Workspace or upload your pitch deck to calculate your verified score.'
+                  : 'Derived from 14 vectors across Team, TAM, CAC payback, and virtual data room completeness.'}
               </p>
             </div>
           </div>
@@ -240,8 +258,8 @@ export const DashboardModule: React.FC<DashboardModuleProps> = ({
               <div style={{ fontSize: '1.8rem', fontWeight: 900, color: 'var(--text-brand)', marginTop: '0.25rem' }}>
                 {investorReadiness}%
               </div>
-              <span style={{ fontSize: '0.72rem', color: '#10B981', fontWeight: 700 }}>
-                Data room 82% complete
+              <span style={{ fontSize: '0.72rem', color: storedDocCount > 0 ? '#10B981' : 'var(--text-hint)', fontWeight: 700 }}>
+                {storedDocCount === 0 ? 'Data room empty (0 files)' : `${storedDocCount} document${storedDocCount > 1 ? 's' : ''} uploaded`}
               </span>
             </div>
 
@@ -272,7 +290,11 @@ export const DashboardModule: React.FC<DashboardModuleProps> = ({
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.82rem', color: 'var(--text-muted)' }}>
             <Info size={15} color="var(--text-brand)" />
-            <span>Target Round: {startup.targetAsk} @ {startup.valuation} ({startup.equityOffered} Equity)</span>
+            <span>
+              Target Round: {startup.targetAsk && startup.targetAsk !== 'Not Set' && startup.targetAsk !== '0' && startup.targetAsk !== '₹0'
+                ? `${startup.targetAsk}${startup.valuation ? ` @ ${startup.valuation}` : ''}${startup.equityOffered ? ` (${startup.equityOffered} Equity)` : ''}`
+                : 'Not configured yet'}
+            </span>
           </div>
 
           <button

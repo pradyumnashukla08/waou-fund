@@ -106,7 +106,17 @@ export const ProfileTeaserModule: React.FC<ProfileTeaserModuleProps> = ({
     try {
       const draft = sessionStorage.getItem(`waou_profile_draft_${startup.id}`);
       if (draft) {
-        return JSON.parse(draft);
+        const parsed = JSON.parse(draft);
+        if (startup.id === 'user_active_startup') {
+          // Clean legacy mock values
+          if (parsed.targetRaise === '20000000') parsed.targetRaise = '';
+          if (parsed.valuationCap === '150000000') parsed.valuationCap = '';
+          if (parsed.pedigree === 'First-Time Founder' && (!parsed.team || parsed.team.length === 0)) parsed.pedigree = '';
+          if (parsed.sector === 'SaaS' && !parsed.pitch) parsed.sector = '';
+          if (parsed.companyType === 'Private Limited' && !parsed.registrationNo) parsed.companyType = '';
+          if (parsed.productStatus === 'MVP in Development' && !parsed.problemValidation) parsed.productStatus = '';
+        }
+        return parsed;
       }
     } catch {}
     return {
@@ -119,10 +129,10 @@ export const ProfileTeaserModule: React.FC<ProfileTeaserModuleProps> = ({
       team: Array.isArray(startup.team) ? startup.team : [],
       companyName: startup.companyName || startup.name || '',
       websiteUrl: startup.websiteUrl || startup.website || '',
-      companyType: startup.companyType || 'Private Limited',
+      companyType: startup.companyType || '',
       isRegistered: startup.isRegistered !== undefined ? startup.isRegistered : false,
       registrationNo: startup.registrationNo || '',
-      sector: startup.sector || startup.category?.split('/')[0]?.trim() || 'SaaS',
+      sector: startup.sector || '',
       pitch: startup.pitch || startup.tagline || '',
       currency: startup.currency || '₹ (INR)',
       tam: startup.tam || '',
@@ -139,7 +149,7 @@ export const ProfileTeaserModule: React.FC<ProfileTeaserModuleProps> = ({
       // Pre-Seed
       waitlistCount: startup.waitlistCount || '',
       betaConversion: startup.betaConversion || '',
-      productStatus: startup.productStatus || 'Functional MVP',
+      productStatus: startup.productStatus || '',
       problemValidation: startup.problemValidation || '',
       teamCapability: startup.teamCapability || '',
       runway: startup.runway || '',

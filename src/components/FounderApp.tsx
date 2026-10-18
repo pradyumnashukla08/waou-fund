@@ -145,17 +145,18 @@ export const FounderApp: React.FC<FounderAppProps> = ({
               <span style={{
                 fontSize: '0.68rem',
                 fontWeight: 800,
-                background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)',
-                color: '#FFFFFF',
+                backgroundColor: startup.fundabilityScore ? 'var(--accent-bg-emerald)' : 'var(--bg-secondary)',
+                color: startup.fundabilityScore ? '#10B981' : 'var(--text-hint)',
+                border: '1px solid var(--border-subtle)',
                 padding: '2px 8px',
                 borderRadius: '6px',
               }}>
-                {startup.fundabilityScore || 85}/100
+                {startup.fundabilityScore ? `${startup.fundabilityScore}/100` : 'Not Scored'}
               </span>
             </div>
           </div>
           <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>
-            {startup.stage || 'Seed'} • {startup.category || 'Tech'}
+            {startup.stage || 'Seed'} {startup.category ? `• ${startup.category}` : ''}
           </div>
           <div style={{
             marginTop: '0.75rem',
@@ -167,8 +168,8 @@ export const FounderApp: React.FC<FounderAppProps> = ({
             color: 'var(--text-brand)',
             fontWeight: 600,
           }}>
-            <span>Ask: {startup.targetAsk || '₹4 Cr'}</span>
-            <span>MRR: {startup.mrr ? (startup.mrr.startsWith('₹') ? startup.mrr : `₹${startup.mrr}`) : '₹12 Lakhs'}</span>
+            <span>Ask: {startup.targetAsk && startup.targetAsk !== '₹0' && startup.targetAsk !== '0' ? startup.targetAsk : 'Not Set'}</span>
+            <span>MRR: {startup.mrr && startup.mrr !== '₹0' && startup.mrr !== '0' ? (startup.mrr.startsWith('₹') ? startup.mrr : `₹${startup.mrr}`) : 'Not Set'}</span>
           </div>
         </div>
 
