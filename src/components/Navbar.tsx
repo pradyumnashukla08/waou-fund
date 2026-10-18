@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { 
   Sparkles, 
   Flame, 
@@ -68,11 +69,17 @@ export const Navbar: React.FC<NavbarProps> = ({
   useEffect(() => {
     if (mobileMenuOpen) {
       document.body.classList.add('modal-open');
+      document.body.style.overflow = 'hidden';
+      document.body.style.touchAction = 'none';
     } else {
       document.body.classList.remove('modal-open');
+      document.body.style.overflow = '';
+      document.body.style.touchAction = '';
     }
     return () => {
       document.body.classList.remove('modal-open');
+      document.body.style.overflow = '';
+      document.body.style.touchAction = '';
     };
   }, [mobileMenuOpen]);
 
@@ -92,7 +99,7 @@ export const Navbar: React.FC<NavbarProps> = ({
         maxWidth: '1400px',
         margin: '0 auto',
         padding: '0 clamp(1rem, 2vw, 1.5rem)',
-        height: '72px',
+        height: '64px',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
@@ -584,7 +591,7 @@ export const Navbar: React.FC<NavbarProps> = ({
       </div>
 
       {/* ── Mobile Navigation Drawer ─────────────────────────────────── */}
-      {mobileMenuOpen && (
+      {mobileMenuOpen && typeof document !== 'undefined' && createPortal(
         <div className="mobile-drawer-overlay" onClick={() => setMobileMenuOpen(false)}>
           <div className="mobile-drawer-content" onClick={(e) => e.stopPropagation()}>
             {/* Drawer Header */}
@@ -918,7 +925,8 @@ export const Navbar: React.FC<NavbarProps> = ({
               )}
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </header>
   );

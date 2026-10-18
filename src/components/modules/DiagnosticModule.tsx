@@ -36,21 +36,21 @@ export const DiagnosticModule: React.FC<DiagnosticModuleProps> = ({
   const [activeFileName, setActiveFileName] = useState(() => {
     try {
       const saved = sessionStorage.getItem('waou_diag_file');
-      if (saved && !saved.includes('My_Startup_Pitch_Deck.pdf') && !saved.includes('My_Venture_Pitch_Deck.pdf')) {
+      if (saved && 
+          !saved.includes('My_Startup') && 
+          !saved.includes('My_Venture') && 
+          !saved.includes('FinFlow') && 
+          !saved.includes('HealthSync')) {
         return saved;
       }
-      if (startup?.pitchDeckUrl) {
+      if (startup?.pitchDeckUrl && !startup.pitchDeckUrl.includes('FinFlow') && !startup.pitchDeckUrl.includes('HealthSync')) {
         return startup.pitchDeckUrl.split('/').pop() || '';
-      }
-      if (startup?.id && startup.id !== 'user_active_startup' && startup.id !== 'custom_startup') {
-        return `${startup.name.replace(/\s+/g, '_')}_Pitch_Deck.pdf`;
       }
       return '';
     } catch {
       return '';
     }
   });
-  const defaultDeckName = activeFileName || `${startup?.name ? startup.name.replace(/\s+/g, '_') : 'My_Startup'}_Pitch_Deck.pdf`;
   const [selectedFinding, setSelectedFinding] = useState<number | null>(null);
   const [scanError, setScanError] = useState<string | null>(null);
 
@@ -70,10 +70,12 @@ export const DiagnosticModule: React.FC<DiagnosticModuleProps> = ({
     'Synthesizing Diagnostic Verdict...',
   ];
 
-  const handleSimulateScan = async (fileName = defaultDeckName, fileSize = '8.4 MB') => {
+  const handleSimulateScan = async (fileName?: string, fileSize = '8.4 MB') => {
+    const targetFile = fileName || activeFileName;
+    if (!targetFile) return;
     setIsScanning(true);
     setScanError(null);
-    setActiveFileName(fileName);
+    setActiveFileName(targetFile);
     setScanStep(0);
 
     for (let i = 0; i < scanSteps.length; i++) {
@@ -82,7 +84,7 @@ export const DiagnosticModule: React.FC<DiagnosticModuleProps> = ({
     }
 
     try {
-      const updated = await api.evaluateDeck(fileName, fileSize, startup?.stage || 'Seed');
+      const updated = await api.evaluateDeck(targetFile, fileSize, startup?.stage || 'Seed');
       onUpdateEvaluation(updated);
     } catch (err: any) {
       console.warn('Diagnostic evaluation error:', err);
@@ -94,6 +96,15 @@ export const DiagnosticModule: React.FC<DiagnosticModuleProps> = ({
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
+    if (file) {
+      const sizeMb = (file.size / (1024 * 1024)).toFixed(1) + ' MB';
+      handleSimulateScan(file.name, sizeMb);
+    }
+  };
+
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    const file = e.dataTransfer.files?.[0];
     if (file) {
       const sizeMb = (file.size / (1024 * 1024)).toFixed(1) + ' MB';
       handleSimulateScan(file.name, sizeMb);
@@ -211,7 +222,11 @@ export const DiagnosticModule: React.FC<DiagnosticModuleProps> = ({
       )}
 
       {/* ── File Upload / Scan Trigger Bar ────────────────────────────── */}
-      <div className="card-elevated" style={{
+      <div 
+        className="card-elevated" 
+        onDragOver={(e) => e.preventDefault()}
+        onDrop={handleDrop}
+        style={{
         borderRadius: '20px',
         padding: '2rem',
         border: '2px dashed rgba(56, 189, 248, 0.3)',
@@ -274,7 +289,7 @@ export const DiagnosticModule: React.FC<DiagnosticModuleProps> = ({
                 style={{ padding: '0.65rem 1.25rem', fontSize: '0.86rem', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}
               >
                 <UploadCloud size={15} />
-                <span>{activeFileName ? 'Upload New Deck File' : 'Browse Pitch Deck (PDF)'}</span>
+                <span>{activeFileName ? 'Upload New Deck File' : 'Browse Pitch Deck (PDF / PPTX)'}</span>
                 <input 
                   type="file" 
                   accept=".pdf,.pptx,.ppt" 
@@ -299,37 +314,9 @@ export const DiagnosticModule: React.FC<DiagnosticModuleProps> = ({
                   }}
                 >
                   <RefreshCw size={14} />
-                  <span>Re-Analyze {startup?.name ? `${startup.name} Deck` : 'Current Deck'}</span>
+                  <span>Re-Analyze {startup?.name ? `${startup.name} Deck` : 'Uploaded Deck'}</span>
                 </button>
               ) : null}
-
-              <button
-                onClick={() => handleSimulateScan('FinFlow_SeriesA_Growth_Deck.pdf', '18.2 MB')}
-                className="btn-outline"
-                style={{
-                  padding: '0.65rem 1.25rem',
-                  fontSize: '0.86rem',
-                  backgroundColor: 'var(--bg-secondary)',
-                  color: 'var(--text-primary)',
-                  borderColor: 'rgba(226, 232, 240, 0.8)',
-                }}
-              >
-                <span>Benchmark: FinFlow Series-A</span>
-              </button>
-
-              <button
-                onClick={() => handleSimulateScan('HealthSync_PreSeed_Deck.pdf', '6.8 MB')}
-                className="btn-outline"
-                style={{
-                  padding: '0.65rem 1.25rem',
-                  fontSize: '0.86rem',
-                  backgroundColor: 'var(--bg-secondary)',
-                  color: 'var(--text-primary)',
-                  borderColor: 'rgba(226, 232, 240, 0.8)',
-                }}
-              >
-                <span>Benchmark: HealthSync Pre-Seed</span>
-              </button>
             </div>
           </div>
         )}

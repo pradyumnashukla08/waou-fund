@@ -11,6 +11,7 @@ import {
   Download, 
   Clock,
   ArrowRight,
+  ArrowDown,
   Eye,
   Trash2
 } from 'lucide-react';
@@ -168,6 +169,68 @@ export const DataRoomModule: React.FC<DataRoomModuleProps> = ({ startup, evaluat
         >
           <ShieldCheck size={16} />
           <span>{isDiligenceRunning ? 'Scanning Room...' : 'Run AI Diligence Scan'}</span>
+        </button>
+      </div>
+
+      {/* ── Standardized Diligence Templates Quick Notice Banner ─────────── */}
+      <div style={{
+        backgroundColor: 'var(--accent-bg-blue)',
+        border: '1px solid rgba(37, 99, 235, 0.25)',
+        borderRadius: '16px',
+        padding: '1.1rem 1.35rem',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        flexWrap: 'wrap',
+        gap: '1rem',
+        boxShadow: '0 2px 10px rgba(37, 99, 235, 0.06)',
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
+          <div style={{
+            width: '40px',
+            height: '40px',
+            borderRadius: '10px',
+            background: 'linear-gradient(135deg, #2563EB 0%, #06B6D4 100%)',
+            color: '#FFFFFF',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexShrink: 0,
+            boxShadow: '0 3px 8px rgba(37, 99, 235, 0.25)',
+          }}>
+            <Download size={20} />
+          </div>
+          <div>
+            <div style={{ fontSize: '0.94rem', fontWeight: 800, color: 'var(--text-primary)' }}>
+              Looking for Standardized Diligence Templates?
+            </div>
+            <div style={{ fontSize: '0.84rem', color: 'var(--text-muted)', marginTop: '0.15rem' }}>
+              If you want standardized templates, you can download them from the bottom of this page.
+            </div>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => {
+            const el = document.getElementById('official-templates-section');
+            if (el) {
+              el.scrollIntoView({ behavior: 'smooth' });
+            }
+          }}
+          className="btn-cyan"
+          style={{
+            padding: '0.55rem 1.15rem',
+            fontSize: '0.84rem',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '0.45rem',
+            whiteSpace: 'nowrap',
+            borderRadius: '10px',
+          }}
+        >
+          <span>Download Templates Below</span>
+          <ArrowDown size={15} />
         </button>
       </div>
 
@@ -527,18 +590,18 @@ export const DataRoomModule: React.FC<DataRoomModuleProps> = ({ startup, evaluat
       </div>
 
       {/* ── Official Diligence & Financial Model Templates ──────────────── */}
-      <div className="card-elevated" style={{ borderRadius: '20px', padding: '1.75rem' }}>
+      <div id="official-templates-section" className="card-elevated" style={{ borderRadius: '20px', padding: '1.75rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '0.5rem' }}>
           <div>
             <div style={{ fontSize: '0.78rem', fontWeight: 800, color: 'var(--text-brand)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
               OFFICIAL DILIGENCE TEMPLATES & FINANCIAL FORECAST MODELS
             </div>
             <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
-              Standard institutional Excel workbooks and document templates formatted for Indian & Global VC syndicates.
+              Standard institutional Excel workbooks formatted for Indian & Global VC syndicates.
             </div>
           </div>
           <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#10B981', backgroundColor: 'var(--accent-bg-emerald)', padding: '4px 10px', borderRadius: '6px' }}>
-            7 Excel Models + 2 Guides Ready
+            4 Institutional Models Ready
           </span>
         </div>
 
@@ -575,41 +638,6 @@ export const DataRoomModule: React.FC<DataRoomModuleProps> = ({ startup, evaluat
               size: '49.1 KB',
               href: '/templates/template_saas.xlsx',
               desc: 'MRR MoM cohort retention, CAC payback, LTV:CAC, and churn diagnostic model.',
-            },
-            {
-              title: 'Manufacturing & Hardware Unit Model',
-              type: 'Excel (.xlsx)',
-              size: '48.1 KB',
-              href: '/templates/template_manufacturing.xlsx',
-              desc: 'BOM pricing, tooling capex, yield progression, and supply chain working capital.',
-            },
-            {
-              title: 'Services & Productized Agency Model',
-              type: 'Excel (.xlsx)',
-              size: '47.5 KB',
-              href: '/templates/template_services.xlsx',
-              desc: 'Value-based pricing, retainer gross margins, and billable hour utilization model.',
-            },
-            {
-              title: 'Narayan Dairy Institutional Project Forecast',
-              type: 'Excel (.xlsx)',
-              size: '260.9 KB',
-              href: '/templates/Narayan_Dairy_Project_Financial_Forecast.xlsx',
-              desc: 'Real institutional case financial forecast model with operational benchmarks.',
-            },
-            {
-              title: 'Investor Diligence FAQs & Script',
-              type: 'Word (.docx)',
-              size: '105.1 KB',
-              href: '/documents/Investor_FAQs.docx',
-              desc: 'Comprehensive VC diligence question set and acquisition FAQs.',
-            },
-            {
-              title: 'Founder Investor Call Training Script',
-              type: 'Word (.docx)',
-              size: '99.0 KB',
-              href: '/documents/Training_Script_Call_1.docx',
-              desc: 'Verbatim verbal script for pitching institutional partners and angel leads.',
             },
           ].map((t, idx) => (
             <div
