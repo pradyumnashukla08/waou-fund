@@ -45,7 +45,9 @@ export const FinanceModule: React.FC<FinanceModuleProps> = ({ startup, evaluatio
   const [fundraiseCr, setFundraiseCr] = useState(() => {
     try {
       const saved = sessionStorage.getItem('waou_fin_raise');
-      return saved ? parseInt(saved, 10) : 4;
+      if (saved) return parseInt(saved, 10);
+      const parsed = parseFloat((startup.targetRaise || '').replace(/[^0-9.]/g, ''));
+      return !isNaN(parsed) && parsed > 0 ? Math.min(Math.round(parsed), 20) : 4;
     } catch {
       return 4;
     }
@@ -115,7 +117,7 @@ Sales & Outbound,${(190 * multiplier).toFixed(0)},${(440 * multiplier).toFixed(0
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement('a');
     link.setAttribute('href', encodedUri);
-    link.setAttribute('download', `${startup.name}_5Year_Financial_Model.csv`);
+    link.setAttribute('download', `${(startup.name || 'Startup').replace(/\s+/g, '_')}_5Year_Financial_Model.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -144,7 +146,7 @@ Sales & Outbound,${(190 * multiplier).toFixed(0)},${(440 * multiplier).toFixed(0
           <div style={{
             fontSize: '0.78rem',
             fontWeight: 800,
-            color: '#FACC15',
+            color: '#D97706',
             letterSpacing: '0.08em',
             textTransform: 'uppercase',
             display: 'flex',
@@ -210,10 +212,10 @@ Sales & Outbound,${(190 * multiplier).toFixed(0)},${(440 * multiplier).toFixed(0
 
         <div className="card-elevated" style={{ borderRadius: '16px', padding: '1.25rem' }}>
           <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 800 }}>TARGET 12M ARR</span>
-          <div style={{ fontSize: '1.6rem', fontWeight: 900, color: '#FACC15', marginTop: '0.25rem', fontFamily: 'var(--font-mono)' }}>
+          <div style={{ fontSize: '1.6rem', fontWeight: 900, color: '#D97706', marginTop: '0.25rem', fontFamily: 'var(--font-mono)' }}>
             {formatINR(targetArr)}
           </div>
-          <span style={{ fontSize: '0.72rem', color: '#FDE047' }}>At {growthPercent}% MoM growth</span>
+          <span style={{ fontSize: '0.72rem', color: '#B45309', fontWeight: 700 }}>At {growthPercent}% MoM growth</span>
         </div>
       </div>
 
@@ -221,10 +223,10 @@ Sales & Outbound,${(190 * multiplier).toFixed(0)},${(440 * multiplier).toFixed(0
       <div className="card-elevated" style={{
         borderRadius: '20px',
         padding: '2rem',
-        border: '1px solid rgba(250, 204, 21, 0.25)',
+        border: '1px solid rgba(217, 119, 6, 0.25)',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.5rem' }}>
-          <Sparkles size={18} color="#FACC15" />
+          <Sparkles size={18} color="#D97706" />
           <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: 'var(--text-primary)' }}>
             Live Scenario Parameters & Headcount Modeling
           </h3>
@@ -266,7 +268,7 @@ Sales & Outbound,${(190 * multiplier).toFixed(0)},${(440 * multiplier).toFixed(0
               <span style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
                 Monthly ARR Growth Rate
               </span>
-              <span style={{ fontSize: '1.1rem', fontWeight: 900, color: '#FACC15', fontFamily: 'var(--font-mono)' }}>
+              <span style={{ fontSize: '1.1rem', fontWeight: 900, color: '#D97706', fontFamily: 'var(--font-mono)' }}>
                 +{growthPercent}% MoM
               </span>
             </div>
@@ -276,7 +278,7 @@ Sales & Outbound,${(190 * multiplier).toFixed(0)},${(440 * multiplier).toFixed(0
               max="40" 
               value={growthPercent}
               onChange={(e) => setGrowthPercent(parseInt(e.target.value))}
-              style={{ width: '100%', accentColor: '#FACC15', cursor: 'pointer' }}
+              style={{ width: '100%', accentColor: '#D97706', cursor: 'pointer' }}
             />
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', color: 'var(--text-hint)', marginTop: '4px' }}>
               <span>5% (Conservative)</span>

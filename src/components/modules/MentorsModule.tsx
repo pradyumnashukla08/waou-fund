@@ -15,7 +15,11 @@ import { Mentor } from '../../types';
 
 export const MentorsModule: React.FC = () => {
   const [selectedMentor, setSelectedMentor] = useState<Mentor | null>(null);
-  const [bookingDate, setBookingDate] = useState('2026-10-16');
+  const [bookingDate, setBookingDate] = useState(() => {
+    const d = new Date();
+    d.setDate(d.getDate() + 1);
+    return d.toISOString().split('T')[0];
+  });
   const [bookingTime, setBookingTime] = useState('15:00');
   const [bookingNotes, setBookingNotes] = useState('');
   const [isBooked, setIsBooked] = useState(false);
@@ -120,7 +124,7 @@ export const MentorsModule: React.FC = () => {
                   key={i}
                   style={{
                     backgroundColor: 'rgba(20, 184, 166, 0.12)',
-                    color: '#2DD4BF',
+                    color: '#0F766E',
                     fontSize: '0.72rem',
                     fontWeight: 700,
                     padding: '3px 8px',
@@ -225,6 +229,7 @@ export const MentorsModule: React.FC = () => {
                       </label>
                       <input 
                         type="date" 
+                        min={new Date().toISOString().split('T')[0]}
                         value={bookingDate}
                         onChange={(e) => setBookingDate(e.target.value)}
                         style={{

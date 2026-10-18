@@ -100,10 +100,10 @@ export const DashboardModule: React.FC<DashboardModuleProps> = ({
             fontFamily: 'var(--font-heading)',
             marginTop: '0.2rem',
           }}>
-            Welcome back, {startup.founder}
+            Welcome back, {startup.founder || 'Founder'}
           </h1>
           <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>
-            {startup.name} is synchronized with the institutional evaluation matrix.
+            {startup.name || 'Your Venture'} is synchronized with the institutional evaluation matrix.
           </p>
         </div>
 

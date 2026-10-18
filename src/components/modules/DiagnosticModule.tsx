@@ -143,16 +143,15 @@ export const DiagnosticModule: React.FC<DiagnosticModuleProps> = ({
 
       {/* ── ACTIVE AI EVALUATOR CARD ────────────────────────────── */}
       <div style={{
-        backgroundColor: 'var(--bg-card)',
         borderRadius: '16px',
         padding: '1.25rem 1.5rem',
-        border: '1px solid rgba(56, 189, 248, 0.25)',
-        background: 'linear-gradient(135deg, rgba(56, 189, 248, 0.05) 0%, rgba(30, 41, 59, 0.25) 100%)',
+        border: '1px solid #BAE6FD',
+        background: 'linear-gradient(135deg, #F0F9FF 0%, #E0F2FE 100%)',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem', flexWrap: 'wrap', gap: '0.5rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <span style={{ display: 'inline-block', width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#38BDF8', boxShadow: '0 0 8px #38BDF8' }} />
-            <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#38BDF8', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+            <span style={{ display: 'inline-block', width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#0284C7', boxShadow: '0 0 8px rgba(2, 132, 199, 0.4)' }} />
+            <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#0369A1', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
               ACTIVE AI EVALUATOR ({(startup?.stage || 'SEED').toUpperCase()})
             </span>
           </div>
@@ -367,19 +366,19 @@ export const DiagnosticModule: React.FC<DiagnosticModuleProps> = ({
           gridTemplateColumns: 'repeat(auto-fit, minmax(90px, 1fr))',
           gap: '1rem',
         }}>
-          <div style={{ backgroundColor: 'var(--bg-secondary)', padding: '0.85rem', borderRadius: '12px', border: '1px solid rgba(255, 255, 255, 0.05)' }}>
+          <div style={{ backgroundColor: 'var(--bg-secondary)', padding: '0.85rem', borderRadius: '12px', border: '1px solid var(--border-subtle)' }}>
             <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 700 }}>TEAM PEDIGREE</span>
             <div style={{ fontSize: '1.3rem', fontWeight: 900, color: 'var(--text-brand)' }}>{evaluation.team_score}/100</div>
             <span style={{ fontSize: '0.68rem', color: '#10B981' }}>Ex-Flipkart / Founders</span>
           </div>
 
-          <div style={{ backgroundColor: 'var(--bg-secondary)', padding: '0.85rem', borderRadius: '12px', border: '1px solid rgba(255, 255, 255, 0.05)' }}>
+          <div style={{ backgroundColor: 'var(--bg-secondary)', padding: '0.85rem', borderRadius: '12px', border: '1px solid var(--border-subtle)' }}>
             <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 700 }}>MARKET / TAM</span>
-            <div style={{ fontSize: '1.3rem', fontWeight: 900, color: '#FACC15' }}>{evaluation.market_score}/100</div>
+            <div style={{ fontSize: '1.3rem', fontWeight: 900, color: '#D97706' }}>{evaluation.market_score}/100</div>
             <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>₹48,000 Cr TAM</span>
           </div>
 
-          <div style={{ backgroundColor: 'var(--bg-secondary)', padding: '0.85rem', borderRadius: '12px', border: '1px solid rgba(255, 255, 255, 0.05)' }}>
+          <div style={{ backgroundColor: 'var(--bg-secondary)', padding: '0.85rem', borderRadius: '12px', border: '1px solid var(--border-subtle)' }}>
             <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 700 }}>UNIT ECONOMICS</span>
             <div style={{ fontSize: '1.3rem', fontWeight: 900, color: '#EC4899' }}>{evaluation.execution_score}/100</div>
             <span style={{ fontSize: '0.68rem', color: '#F59E0B' }}>Payback 13.8 mos</span>

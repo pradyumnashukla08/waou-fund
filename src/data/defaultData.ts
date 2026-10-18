@@ -206,13 +206,13 @@ export const DEFAULT_EVALUATION: EvaluationResult = {
   traction_score: 85,
   red_flags: [
     'Unit Economic Gap: CAC payback period is currently 13.8 months across paid acquisition channels (benchmark is < 9 months).',
-    'Customer Concentration: Top 3 enterprise commercial real estate clients account for 61% of recurring ARR.',
-    'Conversion Funnel Drag: Onboarding trial-to-paid conversion plateaued at 4.2% due to complex GIS data upload steps.',
+    'Customer Concentration: Top 3 enterprise client accounts represent 61% of recurring ARR.',
+    'Conversion Funnel Drag: Onboarding trial-to-paid conversion plateaued at 4.2% due to multi-step configuration friction.',
     'Runway Sensitivity: Current net burn allows 11.6 months of operations without the proposed ₹4 Cr Seed extension.',
   ],
   daily_tasks: [
     'Run scenario analysis reducing paid channel spend by 20% in favor of outbound SDR loops.',
-    'Embed automated spatial sample demo on landing page to cut trial onboarding friction by 40%.',
+    'Embed automated interactive demo sandbox on landing page to cut trial onboarding friction by 40%.',
     'Structure clean 15% ESOP pool addendum to present to lead seed term-sheet partners.',
   ],
   stage_advice:
@@ -223,8 +223,8 @@ export const DEFAULT_EVALUATION: EvaluationResult = {
       reason: 'Validates scalability of sales motion beyond founder-led networks.',
     },
     {
-      question: 'What happens to gross margins if Google Maps & satellite API provider hikes geospatial API costs by 30%?',
-      reason: 'Tests infrastructure resilience and proprietary spatial processing advantage.',
+      question: 'What happens to gross margins if primary upstream cloud and AI API providers hike infrastructure costs by 30%?',
+      reason: 'Tests infrastructure resilience and architectural gross margin defense.',
     },
     {
       question: 'Why did you cap this seed round at ₹4 Cr instead of ₹8 Cr given aggressive expansion plans?',

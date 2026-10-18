@@ -91,8 +91,8 @@ export const MarketTractionModule: React.FC<MarketTractionModuleProps> = ({ star
               fontSize: '0.82rem',
               fontWeight: 800,
               cursor: 'pointer',
-              backgroundColor: activeTab === 'market' ? '#A855F7' : 'transparent',
-              color: activeTab === 'market' ? '#FFFFFF' : '#94A3B8',
+              backgroundColor: activeTab === 'market' ? 'var(--color-brand-600)' : 'transparent',
+              color: activeTab === 'market' ? '#FFFFFF' : 'var(--text-muted)',
             }}
           >
             Market & TAM
@@ -106,8 +106,8 @@ export const MarketTractionModule: React.FC<MarketTractionModuleProps> = ({ star
               fontSize: '0.82rem',
               fontWeight: 800,
               cursor: 'pointer',
-              backgroundColor: activeTab === 'traction' ? '#06B6D4' : 'transparent',
-              color: activeTab === 'traction' ? '#02040A' : '#94A3B8',
+              backgroundColor: activeTab === 'traction' ? '#0891B2' : 'transparent',
+              color: activeTab === 'traction' ? '#FFFFFF' : 'var(--text-muted)',
             }}
           >
             Traction Curves
@@ -142,7 +142,7 @@ export const MarketTractionModule: React.FC<MarketTractionModuleProps> = ({ star
                   justifyContent: 'center',
                   paddingTop: '12px',
                 }}>
-                  <span style={{ fontSize: '0.7rem', fontWeight: 800, color: '#C084FC' }}>
+                  <span style={{ fontSize: '0.7rem', fontWeight: 800, color: '#7E22CE' }}>
                     TAM: {ml.tam}
                   </span>
                 </div>
@@ -170,18 +170,18 @@ export const MarketTractionModule: React.FC<MarketTractionModuleProps> = ({ star
                   inset: '65px',
                   borderRadius: '50%',
                   border: '2px solid #10B981',
-                  background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.3) 0%, rgba(6, 182, 212, 0.3) 100%)',
+                  background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(6, 182, 212, 0.15) 100%)',
                   display: 'flex',
                   flexDirection: 'column',
                   alignItems: 'center',
                   justifyContent: 'center',
                   textAlign: 'center',
-                  boxShadow: '0 0 25px rgba(16, 185, 129, 0.3)',
+                  boxShadow: '0 0 25px rgba(16, 185, 129, 0.18)',
                 }}>
-                  <span style={{ fontSize: '0.68rem', fontWeight: 800, color: '#10B981' }}>
+                  <span style={{ fontSize: '0.68rem', fontWeight: 800, color: '#059669' }}>
                     SOM (CORE)
                   </span>
-                  <span style={{ fontSize: '0.92rem', fontWeight: 900, color: '#FFFFFF', marginTop: '2px' }}>
+                  <span style={{ fontSize: '0.92rem', fontWeight: 900, color: 'var(--text-primary)', marginTop: '2px' }}>
                     {ml.som}
                   </span>
                   <span style={{ fontSize: '0.62rem', color: 'var(--text-secondary)' }}>Beachhead target</span>
@@ -197,8 +197,8 @@ export const MarketTractionModule: React.FC<MarketTractionModuleProps> = ({ star
                 padding: '1rem',
                 border: '1px solid rgba(168, 85, 247, 0.2)',
               }}>
-                <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#C084FC' }}>TOTAL ADDRESSABLE MARKET (TAM)</span>
-                <div style={{ fontSize: '1.4rem', fontWeight: 900, color: '#FFFFFF' }}>{ml.tam}</div>
+                <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#7E22CE' }}>TOTAL ADDRESSABLE MARKET (TAM)</span>
+                <div style={{ fontSize: '1.4rem', fontWeight: 900, color: 'var(--text-primary)' }}>{ml.tam}</div>
                 <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '2px' }}>
                   Global spatial asset underwriting and commercial property intelligence.
                 </p>
@@ -211,7 +211,7 @@ export const MarketTractionModule: React.FC<MarketTractionModuleProps> = ({ star
                 border: '1px solid rgba(37, 99, 235, 0.15)',
               }}>
                 <span style={{ fontSize: '0.72rem', fontWeight: 800, color: 'var(--text-brand)' }}>SERVICEABLE ADDRESSABLE MARKET (SAM)</span>
-                <div style={{ fontSize: '1.4rem', fontWeight: 900, color: '#FFFFFF' }}>{ml.sam}</div>
+                <div style={{ fontSize: '1.4rem', fontWeight: 900, color: 'var(--text-primary)' }}>{ml.sam}</div>
                 <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '2px' }}>
                   Tier-1 and Tier-2 Indian & SE Asia commercial developers and private equity funds.
                 </p>
@@ -223,8 +223,8 @@ export const MarketTractionModule: React.FC<MarketTractionModuleProps> = ({ star
                 padding: '1rem',
                 border: '1px solid rgba(16, 185, 129, 0.2)',
               }}>
-                <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#10B981' }}>SERVICEABLE OBTAINABLE MARKET (SOM)</span>
-                <div style={{ fontSize: '1.4rem', fontWeight: 900, color: '#FFFFFF' }}>{ml.som}</div>
+                <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#059669' }}>SERVICEABLE OBTAINABLE MARKET (SOM)</span>
+                <div style={{ fontSize: '1.4rem', fontWeight: 900, color: 'var(--text-primary)' }}>{ml.som}</div>
                 <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '2px' }}>
                   Realistic 36-month capture across Bengaluru, Mumbai, and NCR pilot metros.
                 </p>
@@ -317,8 +317,8 @@ export const MarketTractionModule: React.FC<MarketTractionModuleProps> = ({ star
                   const y = chartHeight - ((val - minVal) / range) * (chartHeight - 40) - 20;
                   return (
                     <g key={i}>
-                      <circle cx={x} cy={y} r="5" fill="#02040A" stroke="#38BDF8" strokeWidth="3" />
-                      <text x={x} y={y - 12} textAnchor="middle" fill="#FFFFFF" fontSize="11" fontWeight="bold">
+                      <circle cx={x} cy={y} r="5" fill="#FFFFFF" stroke="#0284C7" strokeWidth="2.5" />
+                      <text x={x} y={y - 12} textAnchor="middle" fill="var(--text-primary)" fontSize="11" fontWeight="800">
                         ₹{val}L
                       </text>
                     </g>
@@ -356,15 +356,15 @@ export const MarketTractionModule: React.FC<MarketTractionModuleProps> = ({ star
               <div style={{ fontSize: '1.6rem', fontWeight: 900, color: '#10B981', marginTop: '0.25rem' }}>
                 {tm.beta_users} Accounts
               </div>
-              <span style={{ fontSize: '0.72rem', color: '#34D399' }}>+{tm.beta_conversion_growth}% conversion</span>
+              <span style={{ fontSize: '0.72rem', color: '#059669', fontWeight: 700 }}>+{tm.beta_conversion_growth}% conversion</span>
             </div>
 
             <div className="card-elevated" style={{ borderRadius: '16px', padding: '1.25rem' }}>
               <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 800 }}>NET REVENUE RETENTION</span>
-              <div style={{ fontSize: '1.6rem', fontWeight: 900, color: '#FACC15', marginTop: '0.25rem' }}>
+              <div style={{ fontSize: '1.6rem', fontWeight: 900, color: '#D97706', marginTop: '0.25rem' }}>
                 {tm.nrr}%
               </div>
-              <span style={{ fontSize: '0.72rem', color: '#FDE047' }}>Top decile SaaS</span>
+              <span style={{ fontSize: '0.72rem', color: '#B45309', fontWeight: 700 }}>Top decile SaaS</span>
             </div>
 
             <div className="card-elevated" style={{ borderRadius: '16px', padding: '1.25rem' }}>

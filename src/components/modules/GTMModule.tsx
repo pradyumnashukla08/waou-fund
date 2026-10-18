@@ -112,10 +112,10 @@ export const GTMModule: React.FC<GTMModuleProps> = ({ startup, evaluation }) => 
 
         <div className="card-elevated" style={{ borderRadius: '16px', padding: '1.25rem' }}>
           <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 800 }}>LTV : CAC RATIO</span>
-          <div style={{ fontSize: '1.6rem', fontWeight: 900, color: '#FACC15', marginTop: '0.25rem', fontFamily: 'var(--font-mono)' }}>
+          <div style={{ fontSize: '1.6rem', fontWeight: 900, color: '#D97706', marginTop: '0.25rem', fontFamily: 'var(--font-mono)' }}>
             {gtm.ltv_cac_ratio.toFixed(1)}x
           </div>
-          <span style={{ fontSize: '0.72rem', color: '#FDE047' }}>Benchmark &gt; 3.0x</span>
+          <span style={{ fontSize: '0.72rem', color: '#B45309', fontWeight: 700 }}>Benchmark &gt; 3.0x</span>
         </div>
 
         <div className="card-elevated" style={{ borderRadius: '16px', padding: '1.25rem' }}>
@@ -157,12 +157,12 @@ export const GTMModule: React.FC<GTMModuleProps> = ({ startup, evaluation }) => 
                   padding: '3px 8px',
                   borderRadius: '6px',
                   backgroundColor: ch.status === 'Scaling' ? 'rgba(16, 185, 129, 0.15)' : ch.status === 'Testing' ? 'rgba(56, 189, 248, 0.15)' : 'rgba(239, 68, 68, 0.15)',
-                  color: ch.status === 'Scaling' ? '#10B981' : ch.status === 'Testing' ? '#38BDF8' : '#EF4444',
+                  color: ch.status === 'Scaling' ? '#059669' : ch.status === 'Testing' ? '#0284C7' : '#DC2626',
                 }}>
                   {ch.status.toUpperCase()}
                 </span>
               </div>
-              <div style={{ fontSize: '1.2rem', fontWeight: 900, color: '#FFFFFF', fontFamily: 'var(--font-mono)' }}>
+              <div style={{ fontSize: '1.2rem', fontWeight: 900, color: 'var(--text-primary)', fontFamily: 'var(--font-mono)' }}>
                 ₹{ch.cac.toLocaleString()} <span style={{ fontSize: '0.74rem', color: 'var(--text-hint)' }}>CAC</span>
               </div>
             </div>

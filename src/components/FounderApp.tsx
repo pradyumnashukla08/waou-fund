@@ -140,7 +140,7 @@ export const FounderApp: React.FC<FounderAppProps> = ({
             />
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flex: 1 }}>
               <span style={{ fontSize: '0.96rem', fontWeight: 800, color: 'var(--text-primary)' }}>
-                {startup.name}
+                {startup.name || 'Your Venture'}
               </span>
               <span style={{
                 fontSize: '0.68rem',
@@ -150,12 +150,12 @@ export const FounderApp: React.FC<FounderAppProps> = ({
                 padding: '2px 8px',
                 borderRadius: '6px',
               }}>
-                {startup.fundabilityScore}/100
+                {startup.fundabilityScore || 85}/100
               </span>
             </div>
           </div>
           <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>
-            {startup.stage} • {startup.category}
+            {startup.stage || 'Seed'} • {startup.category || 'Tech'}
           </div>
           <div style={{
             marginTop: '0.75rem',
@@ -167,8 +167,8 @@ export const FounderApp: React.FC<FounderAppProps> = ({
             color: 'var(--text-brand)',
             fontWeight: 600,
           }}>
-            <span>Ask: {startup.targetAsk}</span>
-            <span>MRR: {startup.mrr}</span>
+            <span>Ask: {startup.targetAsk || '₹4 Cr'}</span>
+            <span>MRR: {startup.mrr ? (startup.mrr.startsWith('₹') ? startup.mrr : `₹${startup.mrr}`) : '₹12 Lakhs'}</span>
           </div>
         </div>
 
@@ -352,7 +352,7 @@ export const FounderApp: React.FC<FounderAppProps> = ({
         )}
 
         {activeTab === 'legaldocs' && (
-          <LegalDocsModule />
+          <LegalDocsModule startup={startup} />
         )}
 
         {activeTab === 'mentors' && (

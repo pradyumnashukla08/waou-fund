@@ -24,14 +24,14 @@ interface WorkspaceModuleProps {
 export const WorkspaceModule: React.FC<WorkspaceModuleProps> = ({ startup, evaluation, setActiveTab }) => {
   const coreProfile = [
     { id: '1', title: 'Company Overview & Elevator Pitch', status: 'done', route: 'profile', icon: Building },
-    { id: '2', title: 'Product & Geospatial Architecture', status: 'done', route: 'diagnostic', icon: Layers },
+    { id: '2', title: `Product & Core Architecture (${startup.category || 'Tech'})`, status: 'done', route: 'diagnostic', icon: Layers },
     { id: '4', title: 'Founding Team Pedigree & Equity Split', status: 'done', route: 'profile', icon: Users },
     { id: '7', title: 'Fundraising Goal & Use of Funds', status: 'done', route: 'finance', icon: DollarSign },
   ];
 
   const marketMetrics = [
     { id: '3', title: 'Market Opportunity & Concentric TAM', status: 'done', route: 'market', icon: PieChart },
-    { id: '5', title: 'Traction & 6-Month MRR Expansion', status: 'done', route: 'traction', icon: TrendingUp },
+    { id: '5', title: 'Traction & 6-Month MRR Expansion', status: 'done', route: 'market', icon: TrendingUp },
   ];
 
   const aiVerification = [

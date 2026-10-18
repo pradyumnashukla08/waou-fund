@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { 
   Database, 
   UploadCloud, 
@@ -24,10 +24,13 @@ interface DataRoomModuleProps {
 }
 
 export const DataRoomModule: React.FC<DataRoomModuleProps> = ({ startup, evaluation, setActiveTab }) => {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const startupPrefix = (startup.name || 'Startup').replace(/\s+/g, '_');
+
   const [docs, setDocs] = useState<UploadedDoc[]>([
-    { id: '1', name: `${startup.name}_Seed_Pitch_Deck_V3.pdf`, size: '12.4 MB', date: '2026-10-09', format: 'PDF', status: 'verified' },
-    { id: '2', name: `${startup.name}_Cap_Table_Fully_Diluted.xlsx`, size: '2.1 MB', date: '2026-10-08', format: 'Excel', status: 'verified' },
-    { id: '3', name: `${startup.name}_Financial_Model_3Y.xlsx`, size: '4.8 MB', date: '2026-10-07', format: 'Excel', status: 'verified' },
+    { id: '1', name: `${startupPrefix}_Seed_Pitch_Deck_V3.pdf`, size: '12.4 MB', date: '2026-10-09', format: 'PDF', status: 'verified' },
+    { id: '2', name: `${startupPrefix}_Cap_Table_Fully_Diluted.xlsx`, size: '2.1 MB', date: '2026-10-08', format: 'Excel', status: 'verified' },
+    { id: '3', name: `${startupPrefix}_Financial_Model_3Y.xlsx`, size: '4.8 MB', date: '2026-10-07', format: 'Excel', status: 'verified' },
     { id: '4', name: 'Certificate_of_Incorporation_MCA.pdf', size: '1.2 MB', date: '2026-09-15', format: 'PDF', status: 'verified' },
   ]);
 
@@ -55,17 +58,37 @@ export const DataRoomModule: React.FC<DataRoomModuleProps> = ({ startup, evaluat
     setDiligenceComplete(true);
   };
 
+  const handleRealFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+    const newDocs: UploadedDoc[] = Array.from(files).map((f, i) => {
+      const ext = f.name.split('.').pop()?.toUpperCase() || 'FILE';
+      const sizeMb = (f.size / (1024 * 1024)).toFixed(1);
+      const displaySize = sizeMb === '0.0' ? `${(f.size / 1024).toFixed(0)} KB` : `${sizeMb} MB`;
+      return {
+        id: `${Date.now()}_${i}`,
+        name: f.name,
+        size: displaySize,
+        date: new Date().toISOString().split('T')[0],
+        format: ext.includes('XLS') ? 'Excel' : ext,
+        status: 'verified',
+      };
+    });
+    setDocs((prev) => [...newDocs, ...prev]);
+    if (e.target) e.target.value = '';
+  };
+
   const handleAddSampleDoc = (label: string, format: string) => {
     const ext = format.toLowerCase().includes('excel') ? 'xlsx' : 'pdf';
     const newDoc: UploadedDoc = {
       id: Date.now().toString(),
-      name: `${startup.name}_${label.replace(/\s+/g, '_')}.${ext}`,
+      name: `${startupPrefix}_${label.replace(/\s+/g, '_')}.${ext}`,
       size: `${(Math.random() * 5 + 1).toFixed(1)} MB`,
       date: new Date().toISOString().split('T')[0],
       format: ext.toUpperCase(),
       status: 'verified',
     };
-    setDocs([newDoc, ...docs]);
+    setDocs((prev) => [newDoc, ...prev]);
   };
 
   const handleDeleteDoc = (id: string) => {
@@ -272,8 +295,9 @@ export const DataRoomModule: React.FC<DataRoomModuleProps> = ({ startup, evaluat
                       width: '24px',
                       height: '24px',
                       borderRadius: '50%',
-                      backgroundColor: hasUploaded ? '#10B981' : 'rgba(255, 255, 255, 0.08)',
-                      color: hasUploaded ? '#FFFFFF' : '#94A3B8',
+                      backgroundColor: hasUploaded ? '#10B981' : 'var(--bg-card)',
+                      border: hasUploaded ? 'none' : '1px solid var(--border-subtle)',
+                      color: hasUploaded ? '#FFFFFF' : 'var(--text-hint)',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
@@ -289,7 +313,7 @@ export const DataRoomModule: React.FC<DataRoomModuleProps> = ({ startup, evaluat
                       <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)', marginTop: '2px' }}>
                         {item.description}
                       </div>
-                      <div style={{ fontSize: '0.7rem', color: hasUploaded ? '#10B981' : '#F59E0B', marginTop: '4px', fontWeight: 700 }}>
+                      <div style={{ fontSize: '0.7rem', color: hasUploaded ? '#10B981' : '#D97706', marginTop: '4px', fontWeight: 700 }}>
                         {hasUploaded ? 'SECURED IN LOCKER' : item.isOptional ? 'OPTIONAL' : 'ACTION REQUIRED'}
                       </div>
                     </div>
@@ -321,22 +345,36 @@ export const DataRoomModule: React.FC<DataRoomModuleProps> = ({ startup, evaluat
 
         {/* Right: Uploaded Documents in Room */}
         <div className="card-elevated" style={{ borderRadius: '20px', padding: '1.75rem' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '0.5rem' }}>
             <div style={{ fontSize: '0.78rem', fontWeight: 800, color: 'var(--text-brand)', letterSpacing: '0.08em' }}>
               FILES IN SECURE REPOSITORY ({docs.length})
             </div>
+            <input
+              ref={fileInputRef}
+              type="file"
+              multiple
+              accept=".pdf,.xlsx,.xls,.csv,.doc,.docx,.ppt,.pptx"
+              onChange={handleRealFileUpload}
+              style={{ display: 'none' }}
+            />
             <button
-              onClick={() => handleAddSampleDoc('Additional_Contract', 'PDF')}
+              onClick={() => fileInputRef.current?.click()}
               style={{
                 fontSize: '0.75rem',
                 color: 'var(--text-brand)',
-                backgroundColor: 'transparent',
-                border: 'none',
+                backgroundColor: 'var(--accent-bg-blue)',
+                padding: '0.35rem 0.75rem',
+                borderRadius: '8px',
+                border: '1px solid rgba(37, 99, 235, 0.2)',
                 fontWeight: 700,
                 cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.35rem',
               }}
             >
-              + Upload Custom File
+              <UploadCloud size={13} />
+              <span>+ Upload Device Files</span>
             </button>
           </div>
 

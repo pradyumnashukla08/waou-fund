@@ -133,8 +133,9 @@ export const GrillModule: React.FC<GrillModuleProps> = ({ startup, setActiveTab 
     if (isRecording) {
       setIsRecording(false);
       if (!currentAnswer.trim()) {
+        const mrrText = startup.mrr ? (startup.mrr.startsWith('₹') ? startup.mrr : `₹${startup.mrr}`) : '₹12 Lakhs';
         setCurrentAnswer(
-          `Our verified MRR is ₹${startup.mrr} with +18% MoM growth. Our largest client accounts for 24% of ARR, which is down from 45% last quarter as we diversified into 6 new enterprise accounts.`
+          `Our verified MRR is ${mrrText} with +18% MoM growth. Our largest client accounts for 24% of ARR, which is down from 45% last quarter as we diversified into 6 new enterprise accounts.`
         );
       }
     } else {
@@ -337,7 +338,7 @@ export const GrillModule: React.FC<GrillModuleProps> = ({ startup, setActiveTab 
             </div>
 
             <div style={{ backgroundColor: 'var(--bg-secondary)', padding: '1rem', borderRadius: '12px', border: '1px solid var(--border-subtle)' }}>
-              <div style={{ fontSize: '0.72rem', color: '#FACC15', fontWeight: 800 }}>ROUND 2</div>
+              <div style={{ fontSize: '0.72rem', color: '#D97706', fontWeight: 800 }}>ROUND 2</div>
               <div style={{ fontSize: '0.88rem', fontWeight: 700, color: 'var(--text-primary)' }}>Unit Economics & Burn</div>
               <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>Payback period & runway defense</div>
             </div>
@@ -609,7 +610,7 @@ export const GrillModule: React.FC<GrillModuleProps> = ({ startup, setActiveTab 
               </div>
               <div style={{ backgroundColor: 'var(--bg-secondary)', padding: '1rem', borderRadius: '12px', border: '1px solid var(--border-subtle)' }}>
                 <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 700 }}>FINANCIAL DEFENSE</span>
-                <div style={{ fontSize: '1.3rem', fontWeight: 900, color: '#FACC15' }}>{verdict.vector_scores.financial_defense}%</div>
+                <div style={{ fontSize: '1.3rem', fontWeight: 900, color: '#D97706' }}>{verdict.vector_scores.financial_defense}%</div>
               </div>
               <div style={{ backgroundColor: 'var(--bg-secondary)', padding: '1rem', borderRadius: '12px', border: '1px solid var(--border-subtle)' }}>
                 <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 700 }}>STAGE MATURITY</span>
