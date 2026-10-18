@@ -172,7 +172,7 @@ export const GTMModule: React.FC<GTMModuleProps> = ({ startup, evaluation }) => 
                     backgroundColor: ch.status === 'Scaling' ? 'rgba(16, 185, 129, 0.15)' : ch.status === 'Testing' ? 'rgba(56, 189, 248, 0.15)' : 'rgba(239, 68, 68, 0.15)',
                     color: ch.status === 'Scaling' ? '#059669' : ch.status === 'Testing' ? '#0284C7' : '#DC2626',
                   }}>
-                    {ch.status.toUpperCase()}
+                    {ch.status?.toUpperCase() || 'SCALING'}
                   </span>
                 </div>
                 <div style={{ fontSize: '1.2rem', fontWeight: 900, color: 'var(--text-primary)', fontFamily: 'var(--font-mono)' }}>
@@ -242,7 +242,7 @@ export const GTMModule: React.FC<GTMModuleProps> = ({ startup, evaluation }) => 
                     backgroundColor: exp.status === 'Completed' ? 'rgba(16, 185, 129, 0.15)' : 'rgba(245, 158, 11, 0.15)',
                     color: exp.status === 'Completed' ? '#10B981' : '#F59E0B',
                   }}>
-                    {exp.status.toUpperCase()}
+                    {exp.status?.toUpperCase() || 'ACTIVE'}
                   </span>
                 </div>
                 <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginTop: '4px', maxWidth: '600px' }}>

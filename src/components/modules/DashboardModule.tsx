@@ -107,7 +107,7 @@ export const DashboardModule: React.FC<DashboardModuleProps> = ({
             gap: '0.4rem',
           }}>
             <Sparkles size={13} />
-            <span>Fundraising Dashboard • {startup.stage.toUpperCase()}</span>
+            <span>Fundraising Dashboard • {(startup?.stage || 'Seed').toUpperCase()}</span>
           </div>
           <h1 style={{
             fontSize: 'clamp(1.75rem, 3vw, 2.4rem)',

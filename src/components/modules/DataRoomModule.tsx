@@ -145,7 +145,7 @@ export const DataRoomModule: React.FC<DataRoomModuleProps> = ({ startup, evaluat
             fontFamily: 'var(--font-heading)',
             marginTop: '0.2rem',
           }}>
-            Virtual Data Room ({startup.stage.toUpperCase()})
+            Virtual Data Room ({(startup?.stage || 'Seed').toUpperCase()})
           </h1>
           <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>
             Stage-aware due diligence checklist with bank-grade 256-bit encryption. Prepare your documentation before receiving investor term sheets.
@@ -349,7 +349,7 @@ export const DataRoomModule: React.FC<DataRoomModuleProps> = ({ startup, evaluat
         {/* Left: Stage-Aware Required Checklist */}
         <div className="card-elevated" style={{ borderRadius: '20px', padding: '1.75rem' }}>
           <div style={{ fontSize: '0.78rem', fontWeight: 800, color: 'var(--text-brand)', letterSpacing: '0.08em', marginBottom: '1.25rem' }}>
-            {startup.stage.toUpperCase()} DUE DILIGENCE REQUIREMENTS
+            {(startup?.stage || 'Seed').toUpperCase()} DUE DILIGENCE REQUIREMENTS
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
