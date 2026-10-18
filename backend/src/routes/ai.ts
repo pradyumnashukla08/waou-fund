@@ -38,6 +38,7 @@ export const ExtractDocumentsRequestSchema = z.object({
     size: z.number().nonnegative(),
     type: z.string().default('application/octet-stream'),
   })).min(1, 'At least one file metadata entry is required').max(20),
+  startupContext: z.record(z.string(), z.any()).optional(),
 });
 
 export const EvaluateGrillRequestSchema = z.object({
@@ -163,13 +164,16 @@ router.post('/extract-documents', requireAuth, async (req: Request, res: Respons
       return;
     }
 
-    const { files } = parsed.data;
+    const { files, startupContext } = parsed.data;
     const fileListText = files.map(f => `${f.name} (${(f.size / (1024 * 1024)).toFixed(1)} MB, ${f.type})`).join(', ');
     const ai = getAiClient();
 
+    const companyContextStr = startupContext?.name ? `Company Name: "${startupContext.name}", Stage: "${startupContext.stage || 'Seed'}", Sector: "${startupContext.category || 'Tech'}"` : '';
+
     const prompt = `You are an elite VC analyst evaluating startup diligence materials.
-Analyze the uploaded document names, formats, and context:
-${fileListText}
+Analyze the uploaded document files: ${fileListText}.
+${companyContextStr ? `Founder Profile Context: ${companyContextStr}` : ''}
+Note: Regardless of whether the filenames are generic or custom (e.g. "scan.pdf", "doc1.pdf", "financials.xlsx", "pitch.pdf"), treat uploaded presentations/PDFs as the pitch deck and spreadsheets as financial models.
 
 Extract and synthesize the startup profile as a JSON object with this exact structure:
 {

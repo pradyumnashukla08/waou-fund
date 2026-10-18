@@ -55,13 +55,13 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'Bypass-Tunnel-Reminder'],
 }));
 
-// Request size limits: 1MB to prevent large payload denial-of-service
-app.use(express.json({ limit: '1mb' }));
-app.use(express.urlencoded({ extended: true, limit: '1mb' }));
+// Request size limits: 50MB to support pitch decks and institutional financial models
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
-// Request timeout middleware (30s)
+// Request timeout middleware (60s)
 app.use((req, res, next) => {
-  req.setTimeout(30000, () => {
+  req.setTimeout(60000, () => {
     if (!res.headersSent) {
       res.status(504).json({ error: 'Gateway timeout: request took too long to process' });
     }
@@ -69,11 +69,15 @@ app.use((req, res, next) => {
   next();
 });
 
+// Import storage router
+import storageRouter from './routes/storage.ts';
+
 // Routes
 // /api/ai endpoints are protected by both edge IP rate limiting, Firebase JWT authentication,
 // and per-authenticated-user rate limiting (keyed on verified Firebase UID).
 app.use('/api/ai', ipAiLimiter, requireAuth, userAiLimiter, aiRouter);
 app.use('/api/startup', ipAiLimiter, founderRouter);
+app.use('/api/storage', ipAiLimiter, storageRouter);
 app.use('/api/evaluate', ipAiLimiter, evaluateRoute);
 app.use('/api/generate', ipAiLimiter, generateRoute);
 app.use('/api/finance', ipAiLimiter, financeRouter);

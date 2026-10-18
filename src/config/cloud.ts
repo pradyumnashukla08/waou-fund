@@ -13,7 +13,7 @@ export const CLOUD_CONFIG = {
   // Firebase Cloud Project
   FIREBASE: {
     PROJECT_ID: 'project-f62f4191-7560-45ab-8f3',
-    STORAGE_BUCKET: 'project-f62f4191-7560-45ab-8f3.firebasestorage.app',
+    STORAGE_BUCKET: 'project-f62f4191-7560-45ab-8f3',
     AUTH_DOMAIN: 'project-f62f4191-7560-45ab-8f3.firebaseapp.com',
     API_KEY: 'AIzaSyDDTRLxCkDEY9VD9_Cqwosk03uKt-e1G-E',
     APP_ID: '1:204151638622:android:34f80b97e8f78b52da02cf',

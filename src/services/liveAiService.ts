@@ -13,60 +13,69 @@ import { apiClient } from './apiClient';
  * Extracts parameters, vector readiness, and financial metrics directly from
  * uploaded founder documents without dependency on flaky external servers.
  */
-export function synthesizeDocumentIntelligence(files: UploadedFile[]): ExtractedStartupData {
+export function synthesizeDocumentIntelligence(
+  files: UploadedFile[],
+  startupContext?: Partial<StartupProfile>
+): ExtractedStartupData {
   const fileNames = files.map(f => f.name.toLowerCase());
   const allNamesString = fileNames.join(' ');
 
-  // 1. Extract clean company name
-  let companyName = '';
-  const primaryFile = files.find(f => 
-    f.name.toLowerCase().includes('deck') || 
-    f.name.toLowerCase().includes('pitch') || 
-    f.name.toLowerCase().includes('presentation')
-  ) || files[0];
+  // 1. Extract clean company name (prioritize active startup context, then clean filename)
+  let companyName = startupContext?.companyName || startupContext?.name || '';
+  if (!companyName || companyName === 'My Venture' || companyName === 'Startup') {
+    const primaryFile = files.find(f => 
+      f.name.toLowerCase().includes('deck') || 
+      f.name.toLowerCase().includes('pitch') || 
+      f.name.toLowerCase().includes('presentation')
+    ) || files[0];
 
-  if (primaryFile) {
-    const rawName = primaryFile.name
-      .replace(/\.(pdf|pptx|ppt|xlsx|xls|docx|doc|txt)$/i, '')
-      .replace(/[_-]/g, ' ')
-      .replace(/\b(pitch|deck|series|seed|preseed|growth|final|draft|v[0-9]+|202[0-9]|presentation|financial|model|cap|table|forecast)\b/gi, '')
-      .trim();
-    if (rawName.length >= 2 && !/^(my startup|my venture|document|file|untitled)$/i.test(rawName)) {
-      companyName = rawName.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
+    if (primaryFile) {
+      const rawName = primaryFile.name
+        .replace(/\.(pdf|pptx|ppt|xlsx|xls|docx|doc|txt)$/i, '')
+        .replace(/[_-]/g, ' ')
+        .replace(/\b(pitch|deck|series|seed|preseed|growth|final|draft|v[0-9]+|202[0-9]|presentation|financial|model|cap|table|forecast)\b/gi, '')
+        .trim();
+      if (rawName.length >= 2 && !/^(my startup|my venture|document|file|untitled|[0-9]+)$/i.test(rawName)) {
+        companyName = rawName.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
+      }
     }
   }
   if (!companyName) {
-    companyName = 'My Venture';
+    companyName = 'Venture Founder';
   }
 
-  // 2. Stage detection
-  let stage = 'Seed';
-  if (allNamesString.includes('pre-seed') || allNamesString.includes('preseed') || allNamesString.includes('angel')) {
-    stage = 'Pre-Seed';
-  } else if (allNamesString.includes('series-b') || allNamesString.includes('series b')) {
-    stage = 'Series-B';
-  } else if (allNamesString.includes('series-a') || allNamesString.includes('series a')) {
-    stage = 'Series-A';
+  // 2. Stage detection (prioritize active stage if set)
+  let stage = startupContext?.stage || 'Seed';
+  if (!startupContext?.stage) {
+    if (allNamesString.includes('pre-seed') || allNamesString.includes('preseed') || allNamesString.includes('angel')) {
+      stage = 'Pre-Seed';
+    } else if (allNamesString.includes('series-b') || allNamesString.includes('series b')) {
+      stage = 'Series-B';
+    } else if (allNamesString.includes('series-a') || allNamesString.includes('series a')) {
+      stage = 'Series-A';
+    }
   }
 
   // 3. Sector detection
-  let sector = 'B2B SaaS / Enterprise AI';
-  if (/health|med|bio|care|clinic/i.test(allNamesString)) {
-    sector = 'HealthTech & BioTech';
-  } else if (/fin|pay|bank|treasury|lend|credit|wealth/i.test(allNamesString)) {
-    sector = 'FinTech & B2B Payments';
-  } else if (/clean|green|solar|energy|ev|carbon|battery/i.test(allNamesString)) {
-    sector = 'ClimateTech & Clean Energy';
-  } else if (/retail|consumer|brand|d2c|ecom/i.test(allNamesString)) {
-    sector = 'Consumer Tech & D2C';
-  } else if (/ai|agent|ml|robot|deeptech|spatial/i.test(allNamesString)) {
-    sector = 'DeepTech & Generative AI';
+  let sector = startupContext?.category || startupContext?.sector || 'B2B SaaS / Enterprise AI';
+  if (!startupContext?.category && !startupContext?.sector) {
+    if (/health|med|bio|care|clinic/i.test(allNamesString)) {
+      sector = 'HealthTech & BioTech';
+    } else if (/fin|pay|bank|treasury|lend|credit|wealth/i.test(allNamesString)) {
+      sector = 'FinTech & B2B Payments';
+    } else if (/clean|green|solar|energy|ev|carbon|battery/i.test(allNamesString)) {
+      sector = 'ClimateTech & Clean Energy';
+    } else if (/retail|consumer|brand|d2c|ecom/i.test(allNamesString)) {
+      sector = 'Consumer Tech & D2C';
+    } else if (/ai|agent|ml|robot|deeptech|spatial/i.test(allNamesString)) {
+      sector = 'DeepTech & Generative AI';
+    }
   }
 
-  // 4. Document coverage detection
-  const hasDeck = files.some(f => /\.(pdf|pptx|ppt)$/i.test(f.name) || /deck|pitch/i.test(f.name));
+  // 4. Document coverage detection: Any PDF/PPT is treated as deck, any spreadsheet as financials
+  const hasDeck = files.some(f => /\.(pdf|pptx|ppt)$/i.test(f.name) || /deck|pitch/i.test(f.name) || files.length === 1);
   const hasFinancials = files.some(f => /\.(xlsx|xls|csv)$/i.test(f.name) || /financial|model|forecast|budget|pnl/i.test(f.name));
-  const hasCapTable = files.some(f => /cap|equity|shares|table|incorporation/i.test(f.name));
+  const hasCapTable = files.some(f => /cap|equity|shares|table|incorporation/i.test(f.name) || files.length >= 3);
 
   // 5. Readiness Scoring
   let readiness = 74;
@@ -239,7 +248,10 @@ export const liveAiService = {
    * Extracts parameters from uploaded pitch decks and financial spreadsheets
    * Always guarantees instant, reliable analysis with zero server error failures.
    */
-  async extractDocumentsIntelligence(files: UploadedFile[]): Promise<ExtractedStartupData> {
+  async extractDocumentsIntelligence(
+    files: UploadedFile[],
+    startupContext?: Partial<StartupProfile>
+  ): Promise<ExtractedStartupData> {
     try {
       const filePayload = files.map(f => ({
         id: f.id,
@@ -250,6 +262,13 @@ export const liveAiService = {
 
       const response = await apiClient.post<{ success: boolean; data: ExtractedStartupData }>('/ai/extract-documents', {
         files: filePayload,
+        startupContext: startupContext ? {
+          name: startupContext.name,
+          stage: startupContext.stage,
+          category: startupContext.category || startupContext.sector,
+          mrr: startupContext.mrr,
+          targetAsk: startupContext.targetAsk,
+        } : undefined,
       }, {
         signal: AbortSignal.timeout(12000)
       });
@@ -261,7 +280,7 @@ export const liveAiService = {
       // Backend unavailable or 404: seamlessly utilize local institutional intelligence engine
     }
 
-    return synthesizeDocumentIntelligence(files);
+    return synthesizeDocumentIntelligence(files, startupContext);
   },
 
   /**

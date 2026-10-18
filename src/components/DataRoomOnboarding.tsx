@@ -6,6 +6,7 @@ import {
 import { UserRole, UploadedFile, ExtractedStartupData } from '../types/user';
 import { CLOUD_CONFIG } from '../config/cloud';
 import { liveAiService } from '../services/liveAiService';
+import { storageService } from '../services/storageService';
 
 interface DataRoomOnboardingProps {
   userName: string;
@@ -94,7 +95,8 @@ export const DataRoomOnboarding: React.FC<DataRoomOnboardingProps> = ({ userName
   };
 
   const addFiles = useCallback((newFiles: FileList) => {
-    const added: UploadedFile[] = Array.from(newFiles).map(f => ({
+    const rawFiles = Array.from(newFiles);
+    const added: UploadedFile[] = rawFiles.map(f => ({
       id: `file-${Date.now()}-${Math.random().toString(36).slice(2)}`,
       name: f.name,
       size: f.size,
@@ -103,6 +105,13 @@ export const DataRoomOnboarding: React.FC<DataRoomOnboardingProps> = ({ userName
       status: 'uploaded',
     }));
     setFiles(prev => [...prev, ...added]);
+
+    // Asynchronously store into Google Cloud Storage (gs://project-f62f4191-7560-45ab-8f3)
+    rawFiles.forEach(file => {
+      storageService.uploadDocument(file, {
+        folder: file.name.toLowerCase().includes('pitch') || file.name.toLowerCase().includes('deck') ? 'pitches' : 'data_room',
+      }).catch(err => console.warn('Onboarding cloud upload notice:', err));
+    });
   }, []);
 
   const handleDrop = useCallback((e: React.DragEvent) => {

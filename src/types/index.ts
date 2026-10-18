@@ -112,7 +112,12 @@ export interface UploadedDoc {
   size: string;
   date: string;
   format: string;
-  status: 'verified' | 'analyzing' | 'needs_update';
+  status: 'verified' | 'analyzing' | 'needs_update' | 'uploading';
+  requirementId?: string;
+  categoryLabel?: string;
+  downloadUrl?: string;
+  gcsUri?: string;
+  isCloudStored?: boolean;
 }
 
 export interface Mentor {

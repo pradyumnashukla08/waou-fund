@@ -17,6 +17,7 @@ import { StartupProfile } from '../../data/defaultData';
 import { api } from '../../services/api';
 import { getAIPromptForStage } from '../../services/aiPromptMatrix';
 import { generateActionSteps } from '../../utils/remediationMapper';
+import { storageService } from '../../services/storageService';
 
 interface DiagnosticModuleProps {
   startup?: StartupProfile;
@@ -99,6 +100,14 @@ export const DiagnosticModule: React.FC<DiagnosticModuleProps> = ({
     const file = e.target.files?.[0];
     if (file) {
       const sizeMb = (file.size / (1024 * 1024)).toFixed(1) + ' MB';
+      // Asynchronously upload real file to Google Cloud Storage
+      storageService.uploadDocument(file, {
+        folder: 'pitches',
+        requirementId: 'pitch_deck',
+        stage: startup?.stage || 'Seed',
+      }).then((res) => {
+        if (startup) startup.pitchDeckUrl = res.downloadUrl;
+      }).catch((err) => console.warn('Deck cloud upload warning:', err));
       handleSimulateScan(file.name, sizeMb);
     }
   };
@@ -108,6 +117,13 @@ export const DiagnosticModule: React.FC<DiagnosticModuleProps> = ({
     const file = e.dataTransfer.files?.[0];
     if (file) {
       const sizeMb = (file.size / (1024 * 1024)).toFixed(1) + ' MB';
+      storageService.uploadDocument(file, {
+        folder: 'pitches',
+        requirementId: 'pitch_deck',
+        stage: startup?.stage || 'Seed',
+      }).then((res) => {
+        if (startup) startup.pitchDeckUrl = res.downloadUrl;
+      }).catch((err) => console.warn('Deck cloud upload warning:', err));
       handleSimulateScan(file.name, sizeMb);
     }
   };
