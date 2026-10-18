@@ -43,15 +43,6 @@ export const DataRoomModule: React.FC<DataRoomModuleProps> = ({ startup, evaluat
         }
       }
     } catch {}
-    // If viewing demo mock startup explicitly (e.g. avasplot from switcher), show demo files
-    if (startup.id && startup.id !== 'user_active_startup' && startup.id !== 'custom_startup') {
-      return [
-        { id: '1', name: `${startupPrefix}_Seed_Pitch_Deck_V3.pdf`, size: '12.4 MB', date: '2026-10-09', format: 'PDF', status: 'verified' },
-        { id: '2', name: `${startupPrefix}_Cap_Table_Fully_Diluted.xlsx`, size: '2.1 MB', date: '2026-10-08', format: 'Excel', status: 'verified' },
-        { id: '3', name: `${startupPrefix}_Financial_Model_3Y.xlsx`, size: '4.8 MB', date: '2026-10-07', format: 'Excel', status: 'verified' },
-        { id: '4', name: 'Certificate_of_Incorporation_MCA.pdf', size: '1.2 MB', date: '2026-09-15', format: 'PDF', status: 'verified' },
-      ];
-    }
     // Real user starts clean with 0 fake files
     return [];
   });

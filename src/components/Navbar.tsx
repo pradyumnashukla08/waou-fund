@@ -285,9 +285,9 @@ export const Navbar: React.FC<NavbarProps> = ({
                   letterSpacing: '0.06em', 
                   textTransform: 'uppercase' 
                 }}>
-                  Ventures & Reference Benchmarks
+                  Active Venture Dossier
                 </div>
-                {allStartups.map((s, idx) => (
+                {allStartups.map((s) => (
                   <div
                     key={s.id}
                     onClick={() => {
@@ -304,24 +304,22 @@ export const Navbar: React.FC<NavbarProps> = ({
                       backgroundColor: selectedStartup.id === s.id ? 'var(--accent-bg-blue)' : 'transparent',
                       color: 'var(--text-primary)',
                       transition: 'background 0.15s ease',
-                      borderLeft: idx === 0 ? '3px solid #2563EB' : '3px solid transparent',
+                      borderLeft: '3px solid #2563EB',
                     }}
                   >
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                       <span style={{ fontWeight: 700, fontSize: '0.88rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                        {s.name}
-                        {idx === 0 && (
-                          <span style={{ fontSize: '0.62rem', backgroundColor: '#EFF6FF', color: '#2563EB', padding: '1px 5px', borderRadius: '4px', fontWeight: 800 }}>
-                            YOURS
-                          </span>
-                        )}
+                        {s.companyName || s.name || 'My Venture'}
+                        <span style={{ fontSize: '0.62rem', backgroundColor: '#EFF6FF', color: '#2563EB', padding: '1px 5px', borderRadius: '4px', fontWeight: 800 }}>
+                          ACTIVE
+                        </span>
                       </span>
                       <span style={{ fontSize: '0.72rem', color: s.fundabilityScore ? '#10B981' : 'var(--text-hint)', fontWeight: 700 }}>
                         {s.fundabilityScore ? `${s.fundabilityScore}/100` : 'Not Scored'}
                       </span>
                     </div>
                     <span style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>
-                      {idx === 0 ? 'Active Production Dossier' : `Sample Benchmark • ${s.stage}`}
+                      Active Production Dossier • {s.stage}
                     </span>
                   </div>
                 ))}
@@ -843,10 +841,10 @@ export const Navbar: React.FC<NavbarProps> = ({
             {/* Active Venture Picker in Drawer */}
             <div style={{ marginBottom: 'auto' }}>
               <div style={{ fontSize: '0.72rem', fontWeight: 800, color: 'var(--text-hint)', letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: '0.5rem' }}>
-                Select Active Dossier
+                Active Venture Dossier
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-                {allStartups.map((s, idx) => (
+                {allStartups.map((s) => (
                   <div
                     key={s.id}
                     onClick={() => {
@@ -863,12 +861,12 @@ export const Navbar: React.FC<NavbarProps> = ({
                       alignItems: 'center',
                       backgroundColor: selectedStartup.id === s.id ? 'var(--accent-bg-blue)' : 'var(--bg-secondary)',
                       color: 'var(--text-primary)',
-                      borderLeft: idx === 0 ? '3px solid #2563EB' : '3px solid transparent',
+                      borderLeft: '3px solid #2563EB',
                     }}
                   >
                     <div>
-                      <div style={{ fontSize: '0.84rem', fontWeight: 700 }}>{s.name}</div>
-                      <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>{s.stage}</div>
+                      <div style={{ fontSize: '0.84rem', fontWeight: 700 }}>{s.companyName || s.name || 'My Venture'}</div>
+                      <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>{s.stage} • Active Dossier</div>
                     </div>
                     <span style={{ fontSize: '0.75rem', color: s.fundabilityScore ? '#10B981' : 'var(--text-hint)', fontWeight: 700 }}>
                       {s.fundabilityScore ? `${s.fundabilityScore}/100` : 'Not Scored'}

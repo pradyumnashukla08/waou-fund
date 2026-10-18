@@ -39,11 +39,12 @@ export const DiagnosticModule: React.FC<DiagnosticModuleProps> = ({
       if (saved && 
           !saved.includes('My_Startup') && 
           !saved.includes('My_Venture') && 
+          !saved.includes('AvasPlot') && 
           !saved.includes('FinFlow') && 
           !saved.includes('HealthSync')) {
         return saved;
       }
-      if (startup?.pitchDeckUrl && !startup.pitchDeckUrl.includes('FinFlow') && !startup.pitchDeckUrl.includes('HealthSync')) {
+      if (startup?.pitchDeckUrl && !startup.pitchDeckUrl.includes('AvasPlot') && !startup.pitchDeckUrl.includes('FinFlow') && !startup.pitchDeckUrl.includes('HealthSync')) {
         return startup.pitchDeckUrl.split('/').pop() || '';
       }
       return '';

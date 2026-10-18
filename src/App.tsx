@@ -8,7 +8,7 @@ import {
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { auth } from './config/firebase';
 import { apiClient } from './services/apiClient';
-import { MOCK_STARTUPS, DEFAULT_EVALUATION, INITIAL_USER_EVALUATION, StartupProfile } from './data/defaultData';
+import { INITIAL_USER_EVALUATION, StartupProfile } from './data/defaultData';
 import { EvaluationResult } from './types';
 import { UserRole, ExtractedStartupData } from './types/user';
 import { Navbar } from './components/Navbar';
@@ -185,6 +185,11 @@ export default function App() {
       const draft = sessionStorage.getItem('waou_selected_startup_draft');
       if (draft) {
         const parsed = JSON.parse(draft);
+        if (parsed.id === 'avasplot' || parsed.id === 'finflow' || parsed.id === 'healthsync' || 
+            parsed.name === 'AvasPlot' || parsed.name === 'FinFlow' || parsed.name === 'HealthSync') {
+          sessionStorage.removeItem('waou_selected_startup_draft');
+          return getInitialStartup(null);
+        }
         if (parsed.id === 'user_active_startup') {
           return sanitizeStartupDraft(parsed);
         }
@@ -202,7 +207,7 @@ export default function App() {
 
   const [allStartups, setAllStartups] = useState<StartupProfile[]>(() => {
     const active = getInitialStartup(null);
-    return [active, ...MOCK_STARTUPS.filter(s => s.id !== active.id)];
+    return [active];
   });
 
   const [evaluation, setEvaluation] = useState<EvaluationResult>(() => {
@@ -213,21 +218,17 @@ export default function App() {
     return INITIAL_USER_EVALUATION;
   });
 
-  // Switch evaluation automatically between real active startup and benchmark sample startups
+  // Keep evaluation synchronized with user's saved state
   useEffect(() => {
-    if (selectedStartup.id === 'avasplot') {
-      setEvaluation(DEFAULT_EVALUATION);
-    } else if (selectedStartup.id === 'user_active_startup') {
-      try {
-        const saved = sessionStorage.getItem('waou_user_evaluation');
-        if (saved) {
-          setEvaluation(JSON.parse(saved));
-        } else {
-          setEvaluation(INITIAL_USER_EVALUATION);
-        }
-      } catch {
+    try {
+      const saved = sessionStorage.getItem('waou_user_evaluation');
+      if (saved) {
+        setEvaluation(JSON.parse(saved));
+      } else {
         setEvaluation(INITIAL_USER_EVALUATION);
       }
+    } catch {
+      setEvaluation(INITIAL_USER_EVALUATION);
     }
   }, [selectedStartup.id]);
 
@@ -288,12 +289,12 @@ export default function App() {
             }
 
             setSelectedStartup(userProfile);
-            setAllStartups([userProfile, ...MOCK_STARTUPS.filter(s => s.id !== userProfile.id)]);
+            setAllStartups([userProfile]);
           } else {
             // First time login: seed default clean profile for this user
             const fresh = getInitialStartup({ name, email });
             setSelectedStartup(fresh);
-            setAllStartups([fresh, ...MOCK_STARTUPS.filter(s => s.id !== fresh.id)]);
+            setAllStartups([fresh]);
             apiClient.put('/startup/profile', fresh).catch(err => {
               console.warn('[App] Initial profile sync warning:', err);
             });
@@ -372,7 +373,7 @@ export default function App() {
         tagline: prev.tagline?.includes('AI spatial intelligence') || prev.tagline?.includes('Autonomous AI enterprise') ? '' : prev.tagline,
         team: prev.team?.some(m => m.name === 'Kavita Sundaram') ? [] : (prev.team || []),
       };
-      setAllStartups([updated, ...MOCK_STARTUPS]);
+      setAllStartups([updated]);
 
       // Save to server
       if (auth.currentUser) {
@@ -413,7 +414,7 @@ export default function App() {
     };
 
     setSelectedStartup(merged);
-    setAllStartups([merged, ...MOCK_STARTUPS]);
+    setAllStartups([merged]);
 
     // Persist to server
     if (auth.currentUser) {
@@ -510,38 +511,7 @@ export default function App() {
               else setCurrentView('app');
             }}
             selectedStartup={selectedStartup}
-            setSelectedStartup={(s) => {
-              setSelectedStartup(s);
-              if (s.id === 'finflow') {
-                setEvaluation({
-                  ...DEFAULT_EVALUATION,
-                  overall_score: 94,
-                  team_score: 95,
-                  market_score: 96,
-                  financial_metrics: {
-                    ...DEFAULT_EVALUATION.financial_metrics,
-                    arr: 250000000,
-                    mrr: 25000000,
-                    cash_balance: 45000000,
-                  },
-                });
-              } else if (s.id === 'healthsync') {
-                setEvaluation({
-                  ...DEFAULT_EVALUATION,
-                  overall_score: 74,
-                  team_score: 80,
-                  market_score: 76,
-                  financial_metrics: {
-                    ...DEFAULT_EVALUATION.financial_metrics,
-                    arr: 10000000,
-                    mrr: 850000,
-                    cash_balance: 3500000,
-                  },
-                });
-              } else {
-                setEvaluation(DEFAULT_EVALUATION);
-              }
-            }}
+            setSelectedStartup={setSelectedStartup}
             allStartups={allStartups}
             streakCount={streakCount}
             openStreakModal={() => setShowStreakModal(true)}

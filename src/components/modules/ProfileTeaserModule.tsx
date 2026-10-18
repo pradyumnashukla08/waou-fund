@@ -57,46 +57,6 @@ export const getSafeExternalUrl = (url?: string): string => {
   return trimmed;
 };
 
-const BENCHMARK_SAMPLE_PROFILE: Partial<StartupProfile> = {
-  companyName: 'AvasPlot Technologies',
-  websiteUrl: 'https://avasplot.ai',
-  sector: 'PropTech / Spatial AI',
-  pitch: 'AI spatial intelligence platform enabling institutional REITs to evaluate commercial asset yields with 98% accuracy in 12 minutes.',
-  currency: '₹ (INR)',
-  tam: '42000000000',
-  sam: '8500000000',
-  som: '1200000000',
-  competitor1: 'https://costar.com',
-  competitor2: 'https://cherre.com',
-  competitor3: 'https://reonomy.com',
-  distributionMoat: 'Proprietary spatial graph of 1.4M commercial parcels and direct API integration with Indian municipal land registries.',
-  targetRaise: '40000000',
-  valuationCap: '280000000',
-  equityOffered: '14.2',
-  capitalCommitted: '18000000',
-  waitlistCount: '450',
-  betaConversion: '28',
-  productStatus: 'Functional MVP',
-  problemValidation: 'Commercial real estate underwriting takes 6 weeks of manual surveyor appraisals resulting in 18% pricing variance.',
-  teamCapability: 'Founders have 14+ years combined in enterprise GIS, spatial computer vision, and institutional REIT debt underwriting.',
-  currentMrr: '5000000',
-  userTraction: '18 Enterprise Clients',
-  momGrowth: '18',
-  grossMargin: '82',
-  cac: '85000',
-  verifiedArr: '60000000',
-  churnRate: '1.2',
-  nrr: '124',
-  ltvcacRatio: '4:1',
-  cacPayback: '5',
-  burnRate: '1200000',
-  runway: '14',
-  team: [
-    { name: 'Kavita Sundaram', role: 'CTO (Ex-Google Brain, IIT Madras)', linkedin: 'https://linkedin.com/in/kavita-sundaram' },
-    { name: 'Aditya Sen', role: 'Head of Growth (Ex-Razorpay)', linkedin: 'https://linkedin.com/in/aditya-sen' }
-  ],
-};
-
 export const ProfileTeaserModule: React.FC<ProfileTeaserModuleProps> = ({
   startup,
   onUpdateStartup,
@@ -238,16 +198,6 @@ export const ProfileTeaserModule: React.FC<ProfileTeaserModuleProps> = ({
     setTimeout(() => setSavedSuccess(false), 3500);
   };
 
-  const handleLoadSample = () => {
-    if (window.confirm('Load benchmark sample data? This fills sample traction metrics and pitch details so you can preview the full institutional 1-pager.')) {
-      setFormData(prev => ({
-        ...prev,
-        ...BENCHMARK_SAMPLE_PROFILE,
-        fullName: prev.fullName || 'Rahul Sharma',
-        role: prev.role || 'CEO & Co-Founder',
-      }));
-    }
-  };
 
   const handleClearClean = () => {
     if (window.confirm('Clear all form fields to a fresh clean state?')) {
@@ -404,27 +354,6 @@ export const ProfileTeaserModule: React.FC<ProfileTeaserModuleProps> = ({
 
           {!showTeaserPreview && (
             <>
-              <button
-                type="button"
-                onClick={handleLoadSample}
-                title="Load sample venture benchmark"
-                style={{
-                  padding: '0.65rem 0.95rem',
-                  fontSize: '0.84rem',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.4rem',
-                  borderRadius: '10px',
-                  backgroundColor: '#F1F5F9',
-                  border: '1.5px solid #CBD5E1',
-                  color: '#334155',
-                  fontWeight: 700,
-                  cursor: 'pointer',
-                }}
-              >
-                <Sparkles size={14} color="#2563EB" />
-                <span>Load Sample</span>
-              </button>
               <button
                 type="button"
                 onClick={handleClearClean}
